@@ -109,8 +109,8 @@
             <?php } ?>
             <!-- END FILTER WILAYAH -->
 
-            <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
-            <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
+            <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4 ATAU VERIFIKATOR) -->
+            <?php if ($IsLoggedIn && (!$IsRole4 || empty($InstansiId)) && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
               <div class="form-example-wrap" style="margin-bottom: 20px;">
                 <div class="form-example-int form-horizental">
                   <div class="form-group">

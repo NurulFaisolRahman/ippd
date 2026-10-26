@@ -115,10 +115,49 @@ class Home extends CI_Controller {
 						'isLoggedIn' => true,
 						'Admin' => true, 
 						'Level' => $level, 
+						'userLevel' => 3,
+						'Username' => $akun['Username'],
 						'KodeWilayah' => isset($akun['KodeWilayah']) ? $akun['KodeWilayah'] : ''
 					);
+					if (!empty($akun['KodeWilayah'])) {
+						$wil = $this->db->where('Kode', $akun['KodeWilayah'])->get('kodewilayah')->row_array();
+						if ($wil) {
+							$Session['NamaWilayah'] = $wil['Nama'];
+							$Session['NamaDaerah']  = $wil['Nama'];
+						}
+					}
 					$this->session->set_userdata($Session);
+					foreach ($Session as $sk => $sv) {
+						$_SESSION[$sk] = $sv;
+					}
 					echo $level;
+					return;
+
+				} else if ($level == '4') {
+					$kodeWilayah = isset($akun['KodeWilayah']) ? $akun['KodeWilayah'] : '';
+					$Session = array(
+						'isLoggedIn'   => true,
+						'Admin'        => true, 
+						'Level'        => 4, 
+						'userLevel'    => 4,
+						'IsVerifikator'=> true,
+						'KodeWilayah'  => $kodeWilayah,
+						'Username'     => $akun['Username'],
+						'Nama'         => $akun['Username'],
+						'IdAkun'       => isset($akun['Id']) ? (int)$akun['Id'] : (isset($akun['id']) ? (int)$akun['id'] : null)
+					);
+					if (!empty($kodeWilayah)) {
+						$wil = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
+						if ($wil) {
+							$Session['NamaWilayah'] = $wil['Nama'];
+							$Session['NamaDaerah']  = $wil['Nama'];
+						}
+					}
+					$this->session->set_userdata($Session);
+					foreach ($Session as $sk => $sv) {
+						$_SESSION[$sk] = $sv;
+					}
+					echo '4';
 					return;
 				}
 			}
@@ -169,6 +208,7 @@ class Home extends CI_Controller {
 					'Admin'        => true, 
 					'Instansi'     => true, 
 					'Level'        => 4, 
+					'userLevel'    => 4, 
 					'KodeWilayah'  => $kodeWilayah,
 					'NamaInstansi' => isset($matchedInstansi['nama']) ? $matchedInstansi['nama'] : '',
 					'IdInstansi'   => isset($matchedInstansi['id']) ? $matchedInstansi['id'] : '',
@@ -177,7 +217,17 @@ class Home extends CI_Controller {
 					'UrusanId'     => $urusanId,
 					'Username'     => $username
 				);
+				if (!empty($kodeWilayah)) {
+					$wil = $this->db->where('Kode', $kodeWilayah)->get('kodewilayah')->row_array();
+					if ($wil) {
+						$Session['NamaWilayah'] = $wil['Nama'];
+						$Session['NamaDaerah']  = $wil['Nama'];
+					}
+				}
 				$this->session->set_userdata($Session);
+				foreach ($Session as $sk => $sv) {
+					$_SESSION[$sk] = $sv;
+				}
 				echo '4';
 				return;
 			} else {

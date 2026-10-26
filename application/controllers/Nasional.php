@@ -817,52 +817,14 @@ class Nasional extends CI_Controller {
 
   // ============================================================
   //  AGENDA PEMBANGUNAN (PN/PP/KP) — Hierarki 5 Level
-  //  PN → PP → KP → Sasaran → Indikator
-  //  PP._Id = parent PN.Id | KP._Id = parent PP.Id
+  // ============================================================
+  // AGENDA PEMBANGUNAN (PN / PP / KP) - RPJMN
+  // Menggunakan struktur hierarki dan isi data yang sama dengan Matriks Pembangunan
   // ============================================================
   public function IUPRPJMN(){
     $Header['Halaman'] = 'RPJMN';
-
-    // Ambil semua PN — Periode disimpan langsung sebagai teks
-    $pn_list = $this->db->query(
-      "SELECT * FROM agendapn_rpjmn
-       WHERE Tipe = 'PN' AND deleted_at IS NULL
-       ORDER BY Id ASC"
-    )->result_array();
-
-    $result = [];
-    foreach ($pn_list as $pn) {
-      $pn['Sasaran'] = $this->_getSasaran($pn['Id']);
-      $pn['PP'] = [];
-
-      // Ambil PP di bawah PN ini (_Id → PN.Id)
-      $pp_list = $this->db
-        ->where('_Id', $pn['Id'])->where('Tipe', 'PP')
-        ->where('deleted_at IS NULL')
-        ->order_by('Id', 'ASC')
-        ->get('agendapn_rpjmn')->result_array();
-
-      foreach ($pp_list as $pp) {
-        $pp['Sasaran'] = $this->_getSasaran($pp['Id']);
-        $pp['KP'] = [];
-
-        // Ambil KP di bawah PP ini (_Id → PP.Id)
-        $kp_list = $this->db
-          ->where('_Id', $pp['Id'])->where('Tipe', 'KP')
-          ->where('deleted_at IS NULL')
-          ->order_by('Id', 'ASC')
-          ->get('agendapn_rpjmn')->result_array();
-
-        foreach ($kp_list as $kp) {
-          $kp['Sasaran'] = $this->_getSasaran($kp['Id']);
-          $pp['KP'][] = $kp;
-        }
-        $pn['PP'][] = $pp;
-      }
-      $result[] = $pn;
-    }
-
-    $Data['DataAgenda'] = $result;
+    $Data = $this->_getMatriksPembangunanData();
+    $Data['PageTitle'] = 'Agenda Pembangunan (PN / PP / KP) - RPJMN';
     $this->load->view('Nasional/header', $Header);
     $this->load->view('Nasional/IUPRPJMN', $Data);
   }
@@ -1165,9 +1127,7 @@ class Nasional extends CI_Controller {
   // Hierarki 4 Level: Prioritas Nasional (PN) -> Program Prioritas (PP) ->
   // Kegiatan Prioritas (KP) -> Proyek Prioritas, beserta Sasaran & Indikator
   // =========================================================================
-  public function MatriksPembangunan(){
-    $Header['Halaman'] = 'RKP';
-    
+  private function _getMatriksPembangunanData() {
     // Load data untuk form select Periode (Visi RPJMN)
     $Data['ComboVisi'] = $this->db->where("deleted_at IS NULL")->get("visirpjmn")->result_array();
 
@@ -1178,7 +1138,7 @@ class Nasional extends CI_Controller {
     }
     $Data['MapKementerian'] = $MapKementerian;
 
-    // 1. Fetching Semua Tabel RKP
+    // 1. Fetching Semua Tabel RKP / RPJMN
     // LEVEL 1: PN
     $DataPN = $this->db->query("SELECT a.*, b.TahunMulai, b.TahunAkhir FROM rkp_ps_prioritas_nasional a LEFT JOIN visirpjmn b ON a._IdVisi = b.Id WHERE a.deleted_at IS NULL ORDER BY a.Id ASC")->result_array();
     $SasaranPN   = $this->db->where('deleted_at IS NULL')->get('rkp_ps_pn_sasaran')->result_array();
@@ -1238,6 +1198,13 @@ class Nasional extends CI_Controller {
     $Data['TotalSasaran']     = count($SasaranPN) + count($SasaranPP) + count($SasaranKP);
     $Data['TotalIndikator']   = count($IndikatorPN) + count($IndikatorPP) + count($IndikatorKP);
 
+    return $Data;
+  }
+
+  public function MatriksPembangunan(){
+    $Header['Halaman'] = 'RKP';
+    $Data = $this->_getMatriksPembangunanData();
+    $Data['PageTitle'] = 'Matriks Pembangunan (RKP)';
     $this->load->view('Nasional/header', $Header);
     $this->load->view('Nasional/MatriksPembangunan', $Data);
   }

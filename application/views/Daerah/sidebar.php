@@ -432,10 +432,41 @@
         }
     </style>
 </head>
+<?php
+$isVerifikator = (
+    (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && (!empty($_SESSION['IsVerifikator']) || empty($_SESSION['IdInstansi']) || (isset($_SESSION['Username']) && stripos($_SESSION['Username'], 'verif') !== false))) ||
+    (!empty($_SESSION['IsVerifikator']))
+);
+?>
 <!-- Sidebar -->
 <div class="sidebar-wrapper">
     <div class="sidebar-content">
         <ul class="sidebar-menu">
+
+        <?php if ($isVerifikator): ?>
+            <!-- ==============================================
+                 MENU KHUSUS VERIFIKATOR (LEVEL 4)
+                 Hanya Menampilkan Menu Tab IPPD
+                 ============================================== -->
+            <li class="sidebar-header header-evaluasi" style="color: #0d9488;">
+                <span class="header-icon-box" style="background: rgba(13, 148, 136, 0.15); color: #0d9488;"><i class="fa fa-line-chart"></i></span>
+                <span class="header-text">Evaluasi IPPD</span>
+            </li>
+
+            <!-- IPPD -->
+            <li class="sidebar-dropdown active">
+                <a href="<?=base_url('Instansi/TabelIPPD')?>" style="background: rgba(32, 201, 151, 0.08); border-left: 3px solid #20c997; font-weight: 600;">
+                    <i class="menu-icon fa fa-bar-chart" style="color: #20c997;"></i>
+                    <span style="color: #0f172a; font-weight: 700;">IPPD</span>
+                    <i class="fa fa-chevron-down" style="transform: rotate(180deg);"></i>
+                </a>
+                <div class="sidebar-submenu show" style="display: block;">
+                    <a href="<?=base_url('Instansi/TabelIPPD')?>" class="active" style="color: #20c997; font-weight: 700; background: #e8f8f5;">
+                        <i class="fa fa-table" style="color: #20c997; margin-right: 8px;"></i> Tabel IPPD
+                    </a>
+                </div>
+            </li>
+        <?php else: ?>
 
             <!-- DAFTAR AKUN -->
             <li class="sidebar-header header-pengaturan">
@@ -776,6 +807,7 @@
                     <a href="<?=base_url('Instansi/CapaianIkkPD')?>">Capaian IKK PD</a>
                 </div>
             </li>
+        <?php endif; ?>
 
         </ul>
     </div>

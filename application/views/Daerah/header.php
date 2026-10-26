@@ -1,4 +1,9 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed');
+$isVerifikator = (
+    (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && (!empty($_SESSION['IsVerifikator']) || empty($_SESSION['IdInstansi']) || (isset($_SESSION['Username']) && stripos($_SESSION['Username'], 'verif') !== false))) ||
+    (!empty($_SESSION['IsVerifikator']))
+);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -377,32 +382,37 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 4) { ?>
-      <?php if (!empty($NamaDaerah)) { ?>
-          <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($NamaDaerah) ?>">
+      <?php 
+        $headerDaerah = !empty($NamaDaerah) ? $NamaDaerah : ($_SESSION['NamaDaerah'] ?? ($_SESSION['NamaWilayah'] ?? ''));
+        $headerUser = !empty($LoginInfo) ? $LoginInfo : (!empty($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : (!empty($_SESSION['IsVerifikator']) ? 'Verifikator' : ($_SESSION['Username'] ?? '')));
+      ?>
+      <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4) { ?>
+        <?php if (!empty($headerDaerah)) { ?>
+          <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($headerDaerah) ?>">
             <i class="fas fa-map-marker-alt"></i>
-            <?= html_escape($NamaDaerah) ?>
+            <?= html_escape($headerDaerah) ?>
           </span>
-      <?php } ?>
+        <?php } ?>
       <?php } ?>
 
-        <?php if (!empty($LoginInfo)) { ?>
-          <span class="login-badge" title="<?= html_escape($LoginInfo) ?>">
-            <i class="fas fa-user"></i>
-            <?= html_escape($LoginInfo) ?>
-          </span>
+      <?php if (!empty($headerUser)) { ?>
+        <span class="login-badge" title="<?= html_escape($headerUser) ?>">
+          <i class="fas fa-user-shield"></i>
+          <?= html_escape($headerUser) ?>
+        </span>
       <?php } ?>
     </div>
 
     <div class="navbar-center">
-      <a href="<?= base_url('Daerah/UrusanPD'); ?>" class="navbar-brand">
+      <a href="<?= $isVerifikator ? base_url('Instansi/TabelIPPD') : base_url('Daerah/UrusanPD'); ?>" class="navbar-brand">
         <i class="fas fa-chart-line"></i>
-        Sistem Perencanaan Daerah
-    </a>
+        <?= $isVerifikator ? 'Sistem Penyelarasan & Verifikasi IPPD' : 'Sistem Perencanaan Daerah' ?>
+      </a>
     </div>
 
     <div class="navbar-menu">
 
+      <?php if (!$isVerifikator): ?>
       <div class="dropdown">
         <a href="#" class="navbar-item">Laporan<i class="fas fa-chevron-down ml-1" style="font-size: 0.75rem;"></i></a>
         <div class="dropdown-content">
@@ -459,6 +469,7 @@
 
         </div>
       </div>
+      <?php endif; ?>
 
       <?php if (isset($_SESSION['Level']) && ((int)$_SESSION['Level'] === 3 || (int)$_SESSION['Level'] === 4)) { ?>
         <button class="logout-btn" onclick="logout()" type="button">

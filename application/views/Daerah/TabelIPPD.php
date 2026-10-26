@@ -11,6 +11,10 @@ $tahunAktif = isset($TahunAktif) ? (int)$TahunAktif : 2026;
 $filterInstansi = isset($FilterInstansi) ? (int)$FilterInstansi : 1;
 $masterData = isset($MasterData) ? $MasterData : [];
 $savedScores = isset($SavedScores) ? $SavedScores : [];
+$isVerifikator = isset($IsVerifikator) ? (bool)$IsVerifikator : (
+    (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4 && (!empty($_SESSION['IsVerifikator']) || empty($_SESSION['IdInstansi']) || (isset($_SESSION['Username']) && stripos($_SESSION['Username'], 'verif') !== false))) ||
+    (!empty($_SESSION['IsVerifikator']))
+);
 ?>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -497,6 +501,36 @@ tr.type-sub:hover td {
   background: #dbeafe;
   border-color: #93c5fd;
 }
+.btn-action-detail.verif-btn-verified {
+  background: #dcfce7 !important;
+  border-color: #86efac !important;
+  color: #15803d !important;
+}
+.btn-action-detail.verif-btn-verified:hover {
+  background: #bbf7d0 !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2) !important;
+}
+.btn-action-detail.verif-btn-revision {
+  background: #fef3c7 !important;
+  border-color: #fde68a !important;
+  color: #b45309 !important;
+}
+.btn-action-detail.verif-btn-revision:hover {
+  background: #fde68a !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2) !important;
+}
+.btn-action-detail.verif-btn-pending {
+  background: #f0fdfa !important;
+  border-color: #99f6e4 !important;
+  color: #0d9488 !important;
+}
+.btn-action-detail.verif-btn-pending:hover {
+  background: #ccfbf1 !important;
+  border-color: #14b8a6 !important;
+  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.2) !important;
+}
 
 /* Verifikator Column Styles */
 .btn-action-verifikator {
@@ -575,6 +609,467 @@ tr.type-sub:hover td {
   border-color: #0d9488;
   color: #0f766e;
 }
+.btn-action-verifikator.verif-btn-verified {
+  background: #dcfce7 !important;
+  border: 1px solid #86efac !important;
+  color: #15803d !important;
+  font-weight: 700 !important;
+}
+.btn-action-verifikator.verif-btn-verified:hover {
+  background: #bbf7d0 !important;
+  border-color: #22c55e !important;
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2) !important;
+}
+.btn-action-verifikator.verif-btn-revision {
+  background: #fef3c7 !important;
+  border: 1px solid #fde68a !important;
+  color: #b45309 !important;
+  font-weight: 700 !important;
+}
+.btn-action-verifikator.verif-btn-revision:hover {
+  background: #fde68a !important;
+  border-color: #f59e0b !important;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2) !important;
+}
+.btn-action-verifikator.verif-btn-pending {
+  background: #f0fdfa !important;
+  border: 1px solid #99f6e4 !important;
+  color: #0d9488 !important;
+  font-weight: 700 !important;
+}
+.btn-action-verifikator.verif-btn-pending:hover {
+  background: #ccfbf1 !important;
+  border-color: #14b8a6 !important;
+  box-shadow: 0 2px 6px rgba(20, 184, 166, 0.2) !important;
+}
+
+/* Verifikator Decision Panel inside Modal */
+.verif-decision-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-md, 10px);
+  margin: 10px 16px 0;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(15,23,42,0.04);
+}
+.verif-decision-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.verif-decision-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.verif-decision-tag {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.verif-badge-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.verif-badge-pill.status-draft {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+.verif-badge-pill.status-verified {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.verif-badge-pill.status-revision {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.verif-decision-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-decision-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #ffffff;
+}
+.btn-choice-verify {
+  border-color: #86efac;
+  color: #166534;
+  background: #f0fdf4;
+}
+.btn-choice-verify:hover {
+  background: #dcfce7;
+  border-color: #22c55e;
+  box-shadow: 0 2px 6px rgba(34, 197, 94, 0.2);
+}
+.btn-choice-verify.active {
+  background: #16a34a;
+  border-color: #15803d;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+.btn-choice-revision {
+  border-color: #fde68a;
+  color: #92400e;
+  background: #fffbeb;
+}
+.btn-choice-revision:hover {
+  background: #fef3c7;
+  border-color: #f59e0b;
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+}
+.btn-choice-revision.active {
+  background: #d97706;
+  border-color: #b45309;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+}
+
+/* Alasan Revisi Box */
+.verif-revisi-expandable {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+  animation: fadeInDown 0.2s ease-out;
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.revisi-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.revisi-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #b45309;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.revisi-guide {
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+}
+.revisi-textarea {
+  width: 100%;
+  border: 1.5px solid #fcd34d;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  background: #fffdf5;
+  color: #1e293b;
+  resize: vertical;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+.revisi-textarea:focus {
+  outline: none;
+  border-color: #f59e0b;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+}
+.revisi-template-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.chips-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip-item-revisi {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.chip-item-revisi:hover {
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #b45309;
+}
+
+/* Modal Bottom Action Buttons for Verifikator */
+.btn-excel-verify {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: none;
+  background: #16a34a;
+  color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);
+  transition: all 0.15s ease;
+}
+.btn-excel-verify:hover {
+  background: #15803d;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.35);
+  transform: translateY(-1px);
+}
+.btn-excel-revision {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 18px;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 6px;
+  border: 1px solid #d97706;
+  background: #fef3c7;
+  color: #b45309;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-excel-revision:hover {
+  background: #d97706;
+  color: #ffffff;
+  box-shadow: 0 4px 10px rgba(217, 119, 6, 0.25);
+  transform: translateY(-1px);
+}
+
+/* Alert Banners inside Modal */
+.verif-banner-revisi {
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-bottom: 1px solid #fde68a;
+  padding: 10px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.banner-revisi-icon {
+  color: #d97706;
+  font-size: 18px;
+  margin-top: 1px;
+}
+.banner-revisi-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #92400e;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.banner-revisi-text {
+  font-size: 12.5px;
+  color: #78350f;
+  margin-top: 2px;
+}
+.verif-banner-verified {
+  background: #f0fdf4;
+  border-left: 4px solid #16a34a;
+  border-bottom: 1px solid #bbf7d0;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.banner-verified-icon {
+  color: #16a34a;
+  font-size: 18px;
+}
+.banner-verified-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.banner-verified-text {
+  font-size: 12.5px;
+  color: #15803d;
+}
+
+/* Data Informasi Dokumen & Bukti Pendukung Card */
+.excel-info-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #00c292;
+  border-radius: var(--radius-md, 8px);
+  margin: 10px 16px 0;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.excel-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #cbd5e1;
+}
+.excel-info-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.excel-info-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: #e8f8f5;
+  color: #007a5a;
+  border: 1px solid #b2dfdb;
+}
+.excel-info-badge.badge-success {
+  background: #e8f8f5;
+  color: #007a5a;
+  border: 1px solid #b2dfdb;
+}
+.excel-info-badge.badge-empty {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+.excel-info-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.excel-info-pill {
+  font-size: 11.5px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 6px;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.excel-info-catatan {
+  font-size: 12px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 8px 12px;
+  color: #334155;
+  margin-bottom: 8px;
+  line-height: 1.45;
+}
+.excel-info-bukti {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.btn-info-bukti-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.btn-info-bukti-link:hover {
+  background: #dbeafe;
+  color: #1e40af;
+  text-decoration: none;
+}
+
+/* Verifikator Single Action Button & Status Pill */
+.btn-action-detail.btn-verif-action {
+  background: #f0fdfa !important;
+  border: 1.5px solid #00c292 !important;
+  color: #007a5a !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(0, 194, 146, 0.12) !important;
+}
+.btn-action-detail.btn-verif-action:hover {
+  background: #00c292 !important;
+  border-color: #00a87e !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 8px rgba(0, 194, 146, 0.3) !important;
+  transform: translateY(-1px);
+}
+.verif-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: 9999px;
+  width: 100%;
+  max-width: 195px;
+  text-align: center;
+  line-height: 1.35;
+  box-sizing: border-box;
+}
+.verif-status-pill.pill-verified {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+.verif-status-pill.pill-revision {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.verif-status-pill.pill-draft {
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+}
+
 .badge-verif-pill {
   display: inline-block;
   padding: 3px 8px;
@@ -1697,7 +2192,18 @@ tr.type-sub:hover td {
         </select>
       </div>
 
+      <?php if (!empty($ListInstansi) && empty($InstansiId)): ?>
+      <div class="t-field">
+        <label for="selectInstansi">Perangkat Daerah / Instansi</label>
+        <select id="selectInstansi" class="t-select" onchange="window.location.href='<?= base_url('Instansi/TabelIPPD') ?>?tahun=<?= $tahunAktif ?>&instansi_id=' + this.value">
+          <?php foreach ($ListInstansi as $inst): ?>
+            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <?php else: ?>
       <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+      <?php endif; ?>
 
       <div class="t-field">
         <label for="inputSearch">Pencarian Uraian</label>
@@ -1736,8 +2242,8 @@ tr.type-sub:hover td {
             <th>URAIAN INDIKATOR / SUB-INDIKATOR</th>
             <th class="col-bobot-maks text-center">Bobot Maksimal</th>
             <th class="col-bobot-capaian text-center">Bobot Capaian</th>
-            <th class="col-opsi-aksi text-center">Aksi & Detail Penilaian</th>
-            <th class="col-verifikator text-center">Verifikator</th>
+            <th class="col-opsi-aksi text-center"><?= $isVerifikator ? 'Aksi' : 'Aksi & Detail Penilaian' ?></th>
+            <th class="col-verifikator text-center">Status Verifikasi</th>
           </tr>
         </thead>
         <tbody id="tbodyIppd">
@@ -1757,8 +2263,8 @@ tr.type-sub:hover td {
     <!-- 1. Excel Title Bar -->
     <div class="excel-titlebar">
       <div class="excel-title-left">
-        <div class="excel-icon-brand"><i class="fa fa-file-excel-o"></i></div>
-        <span> IPPN Daerah - Lembar Kerja Evaluasi [<span id="excelPointBadge">POIN 1.a.1.a</span>]</span>
+        <div class="excel-icon-brand" id="modalExcelBrandIcon"><i class="fa fa-file-excel-o"></i></div>
+        <span id="modalExcelTitleWrap"> IPPD Daerah - Lembar Kerja Evaluasi [<span id="excelPointBadge">POIN 1.a.1.a</span>]</span>
       </div>
       <div class="excel-window-controls">
         <button type="button" class="excel-win-btn" id="btnModalMaximize" title="Perbesar / Perkecil Tampilan Layar Penuh"><i class="fa fa-arrows-alt" id="iconModalMaximize"></i></button>
@@ -1774,7 +2280,23 @@ tr.type-sub:hover td {
       <div class="excel-score-pill">
         <span>Bobot Maks: <strong id="modalMaxBadge">0.500</strong></span>
         <span>|</span>
-        <span>Capaian: <strong id="modalCalcDisplay">0.000</strong></span>
+        <span id="modalScorePillLabel"><?= $isVerifikator ? 'Bobot Verifikasi:' : 'Capaian:' ?></span> <strong id="modalCalcDisplay">0.000</strong>
+      </div>
+    </div>
+
+    <!-- Banner Info Status Verifikasi -->
+    <div id="bannerStatusRevisi" class="verif-banner-revisi" style="display:none;">
+      <div class="banner-revisi-icon"><i class="fa fa-exclamation-triangle"></i></div>
+      <div class="banner-revisi-content">
+        <div class="banner-revisi-title"><i class="fa fa-pencil-square-o"></i> Catatan Perbaikan dari Verifikator:</div>
+        <div class="banner-revisi-text" id="bannerRevisiText">-</div>
+      </div>
+    </div>
+    <div id="bannerStatusVerified" class="verif-banner-verified" style="display:none;">
+      <div class="banner-verified-icon"><i class="fa fa-check-circle"></i></div>
+      <div class="banner-verified-content">
+        <div class="banner-verified-title">Status: Terverifikasi oleh Verifikator</div>
+        <div class="banner-verified-text">Indikator ini telah memenuhi kriteria dan disetujui.</div>
       </div>
     </div>
 
@@ -1787,62 +2309,122 @@ tr.type-sub:hover td {
         <!-- Injected dynamically with Excel row numbers & column letters -->
       </div>
 
-      <!-- 4. Excel Reference & Evidence Metadata Box -->
-      <div class="excel-meta-box">
-        <div class="excel-meta-title"><i class="fa fa-bookmark"></i> Referensi Dokumen & Pembuktian (Audit Trail)</div>
-        <div class="meta-grid-3">
-          <div class="meta-field">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label for="modalRefDokumen" style="margin-bottom:0;">Dokumen Sumber</label>
-              <div class="excel-meta-quick">
-                <span class="chip-mini chip-doc" data-text="RPJMD 2025-2029">RPJMD</span>
-                <span class="chip-mini chip-doc" data-text="RKPD 2026">RKPD</span>
-                <span class="chip-mini chip-doc" data-text="Renstra PD">Renstra</span>
-              </div>
-            </div>
-            <input type="text" id="modalRefDokumen" placeholder="Contoh: RPJMD 2025-2029 / RKPD 2026">
+      <!-- Section Keputusan Verifikasi & Alasan Revisi -->
+      <div class="verif-decision-panel" id="verifDecisionPanel" style="<?= $isVerifikator ? '' : 'display:none;' ?>">
+        <div class="verif-decision-header">
+          <div class="verif-decision-left">
+            <span class="verif-decision-tag"><i class="fa fa-shield"></i> Keputusan Verifikator:</span>
+            <span class="verif-badge-pill status-draft" id="badgeVerifModalStatus">Belum Diverifikasi</span>
           </div>
-          <div class="meta-field">
-            <label for="modalRefHalaman">Halaman</label>
-            <input type="text" id="modalRefHalaman" placeholder="Contoh: Bab IV Hal. 142-148">
-          </div>
-          <div class="meta-field">
-            <label for="modalRefTabel">Tabel / Matriks</label>
-            <input type="text" id="modalRefTabel" placeholder="Contoh: Tabel 4.12 Matrik Penyelarasan">
+          <div class="verif-decision-buttons">
+            <button type="button" class="btn-decision-choice btn-choice-verify" id="btnChoiceVerify" title="Setujui indikator & konfirmasi capaian">
+              <i class="fa fa-check-circle"></i> Verifikasi (Sesuai)
+            </button>
+            <button type="button" class="btn-decision-choice btn-choice-revision" id="btnChoiceRevision" title="Tandai belum sesuai & isi alasan perbaikan">
+              <i class="fa fa-pencil-square-o"></i> Perbaiki (Belum Sesuai)
+            </button>
           </div>
         </div>
-        <div class="meta-grid-2">
-          <div class="meta-field">
-            <label for="modalCatatan">Catatan / Analisis Evaluasi</label>
-            <textarea id="modalCatatan" rows="2" placeholder="Catatan evaluasi, justifikasi, atau keterangan pendukung..."></textarea>
-            <div class="quick-chips-wrap" style="margin-top:4px;">
-              <button type="button" class="quick-chip excel-catatan-chip" data-text="Target telah selaras dan konsisten.">Target Selaras</button>
-              <button type="button" class="quick-chip excel-catatan-chip" data-text="Sesuai dokumen perencanaan daerah.">Sesuai Dokumen</button>
-              <button type="button" class="quick-chip excel-catatan-chip" data-text="Bukti dukung telah diverifikasi.">Diverifikasi</button>
-              <button type="button" class="quick-chip excel-catatan-chip" data-text="Perlu penyesuaian indikator dan target.">Perlu Revisi</button>
-            </div>
+
+        <!-- Box Alasan Revisi: Tampil jika memilih 'Perbaiki' / Belum Sesuai -->
+        <div class="verif-revisi-expandable" id="boxAlasanRevisi" style="display:none;">
+          <div class="revisi-label-row">
+            <label for="modalAlasanRevisi" class="revisi-label">
+              <i class="fa fa-exclamation-circle text-amber"></i> Alasan Revisi / Catatan Perbaikan <span class="text-danger">*</span>
+            </label>
+            <span class="revisi-guide">Tuliskan hal-hal yang belum sesuai agar daerah dapat melakukan perbaikan.</span>
           </div>
-          <div class="meta-field">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-              <label for="modalBuktiDukung" style="margin-bottom:0;">Bukti Dukung / Tautan Digital</label>
-              <a href="#" target="_blank" id="btnPreviewExcelLink" class="btn-preview-link" style="display:none;" title="Buka tautan di tab baru">
-                <i class="fa fa-external-link"></i> Buka Tautan ↗
-              </a>
-            </div>
-            <div style="display:flex; gap: 8px; flex-direction: column;">
-              <div style="display:flex; gap: 8px;">
-                <input type="text" id="modalBuktiDukung" class="form-control" style="flex:1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Link tautan dokumen, Google Drive, atau hasil upload...">
-                <input type="file" id="uploadBuktiFile" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" multiple>
-                <button type="button" class="btn-ui btn-ui-primary" id="btnUploadBuktiFile" style="white-space: nowrap; padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('uploadBuktiFile').click()">
-                  <i class="fa fa-upload"></i> Upload
-                </button>
-              </div>
-              <div id="uploadBuktiLoading" style="display:none; font-size: 11px; color: #b45309;"><i class="fa fa-spinner fa-spin"></i> Sedang mengunggah...</div>
-              <div id="previewBuktiContainer" style="display:none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; background: #f8fafc; text-align: center;"></div>
-            </div>
+          <textarea id="modalAlasanRevisi" class="revisi-textarea" rows="3" placeholder="Tuliskan catatan perbaikan atau alasan mengapa indikator / bukti dukung ini belum sesuai..."></textarea>
+          
+          <div class="revisi-template-chips">
+            <span class="chips-title"><i class="fa fa-tags"></i> Template Alasan Cepat:</span>
+            <button type="button" class="chip-item-revisi" data-text="Dokumen bukti dukung belum dilampirkan atau tautan tidak dapat diakses.">Bukti Belum Lengkap</button>
+            <button type="button" class="chip-item-revisi" data-text="Target indikator daerah belum konsisten dengan target nasional RPJMN.">Target Belum Selaras</button>
+            <button type="button" class="chip-item-revisi" data-text="Matriks penyelarasan program dan sub-kegiatan belum memadai.">Matriks Kurang Lengkap</button>
+            <button type="button" class="chip-item-revisi" data-text="Perlu penyesuaian perhitungan bobot capaian berdasarkan data realisasi terbaru.">Penyesuaian Nilai</button>
+            <button type="button" class="chip-item-revisi" data-text="Belum mencakup target dan capaian SPM tahun berjalan secara lengkap.">Target SPM Belum Sesuai</button>
           </div>
         </div>
       </div>
+
+      <?php if (!empty($isVerifikator)): ?>
+        <!-- Hidden Inputs for Verifikator to preserve form references safely without errors -->
+        <input type="hidden" id="modalRefDokumen" value="">
+        <input type="hidden" id="modalRefHalaman" value="">
+        <input type="hidden" id="modalRefTabel" value="">
+        <input type="hidden" id="modalCatatan" value="">
+        <input type="hidden" id="modalBuktiDukung" value="">
+
+        <!-- Read-Only: Data Informasi Dokumen & Bukti Pendukung untuk Verifikator -->
+        <div class="excel-info-card" id="boxDataInformasi">
+          <div class="excel-info-header">
+            <div class="excel-info-title">
+              <i class="fa fa-info-circle" style="color:#00c292;"></i> Data Informasi Referensi Sumber & Bukti Dukung
+            </div>
+            <span class="excel-info-badge" id="badgeDataInformasi"><i class="fa fa-check-circle"></i> Data Terlampir</span>
+          </div>
+          <div class="excel-info-body" id="contentDataInformasi">
+            <!-- Populated dynamically via JavaScript -->
+          </div>
+        </div>
+      <?php else: ?>
+        <!-- Editable: Excel Reference & Evidence Metadata Box untuk Akun Daerah -->
+        <div class="excel-meta-box" id="boxInputReferensiDaerah">
+          <div class="excel-meta-title"><i class="fa fa-bookmark"></i> Referensi Dokumen & Pembuktian (Audit Trail)</div>
+          <div class="meta-grid-3">
+            <div class="meta-field">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label for="modalRefDokumen" style="margin-bottom:0;">Dokumen Sumber</label>
+                <div class="excel-meta-quick">
+                  <span class="chip-mini chip-doc" data-text="RPJMD 2025-2029">RPJMD</span>
+                  <span class="chip-mini chip-doc" data-text="RKPD 2026">RKPD</span>
+                  <span class="chip-mini chip-doc" data-text="Renstra PD">Renstra</span>
+                </div>
+              </div>
+              <input type="text" id="modalRefDokumen" placeholder="Contoh: RPJMD 2025-2029 / RKPD 2026">
+            </div>
+            <div class="meta-field">
+              <label for="modalRefHalaman">Halaman</label>
+              <input type="text" id="modalRefHalaman" placeholder="Contoh: Bab IV Hal. 142-148">
+            </div>
+            <div class="meta-field">
+              <label for="modalRefTabel">Tabel / Matriks</label>
+              <input type="text" id="modalRefTabel" placeholder="Contoh: Tabel 4.12 Matrik Penyelarasan">
+            </div>
+          </div>
+          <div class="meta-grid-2">
+            <div class="meta-field">
+              <label for="modalCatatan">Catatan / Analisis Evaluasi</label>
+              <textarea id="modalCatatan" rows="2" placeholder="Catatan evaluasi, justifikasi, atau keterangan pendukung..."></textarea>
+              <div class="quick-chips-wrap" style="margin-top:4px;">
+                <button type="button" class="quick-chip excel-catatan-chip" data-text="Target telah selaras dan konsisten.">Target Selaras</button>
+                <button type="button" class="quick-chip excel-catatan-chip" data-text="Sesuai dokumen perencanaan daerah.">Sesuai Dokumen</button>
+                <button type="button" class="quick-chip excel-catatan-chip" data-text="Bukti dukung telah diverifikasi.">Diverifikasi</button>
+                <button type="button" class="quick-chip excel-catatan-chip" data-text="Perlu penyesuaian indikator dan target.">Perlu Revisi</button>
+              </div>
+            </div>
+            <div class="meta-field">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label for="modalBuktiDukung" style="margin-bottom:0;">Bukti Dukung / Tautan Digital</label>
+                <a href="#" target="_blank" id="btnPreviewExcelLink" class="btn-preview-link" style="display:none;" title="Buka tautan di tab baru">
+                  <i class="fa fa-external-link"></i> Buka Tautan ↗
+                </a>
+              </div>
+              <div style="display:flex; gap: 8px; flex-direction: column;">
+                <div style="display:flex; gap: 8px;">
+                  <input type="text" id="modalBuktiDukung" class="form-control" style="flex:1; padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px;" placeholder="Link tautan dokumen, Google Drive, atau hasil upload...">
+                  <input type="file" id="uploadBuktiFile" style="display:none;" accept=".jpg,.jpeg,.png,.pdf" multiple>
+                  <button type="button" class="btn-ui btn-ui-primary" id="btnUploadBuktiFile" style="white-space: nowrap; padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('uploadBuktiFile').click()">
+                    <i class="fa fa-upload"></i> Upload
+                  </button>
+                </div>
+                <div id="uploadBuktiLoading" style="display:none; font-size: 11px; color: #b45309;"><i class="fa fa-spinner fa-spin"></i> Sedang mengunggah...</div>
+                <div id="previewBuktiContainer" style="display:none; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px; background: #f8fafc; text-align: center;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
 
       <!-- 5. Excel Statusbar & Actions -->
       <div class="excel-statusbar">
@@ -1860,14 +2442,23 @@ tr.type-sub:hover td {
 
         <div class="excel-actions-right">
           <div class="excel-score-input-wrap">
-            <label for="modalBobotInput">Capaian:</label>
+            <label for="modalBobotInput" id="modalBobotLabel"><?= $isVerifikator ? 'Bobot Verifikasi:' : 'Capaian:' ?></label>
             <input type="number" step="0.001" min="0" id="modalBobotInput" placeholder="0.000">
             <span class="excel-pct-badge" id="excelScorePctBadge">100%</span>
           </div>
-          <button type="button" class="btn-excel-cancel" id="btnModalCancel">Batal</button>
-          <button type="button" class="btn-excel-save" id="btnModalSave">
-            <i class="fa fa-save"></i> Simpan Penilaian <span class="shortcut-pill">Ctrl+S</span>
-          </button>
+          <button type="button" class="btn-excel-cancel" id="btnModalCancel">Tutup</button>
+          <?php if ($isVerifikator): ?>
+            <button type="button" class="btn-excel-revision" id="btnModalActionPerbaiki" title="Tandai perlu perbaikan jika belum sesuai">
+              <i class="fa fa-pencil-square-o"></i> Perbaiki
+            </button>
+            <button type="button" class="btn-excel-verify" id="btnModalActionVerifikasi" title="Verifikasi & setujui capaian">
+              <i class="fa fa-check-circle"></i> Verifikasi
+            </button>
+          <?php else: ?>
+            <button type="button" class="btn-excel-save" id="btnModalSave">
+              <i class="fa fa-save"></i> Simpan Penilaian <span class="shortcut-pill">Ctrl+S</span>
+            </button>
+          <?php endif; ?>
         </div>
       </div>
     </form>
@@ -2036,8 +2627,14 @@ tr.type-sub:hover td {
   var MASTER_DATA = <?= json_encode($MasterData) ?>;
   var SCORES_MAP = <?= json_encode($SavedScores) ?> || {};
   var AUTO_DATA_1_A_1_A = <?= isset($AutoData_1_a_1_a) ? json_encode($AutoData_1_a_1_a) : '{}' ?>;
+  var AUTO_DATA_1_A_1_B = <?= isset($AutoData_1_a_1_b) ? json_encode($AutoData_1_a_1_b) : '{}' ?>;
   var AUTO_DATA_1_A_1_C = <?= isset($AutoData_1_a_1_c) ? json_encode($AutoData_1_a_1_c) : '[]' ?>;
+  var AUTO_DATA_1_A_1_D = <?= isset($AutoData_1_a_1_d) ? json_encode($AutoData_1_a_1_d) : '{}' ?>;
   var AUTO_DATA_1_A_2_A = <?= isset($AutoData_1_a_2_a) ? json_encode($AutoData_1_a_2_a) : '[]' ?>;
+  var AUTO_DATA_1_A_2_B = <?= isset($AutoData_1_a_2_b) ? json_encode($AutoData_1_a_2_b) : '[]' ?>;
+  var AUTO_DATA_1_A_2_C = <?= isset($AutoData_1_a_2_c) ? json_encode($AutoData_1_a_2_c) : '[]' ?>;
+  var AUTO_DATA_1_A_2_D = <?= isset($AutoData_1_a_2_d) ? json_encode($AutoData_1_a_2_d) : '[]' ?>;
+  var AUTO_DATA_1_A_2_E = <?= isset($AutoData_1_a_2_e) ? json_encode($AutoData_1_a_2_e) : '[]' ?>;
   var AUTO_DATA_1_A_2_ALL = <?= isset($AutoData_1_a_2_ALL) ? json_encode($AutoData_1_a_2_ALL) : '{}' ?>;
   var AUTO_DATA_1_A_3_A = <?= isset($AutoData_1_a_3_a) ? json_encode($AutoData_1_a_3_a) : '{}' ?>;
   var AUTO_DATA_1_A_3_B = <?= isset($AutoData_1_a_3_b) ? json_encode($AutoData_1_a_3_b) : '{}' ?>;
@@ -2046,8 +2643,35 @@ tr.type-sub:hover td {
   var AUTO_DATA_1_A_6 = <?= isset($AutoData_1_a_6) ? json_encode($AutoData_1_a_6) : '[]' ?>;
   var AUTO_DATA_1_B_10_A = <?= isset($AutoData_1_b_10_a) ? json_encode($AutoData_1_b_10_a) : '{}' ?>;
   var AUTO_DATA_1_B_10_B = <?= isset($AutoData_1_b_10_b) ? json_encode($AutoData_1_b_10_b) : '{}' ?>;
+  var AUTO_DATA_1_B_1_B = <?= isset($AutoData_1_b_1_b) ? json_encode($AutoData_1_b_1_b) : '{}' ?>;
+  var AUTO_DATA_1_B_1_D = <?= isset($AutoData_1_b_1_d) ? json_encode($AutoData_1_b_1_d) : '{}' ?>;
+  var AUTO_DATA_1_B_2_B = <?= isset($AutoData_1_b_2_b) ? json_encode($AutoData_1_b_2_b) : '{}' ?>;
+  var AUTO_DATA_1_B_3_B = <?= isset($AutoData_1_b_3_b) ? json_encode($AutoData_1_b_3_b) : '{}' ?>;
+  var AUTO_DATA_1_B_4_B = <?= isset($AutoData_1_b_4_b) ? json_encode($AutoData_1_b_4_b) : '{}' ?>;
+  var AUTO_DATA_1_B_5_B = <?= isset($AutoData_1_b_5_b) ? json_encode($AutoData_1_b_5_b) : '{}' ?>;
+  var AUTO_DATA_1_B_6_B = <?= isset($AutoData_1_b_6_b) ? json_encode($AutoData_1_b_6_b) : '{}' ?>;
+  var AUTO_DATA_1_B_7_B = <?= isset($AutoData_1_b_7_b) ? json_encode($AutoData_1_b_7_b) : '{}' ?>;
+  var AUTO_DATA_1_B_8_B = <?= isset($AutoData_1_b_8_b) ? json_encode($AutoData_1_b_8_b) : '{}' ?>;
+  var AUTO_DATA_1_B_9_B = <?= isset($AutoData_1_b_9_b) ? json_encode($AutoData_1_b_9_b) : '{}' ?>;
   var AUTO_DATA_1_C_1 = <?= isset($AutoData_1_c_1) ? json_encode($AutoData_1_c_1) : '[]' ?>;
   var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
+  var IS_VERIFIKATOR = <?= !empty($isVerifikator) ? 'true' : 'false' ?>;
+
+  var verifDecisionPanel = document.getElementById("verifDecisionPanel");
+  var badgeVerifModalStatus = document.getElementById("badgeVerifModalStatus");
+  var btnChoiceVerify = document.getElementById("btnChoiceVerify");
+  var btnChoiceRevision = document.getElementById("btnChoiceRevision");
+  var boxAlasanRevisi = document.getElementById("boxAlasanRevisi");
+  var modalAlasanRevisi = document.getElementById("modalAlasanRevisi");
+  var btnModalActionVerifikasi = document.getElementById("btnModalActionVerifikasi");
+  var btnModalActionPerbaiki = document.getElementById("btnModalActionPerbaiki");
+  var bannerStatusRevisi = document.getElementById("bannerStatusRevisi");
+  var bannerRevisiText = document.getElementById("bannerRevisiText");
+  var bannerStatusVerified = document.getElementById("bannerStatusVerified");
+  var modalExcelBrandIcon = document.getElementById("modalExcelBrandIcon");
+  var modalExcelTitleWrap = document.getElementById("modalExcelTitleWrap");
+  var modalScorePillLabel = document.getElementById("modalScorePillLabel");
+  var modalBobotLabel = document.getElementById("modalBobotLabel");
 
   var tbody = document.getElementById("tbodyIppd");
   var selectTahun = document.getElementById("selectTahun");
@@ -2194,6 +2818,42 @@ tr.type-sub:hover td {
               if (ind.sub && ind.sub.length > 0){
                 ind.sub.forEach(function(sub){
                   var subVal = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_capaian !== null ? Number(SCORES_MAP[sub.code].bobot_capaian) : 0;
+                  if (sub.code === '1.a.1.a' && (!SCORES_MAP['1.a.1.a'] || SCORES_MAP['1.a.1.a'].bobot_capaian === null || SCORES_MAP['1.a.1.a'].bobot_capaian === undefined)) {
+                    var auto1a1a = getAutoScore_1_a_1_a();
+                    subVal = auto1a1a.score;
+                  }
+                  if (sub.code === '1.a.1.b' && (!SCORES_MAP['1.a.1.b'] || SCORES_MAP['1.a.1.b'].bobot_capaian === null || SCORES_MAP['1.a.1.b'].bobot_capaian === undefined)) {
+                    var auto1a1b = getAutoScore_1_a_1_b();
+                    subVal = auto1a1b.score;
+                  }
+                  if (sub.code === '1.a.1.c' && (!SCORES_MAP['1.a.1.c'] || SCORES_MAP['1.a.1.c'].bobot_capaian === null || SCORES_MAP['1.a.1.c'].bobot_capaian === undefined)) {
+                    var auto1a1c = getAutoScore_1_a_1_c();
+                    subVal = auto1a1c.score;
+                  }
+                  if (sub.code === '1.a.1.d' && (!SCORES_MAP['1.a.1.d'] || SCORES_MAP['1.a.1.d'].bobot_capaian === null || SCORES_MAP['1.a.1.d'].bobot_capaian === undefined)) {
+                    var auto1a1d = getAutoScore_1_a_1_d();
+                    subVal = auto1a1d.score;
+                  }
+                  if (sub.code === '1.a.2.a' && (!SCORES_MAP['1.a.2.a'] || SCORES_MAP['1.a.2.a'].bobot_capaian === null || SCORES_MAP['1.a.2.a'].bobot_capaian === undefined)) {
+                    var auto1a2a = getAutoScore_1_a_2_a();
+                    subVal = auto1a2a.score;
+                  }
+                  if (sub.code === '1.a.2.b' && (!SCORES_MAP['1.a.2.b'] || SCORES_MAP['1.a.2.b'].bobot_capaian === null || SCORES_MAP['1.a.2.b'].bobot_capaian === undefined)) {
+                    var auto1a2b = getAutoScore_1_a_2_b();
+                    subVal = auto1a2b.score;
+                  }
+                  if (sub.code === '1.a.2.c' && (!SCORES_MAP['1.a.2.c'] || SCORES_MAP['1.a.2.c'].bobot_capaian === null || SCORES_MAP['1.a.2.c'].bobot_capaian === undefined)) {
+                    var auto1a2c = getAutoScore_1_a_2_c();
+                    subVal = auto1a2c.score;
+                  }
+                  if (sub.code === '1.a.2.d' && (!SCORES_MAP['1.a.2.d'] || SCORES_MAP['1.a.2.d'].bobot_capaian === null || SCORES_MAP['1.a.2.d'].bobot_capaian === undefined)) {
+                    var auto1a2d = getAutoScore_1_a_2_d();
+                    subVal = auto1a2d.score;
+                  }
+                  if (sub.code === '1.a.2.e' && (!SCORES_MAP['1.a.2.e'] || SCORES_MAP['1.a.2.e'].bobot_capaian === null || SCORES_MAP['1.a.2.e'].bobot_capaian === undefined)) {
+                    var auto1a2e = getAutoScore_1_a_2_e();
+                    subVal = auto1a2e.score;
+                  }
                   indScore += subVal;
                   var subVerif = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_verifikator !== null ? Number(SCORES_MAP[sub.code].bobot_verifikator) : 0;
                   indVerifScore += subVerif;
@@ -2241,42 +2901,35 @@ tr.type-sub:hover td {
     return { normal: calculated, verif: calculatedVerif };
   }
 
-  function renderVerifikatorButtonHtml(code, savedScore){
+  function renderVerifikatorActionButton(code, savedScore){
+    return '<button type="button" class="btn-action-detail btn-verif-action" data-code="' + code + '" title="Buka lembar kerja verifikasi">' +
+             '<i class="fa fa-shield"></i> Verifikasi' +
+           '</button>';
+  }
+
+  function renderVerifikatorStatusBadge(code, savedScore){
     savedScore = savedScore || {};
+    var statusVerif = savedScore.status_verifikasi || (savedScore.bobot_verifikator !== null && savedScore.bobot_verifikator !== undefined && savedScore.bobot_verifikator !== "" ? 'Terverifikasi' : 'Draft');
     var hasVerif = (savedScore.bobot_verifikator !== null && savedScore.bobot_verifikator !== undefined && savedScore.bobot_verifikator !== "");
     var kriteria = (savedScore.opsi_aksi_verifikator || "").trim();
 
-    var kriteriaClass = "kriteria-empty";
-    var iconClass = IS_ROLE_4 ? "fa-pencil-square-o" : "fa-eye";
-    var labelText = IS_ROLE_4 ? "Verifikasi" : "Belum Diverifikasi";
-
-    if (kriteria !== ""){
-      labelText = kriteria;
-      iconClass = "fa-check-circle";
-      if (kriteria.indexOf("100%") !== -1 || kriteria.indexOf("Memenuhi Sepenuhnya") !== -1) {
-        kriteriaClass = "kriteria-100";
-      } else if (kriteria.indexOf("75%") !== -1 || kriteria.indexOf("Sebagian Besar") !== -1) {
-        kriteriaClass = "kriteria-75";
-      } else if (kriteria.indexOf("50%") !== -1 || kriteria.indexOf("Sebagian Memenuhi") !== -1) {
-        kriteriaClass = "kriteria-50";
-      } else if (kriteria.indexOf("0%") !== -1 || kriteria.indexOf("Belum Memenuhi") !== -1) {
-        kriteriaClass = "kriteria-0";
-      } else {
-        kriteriaClass = "kriteria-na";
-      }
+    if (statusVerif === 'Terverifikasi' || kriteria === 'Terverifikasi' || kriteria.indexOf("100%") !== -1 || kriteria.indexOf("Memenuhi Sepenuhnya") !== -1){
+      return '<span class="verif-status-pill pill-verified" title="Status: Terverifikasi">' +
+               '<i class="fa fa-check-circle"></i> Terverifikasi (' + numFmt(savedScore.bobot_verifikator || savedScore.bobot_capaian) + ')' +
+             '</span>';
+    } else if (statusVerif === 'Perlu Perbaikan' || statusVerif === 'Revisi' || kriteria === 'Perlu Perbaikan'){
+      return '<span class="verif-status-pill pill-revision" title="' + escapeHtml(savedScore.alasan_revisi ? 'Perlu Perbaikan: ' + savedScore.alasan_revisi : 'Perlu Perbaikan') + '">' +
+               '<i class="fa fa-pencil-square-o"></i> Perlu Perbaikan' +
+             '</span>';
     } else if (hasVerif){
-      labelText = "Bobot: " + numFmt(savedScore.bobot_verifikator);
-      iconClass = "fa-check-circle";
-      kriteriaClass = "kriteria-75";
+      return '<span class="verif-status-pill pill-verified">' +
+               '<i class="fa fa-check-circle"></i> Terverifikasi (' + numFmt(savedScore.bobot_verifikator) + ')' +
+             '</span>';
+    } else {
+      return '<span class="verif-status-pill pill-draft">' +
+               '<i class="fa fa-clock-o"></i> Belum Diverifikasi' +
+             '</span>';
     }
-
-    var titleAttr = (kriteria ? "Kriteria: " + kriteria + (hasVerif ? " (" + numFmt(savedScore.bobot_verifikator) + ")" : "") : (hasVerif ? "Bobot: " + numFmt(savedScore.bobot_verifikator) : "Belum dinilai")) + 
-                    (IS_ROLE_4 ? " | Klik untuk ubah penilaian verifikator" : " | Klik untuk lihat detail verifikasi");
-
-    return '<button type="button" class="btn-action-verifikator ' + (hasVerif || kriteria ? 'has-verif ' : '') + kriteriaClass + '" data-code="' + code + '" title="' + escapeHtml(titleAttr) + '">' +
-             '<i class="fa ' + iconClass + '"></i> ' +
-             '<span>' + escapeHtml(labelText) + '</span>' +
-           '</button>';
   }
 
   function renderTable(){
@@ -2340,6 +2993,46 @@ tr.type-sub:hover td {
 
               var savedScoreInd = SCORES_MAP[ind.code] || {};
               var hasScore = savedScoreInd.bobot_capaian !== null && savedScoreInd.bobot_capaian !== undefined && savedScoreInd.bobot_capaian !== "";
+
+              if (ind.code === '1.a.4') {
+                var auto1a4 = getAutoScore_1_a_4(savedScoreInd.detail_json ? (typeof savedScoreInd.detail_json === 'string' ? JSON.parse(savedScoreInd.detail_json) : savedScoreInd.detail_json) : null);
+                if (!hasScore || (parseFloat(savedScoreInd.bobot_capaian) !== 0.5 && parseFloat(savedScoreInd.bobot_capaian) !== 1.0)) {
+                  savedScoreInd = Object.assign(savedScoreInd, {
+                    bobot_capaian: auto1a4.score,
+                    opsi_aksi: auto1a4.aksi,
+                    catatan: 'Otomatis dihitung dari keselarasan Dukungan Program Daerah terhadap Kegiatan Prioritas Utama (KPU) RPJMN (Rata-rata Terbobot: ' + auto1a4.avg.toFixed(2) + ', Kriteria ' + auto1a4.crit + ' = ' + auto1a4.aksi + ')'
+                  });
+                  SCORES_MAP['1.a.4'] = savedScoreInd;
+                  hasScore = true;
+                }
+              }
+
+              if (ind.code === '1.a.5') {
+                var auto1a5 = getAutoScore_1_a_5(savedScoreInd.detail_json ? (typeof savedScoreInd.detail_json === 'string' ? JSON.parse(savedScoreInd.detail_json) : savedScoreInd.detail_json) : null);
+                if (!hasScore || (parseFloat(savedScoreInd.bobot_capaian) !== 0.5 && parseFloat(savedScoreInd.bobot_capaian) !== 1.0)) {
+                  savedScoreInd = Object.assign(savedScoreInd, {
+                    bobot_capaian: auto1a5.score,
+                    opsi_aksi: auto1a5.aksi,
+                    catatan: 'Otomatis dihitung dari keselarasan Komponen Indikator SPM Daerah terhadap PP No. 2 Tahun 2018 (Rata-rata Terbobot: ' + auto1a5.avg.toFixed(2) + ', Kriteria ' + auto1a5.crit + ' = ' + auto1a5.aksi + ')'
+                  });
+                  SCORES_MAP['1.a.5'] = savedScoreInd;
+                  hasScore = true;
+                }
+              }
+
+              if (ind.code === '1.a.6') {
+                var auto1a6 = getAutoScore_1_a_6(savedScoreInd.detail_json ? (typeof savedScoreInd.detail_json === 'string' ? JSON.parse(savedScoreInd.detail_json) : savedScoreInd.detail_json) : null);
+                if (!hasScore || (parseFloat(savedScoreInd.bobot_capaian) !== 0.5 && parseFloat(savedScoreInd.bobot_capaian) !== 1.0)) {
+                  savedScoreInd = Object.assign(savedScoreInd, {
+                    bobot_capaian: auto1a6.score,
+                    opsi_aksi: auto1a6.aksi,
+                    catatan: 'Otomatis dihitung dari keselarasan Target SPM Daerah terhadap PP No. 2 Tahun 2018 (Rata-rata Terbobot: ' + auto1a6.avg.toFixed(2) + ', Kriteria ' + auto1a6.crit + ' = ' + auto1a6.aksi + ')'
+                  });
+                  SCORES_MAP['1.a.6'] = savedScoreInd;
+                  hasScore = true;
+                }
+              }
+
               var currentScoreVal = hasSub ? calculatedScores[ind.code] : (hasScore ? savedScoreInd.bobot_capaian : "");
               var hasVerifInd = savedScoreInd.bobot_verifikator !== null && savedScoreInd.bobot_verifikator !== undefined && savedScoreInd.bobot_verifikator !== "";
 
@@ -2352,14 +3045,17 @@ tr.type-sub:hover td {
 
               var directActionHtml = hasSub ? 
                 '<span style="font-size:11.5px; color:#047857; font-weight:600;"><i class="fa fa-list"></i> ' + ind.sub.length + ' Sub-Indikator</span>' :
-                '<button type="button" class="btn-action-detail ' + (hasScore ? 'has-score' : '') + '" data-code="' + ind.code + '" title="Buka lembar kerja penilaian detail">' +
-                  '<i class="fa ' + (hasScore ? 'fa-check-square' : 'fa-pencil-square-o') + '"></i> ' +
-                  (hasScore ? 'Detail (' + numFmt(savedScoreInd.bobot_capaian) + ')' : 'Detail Penilaian') +
-                '</button>';
+                (IS_VERIFIKATOR ?
+                  renderVerifikatorActionButton(ind.code, savedScoreInd) :
+                  '<button type="button" class="btn-action-detail ' + (hasScore ? 'has-score' : '') + '" data-code="' + ind.code + '" title="Buka lembar kerja penilaian detail">' +
+                    '<i class="fa ' + (hasScore ? 'fa-check-square' : 'fa-pencil-square-o') + '"></i> ' +
+                    (hasScore ? 'Detail (' + numFmt(savedScoreInd.bobot_capaian) + ')' : 'Detail Penilaian') +
+                  '</button>'
+                );
 
               var verifActionHtml = hasSub ?
                 '<span class="badge-verif-subtotal" title="Total Nilai Verifikator Indikator ' + ind.no + '"><i class="fa fa-shield"></i> ' + numFmt(calculatedVerif[ind.code] || 0) + '</span>' :
-                renderVerifikatorButtonHtml(ind.code, savedScoreInd);
+                renderVerifikatorStatusBadge(ind.code, savedScoreInd);
 
               trInd.innerHTML = 
                 '<td class="col-no">' + ind.no + '</td>' +
@@ -2382,10 +3078,82 @@ tr.type-sub:hover td {
                 ind.sub.forEach(function(sub){
                   var savedScoreSub = SCORES_MAP[sub.code] || {};
                   var hasSubScore = savedScoreSub.bobot_capaian !== null && savedScoreSub.bobot_capaian !== undefined && savedScoreSub.bobot_capaian !== "";
+                  if (sub.code === '1.a.1.a' && !hasSubScore) {
+                    var auto1a1a = getAutoScore_1_a_1_a();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a1a.score,
+                      opsi_aksi: auto1a1a.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a1a.score > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.1.b' && !hasSubScore) {
+                    var auto1a1b = getAutoScore_1_a_1_b();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a1b.score,
+                      opsi_aksi: auto1a1b.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : 'Belum Memenuhi'
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.1.c' && !hasSubScore) {
+                    var auto1a1c = getAutoScore_1_a_1_c();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a1c.score,
+                      opsi_aksi: auto1a1c.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a1c.score > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.1.d' && !hasSubScore) {
+                    var auto1a1d = getAutoScore_1_a_1_d();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a1d.score,
+                      opsi_aksi: auto1a1d.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : 'Belum Memenuhi'
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.2.a' && !hasSubScore) {
+                    var auto1a2a = getAutoScore_1_a_2_a();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a2a.score,
+                      opsi_aksi: auto1a2a.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2a.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.2.b' && !hasSubScore) {
+                    var auto1a2b = getAutoScore_1_a_2_b();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a2b.score,
+                      opsi_aksi: auto1a2b.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2b.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.2.c' && !hasSubScore) {
+                    var auto1a2c = getAutoScore_1_a_2_c();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a2c.score,
+                      opsi_aksi: auto1a2c.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2c.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.2.d' && !hasSubScore) {
+                    var auto1a2d = getAutoScore_1_a_2_d();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a2d.score,
+                      opsi_aksi: auto1a2d.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2d.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '1.a.2.e' && !hasSubScore) {
+                    var auto1a2e = getAutoScore_1_a_2_e();
+                    savedScoreSub = {
+                      bobot_capaian: auto1a2e.score,
+                      opsi_aksi: auto1a2e.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2e.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
                   var currentSubScore = hasSubScore ? savedScoreSub.bobot_capaian : "";
                   var hasSubVerif = savedScoreSub.bobot_verifikator !== null && savedScoreSub.bobot_verifikator !== undefined && savedScoreSub.bobot_verifikator !== "";
 
-                  var verifSubHtml = renderVerifikatorButtonHtml(sub.code, savedScoreSub);
+                  var verifSubHtml = renderVerifikatorStatusBadge(sub.code, savedScoreSub);
 
                   var trSub = document.createElement("tr");
                   trSub.className = "type-sub";
@@ -2404,10 +3172,13 @@ tr.type-sub:hover td {
                       '<input type="number" step="0.001" min="0" max="' + sub.bobot + '" class="input-bobot-cell" data-code="' + sub.code + '" data-max="' + sub.bobot + '" value="' + currentSubScore + '" placeholder="0">' +
                     '</td>' +
                     '<td class="col-opsi-aksi">' +
-                      '<button type="button" class="btn-action-detail ' + (hasSubScore ? 'has-score' : '') + '" data-code="' + sub.code + '" title="Buka lembar kerja penilaian detail">' +
-                        '<i class="fa ' + (hasSubScore ? 'fa-check-square' : 'fa-pencil-square-o') + '"></i> ' +
-                        (hasSubScore ? 'Detail (' + numFmt(savedScoreSub.bobot_capaian) + ')' : 'Detail Penilaian') +
-                      '</button>' +
+                      (IS_VERIFIKATOR ?
+                        renderVerifikatorActionButton(sub.code, savedScoreSub) :
+                        '<button type="button" class="btn-action-detail ' + (hasSubScore ? 'has-score' : '') + '" data-code="' + sub.code + '" title="Buka lembar kerja penilaian detail">' +
+                          '<i class="fa ' + (hasSubScore ? 'fa-check-square' : 'fa-pencil-square-o') + '"></i> ' +
+                          (hasSubScore ? 'Detail (' + numFmt(savedScoreSub.bobot_capaian) + ')' : 'Detail Penilaian') +
+                        '</button>'
+                      ) +
                     '</td>' +
                     '<td class="col-verifikator">' + verifSubHtml + '</td>';
                   tbody.appendChild(trSub);
@@ -2449,6 +3220,145 @@ tr.type-sub:hover td {
   }
 
   // =========================================================================
+  // STANDARDIZED CRITERIA CARD COMPONENT (Same style across all IPPD points)
+  // =========================================================================
+  function renderStandardCriteriaCard(cfg) {
+    var safeId = cfg.safeId;
+    var code = cfg.code;
+    var title = cfg.title || ('Keterangan & Kriteria Penilaian Poin ' + code);
+    var badgeText = cfg.badgeText || 'Evaluasi Penilaian';
+    var colTitle = cfg.colTitle || ('Kriteria Penilaian Poin ' + code);
+    var rows = cfg.rows || [];
+    var sourceTitle = cfg.sourceTitle || 'Hasil Kelengkapan Sinkronisasi Form Terkait';
+    var infoRows = cfg.infoRows || [];
+    var initialScore = cfg.initialScore !== undefined ? numFmt(cfg.initialScore) : '-';
+
+    var html = 
+      '<div class="ws-criteria-card-standard" style="margin-top:16px; border:1px solid #e2e8f0; border-radius:8px; background:#ffffff; box-shadow:0 1px 3px rgba(0,0,0,0.05); overflow:hidden;">' +
+        '<div style="background:#f8fafc; padding:10px 14px; border-bottom:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">' +
+          '<div style="font-weight:700; font-size:12.5px; color:#1e293b; display:flex; align-items:center; gap:6px;">' +
+            '<i class="fa fa-info-circle" style="color:#2563eb;"></i> ' + title +
+          '</div>' +
+          '<div id="' + safeId + 'CriteriaBadge" style="font-size:11.5px; font-weight:700; padding:3px 10px; border-radius:20px; background:#f1f5f9; color:#475569; border:1px solid #cbd5e1;">' +
+            badgeText +
+          '</div>' +
+        '</div>' +
+        '<div style="padding:14px; display:flex; gap:20px; flex-wrap:wrap;">' +
+          '<div style="flex:1.4; min-width:380px;">' +
+            '<table style="width:100%; border-collapse:collapse; font-size:11.5px; border:1px solid #cbd5e1;">' +
+              '<thead>' +
+                '<tr style="background:#f1f5f9; color:#334155;">' +
+                  '<th style="border:1px solid #cbd5e1; padding:7px 10px; text-align:left; font-weight:700;">' + colTitle + '</th>' +
+                  '<th style="border:1px solid #cbd5e1; padding:7px 10px; text-align:center; width:100px; min-width:100px; font-weight:700;">Nilai</th>' +
+                '</tr>' +
+              '</thead>' +
+              '<tbody>';
+
+    rows.forEach(function(r) {
+      var critLetter = r.crit;
+      var critText = r.text;
+      var critVal = r.val;
+      var critColor = r.color || '#1e293b';
+
+      html += 
+        '<tr id="' + safeId + 'CritRow_' + critLetter + '" style="transition:background 0.2s;">' +
+          '<td style="border:1px solid #cbd5e1; padding:6px 10px; color:#1e293b;">' +
+            '<span class="crit-icon" style="margin-right:4px;"></span><strong>' + critLetter + '.</strong> ' + critText +
+          '</td>' +
+          '<td style="border:1px solid #cbd5e1; padding:6px 10px; text-align:center; font-weight:700; color:' + critColor + ';">' +
+            critVal +
+          '</td>' +
+        '</tr>';
+    });
+
+    html += 
+              '</tbody>' +
+            '</table>';
+
+    if (cfg.notes && Array.isArray(cfg.notes) && cfg.notes.length > 0) {
+      html += 
+        '<div style="margin-top:10px; padding:8px 12px; background:#f8fafc; border-left:3px solid #3b82f6; border-radius:4px; font-size:11.5px; color:#334155; line-height:1.6;">';
+      cfg.notes.forEach(function(nt) {
+        html += '<div style="margin-bottom:2px;"><i class="fa fa-info-circle" style="color:#3b82f6; margin-right:5px; font-size:11px;"></i>' + nt + '</div>';
+      });
+      html += '</div>';
+    }
+
+    html += 
+          '</div>' +
+          '<div style="flex:1; min-width:280px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px; font-size:12px;">' +
+            '<div style="font-weight:700; color:#0f172a; margin-bottom:8px; display:flex; align-items:center; gap:6px;">' +
+              '<i class="fa fa-sliders" style="color:#0ea5e9;"></i> ' + sourceTitle +
+            '</div>';
+
+    infoRows.forEach(function(ir) {
+      var idAttr = ir.id ? ' id="' + ir.id + '"' : '';
+      html += 
+        '<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #e2e8f0;">' +
+          '<span style="color:#64748b;">' + ir.label + '</span>' +
+          '<strong' + idAttr + ' style="color:#0f172a;">' + (ir.value || '-') + '</strong>' +
+        '</div>';
+    });
+
+    html += 
+            '<div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; margin-top:2px;">' +
+              '<span style="color:#64748b; font-weight:600;">Nilai Capaian Otomatis:</span>' +
+              '<strong id="' + safeId + 'GeneratedScore" style="color:#16a34a; font-size:14px;">' + initialScore + '</strong>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+
+    return html;
+  }
+
+  function updateStandardCriteriaHighlight(safeId, currentCrit, currentScore, infoMap, allLetters) {
+    allLetters = allLetters || ['A', 'B', 'C', 'D', 'E'];
+    allLetters.forEach(function(c) {
+      var row = document.getElementById(safeId + "CritRow_" + c);
+      if (row) {
+        var icon = row.querySelector(".crit-icon");
+        if (c === currentCrit) {
+          row.style.background = '#dcfce7';
+          row.style.fontWeight = '700';
+          if (icon) icon.innerHTML = '<i class="fa fa-check-circle" style="color:#15803d; font-size:12px;"></i> ';
+        } else {
+          row.style.background = 'transparent';
+          row.style.fontWeight = 'normal';
+          if (icon) icon.innerHTML = '';
+        }
+      }
+    });
+
+    var badge = document.getElementById(safeId + "CriteriaBadge");
+    if (badge) {
+      badge.innerHTML = '<i class="fa fa-tag"></i> Kriteria ' + currentCrit + ' : Nilai ' + numFmt(currentScore);
+      var isPassing = (allLetters && allLetters.length === 2) ? (currentCrit === 'B') : (currentCrit === 'E' || currentCrit === 'D');
+      badge.style.background = isPassing ? '#dcfce7' : (currentCrit === 'C' ? '#e0f2fe' : (currentCrit === 'B' ? '#fef3c7' : '#fee2e2'));
+      badge.style.color = isPassing ? '#15803d' : (currentCrit === 'C' ? '#0369a1' : (currentCrit === 'B' ? '#b45309' : '#b91c1c'));
+      badge.style.border = isPassing ? '1px solid #86efac' : (currentCrit === 'C' ? '1px solid #7dd3fc' : (currentCrit === 'B' ? '1px solid #fde68a' : '1px solid #fca5a5'));
+    }
+
+    if (infoMap) {
+      Object.keys(infoMap).forEach(function(elId) {
+        var el = document.getElementById(elId);
+        if (el) {
+          if (typeof infoMap[elId] === 'string' && infoMap[elId].indexOf('<') !== -1) {
+            el.innerHTML = infoMap[elId];
+          } else {
+            el.textContent = infoMap[elId];
+          }
+        }
+      });
+    }
+
+    var scoreEl = document.getElementById(safeId + "GeneratedScore");
+    if (scoreEl) {
+      scoreEl.textContent = numFmt(currentScore);
+    }
+  }
+
+  // =========================================================================
   // WORKSHEET RENDERERS (Exact replicas of the 21 Excel Sheet HTML Templates)
   // =========================================================================
 
@@ -2457,20 +3367,20 @@ tr.type-sub:hover td {
     d = d || {};
     var rowsData = [
       { id: 'lpe', name: 'Laju Pertumbuhan Ekonomi (LPE)', unit: 'Persen', isPositive: true,
-        mn_base: d.lpe_mn_base !== undefined ? d.lpe_mn_base : (AUTO_DATA_1_A_1_A.mn_lpe_base || ''),
-        mn_end:  d.lpe_mn_end  !== undefined ? d.lpe_mn_end  : (AUTO_DATA_1_A_1_A.mn_lpe_end || ''),
-        md_base: d.lpe_md_base !== undefined ? d.lpe_md_base : (AUTO_DATA_1_A_1_A.md_lpe_base || ''),
-        md_end:  d.lpe_md_end  !== undefined ? d.lpe_md_end  : (AUTO_DATA_1_A_1_A.md_lpe_end || '') },
+        mn_base: (d.lpe_mn_base !== undefined && String(d.lpe_mn_base).trim() !== '') ? d.lpe_mn_base : (AUTO_DATA_1_A_1_A.mn_lpe_base || ''),
+        mn_end:  (d.lpe_mn_end  !== undefined && String(d.lpe_mn_end).trim() !== '')  ? d.lpe_mn_end  : (AUTO_DATA_1_A_1_A.mn_lpe_end || ''),
+        md_base: (d.lpe_md_base !== undefined && String(d.lpe_md_base).trim() !== '') ? d.lpe_md_base : (AUTO_DATA_1_A_1_A.md_lpe_base || ''),
+        md_end:  (d.lpe_md_end  !== undefined && String(d.lpe_md_end).trim() !== '')  ? d.lpe_md_end  : (AUTO_DATA_1_A_1_A.md_lpe_end || '') },
       { id: 'tk', name: 'Tingkat Kemiskinan (TK)', unit: 'Persen', isPositive: true,
-        mn_base: d.tk_mn_base !== undefined ? d.tk_mn_base : (AUTO_DATA_1_A_1_A.mn_tk_base || ''),
-        mn_end:  d.tk_mn_end  !== undefined ? d.tk_mn_end  : (AUTO_DATA_1_A_1_A.mn_tk_end || ''),
-        md_base: d.tk_md_base !== undefined ? d.tk_md_base : (AUTO_DATA_1_A_1_A.md_tk_base || ''),
-        md_end:  d.tk_md_end  !== undefined ? d.tk_md_end  : (AUTO_DATA_1_A_1_A.md_tk_end || '') },
+        mn_base: (d.tk_mn_base !== undefined && String(d.tk_mn_base).trim() !== '') ? d.tk_mn_base : (AUTO_DATA_1_A_1_A.mn_tk_base || ''),
+        mn_end:  (d.tk_mn_end  !== undefined && String(d.tk_mn_end).trim() !== '')  ? d.tk_mn_end  : (AUTO_DATA_1_A_1_A.mn_tk_end || ''),
+        md_base: (d.tk_md_base !== undefined && String(d.tk_md_base).trim() !== '') ? d.tk_md_base : (AUTO_DATA_1_A_1_A.md_tk_base || ''),
+        md_end:  (d.tk_md_end  !== undefined && String(d.tk_md_end).trim() !== '')  ? d.tk_md_end  : (AUTO_DATA_1_A_1_A.md_tk_end || '') },
       { id: 'tpt', name: 'Tingkat Pengangguran Terbuka (TPT)', unit: 'Persen', isPositive: false,
-        mn_base: d.tpt_mn_base !== undefined ? d.tpt_mn_base : (AUTO_DATA_1_A_1_A.mn_tpt_base || ''),
-        mn_end:  d.tpt_mn_end  !== undefined ? d.tpt_mn_end  : (AUTO_DATA_1_A_1_A.mn_tpt_end || ''),
-        md_base: d.tpt_md_base !== undefined ? d.tpt_md_base : (AUTO_DATA_1_A_1_A.md_tpt_base || ''),
-        md_end:  d.tpt_md_end  !== undefined ? d.tpt_md_end  : (AUTO_DATA_1_A_1_A.md_tpt_end || '') }
+        mn_base: (d.tpt_mn_base !== undefined && String(d.tpt_mn_base).trim() !== '') ? d.tpt_mn_base : (AUTO_DATA_1_A_1_A.mn_tpt_base || ''),
+        mn_end:  (d.tpt_mn_end  !== undefined && String(d.tpt_mn_end).trim() !== '')  ? d.tpt_mn_end  : (AUTO_DATA_1_A_1_A.mn_tpt_end || ''),
+        md_base: (d.tpt_md_base !== undefined && String(d.tpt_md_base).trim() !== '') ? d.tpt_md_base : (AUTO_DATA_1_A_1_A.md_tpt_base || ''),
+        md_end:  (d.tpt_md_end  !== undefined && String(d.tpt_md_end).trim() !== '')  ? d.tpt_md_end  : (AUTO_DATA_1_A_1_A.md_tpt_end || '') }
     ];
 
     var html = 
@@ -2523,111 +3433,657 @@ tr.type-sub:hover td {
       '</table>' +
       '</div>';
 
+    // Keterangan di bawah tabel: Range Nilai sesuai kriteria evaluasi
+    html += renderStandardCriteriaCard({
+      code: '1.a.1.a',
+      safeId: 'ws1a1a',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.1.a',
+      badgeText: 'Evaluasi Data Sinkronisasi',
+      colTitle: 'Kriteria Kesesuaian dengan PN RPJMN',
+      rows: [
+        { crit: 'A', text: 'Tidak ada keterkaitan', val: '0', color: '#475569' },
+        { crit: 'B', text: 'Kurang dari 50% sesuai dengan PN RPJMN', val: '0,3', color: '#d97706' },
+        { crit: 'C', text: 'Di atas atau sama dengan 50% sesuai dengan PN RPJMN', val: '0,5', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Data',
+      infoRows: [
+        { label: 'Indikator Sesuai:', id: 'ws1a1aCountMatched', value: '-' },
+        { label: 'Persentase Keterkaitan:', id: 'ws1a1aPctMatched', value: '-%' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a1aCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
-  // 2. Sheet 1.a.1.b & 1.a.1.d (Tabel Persandingan Ada / Tidak Ada)
-  function renderWs_TabelPersandingan(code, d, maxBobot){
+  // Helper untuk menghitung capaian otomatis 1.a.1.a berdasarkan kelengkapan sinkronisasi data
+  function getAutoScore_1_a_1_a(d){
     d = d || {};
-    var labelItem = (code === '1.a.1.b') ? 
-      'Tabel Persandingan antara Sasaran Pembangunan Daerah RPJMD dengan PN RPJMN' : 
-      'Tabel Persandingan antara Prioritas Pembangunan Daerah RPJMD dengan PN RPJMN';
-    var curVal = d.status_tabel || (d.avail == '0' ? 'Tidak Ada' : 'Ada');
+    var lpe_base = (d.lpe_md_base !== undefined && String(d.lpe_md_base).trim() !== '') ? d.lpe_md_base : (AUTO_DATA_1_A_1_A.md_lpe_base || '');
+    var lpe_end  = (d.lpe_md_end  !== undefined && String(d.lpe_md_end).trim() !== '')  ? d.lpe_md_end  : (AUTO_DATA_1_A_1_A.md_lpe_end || '');
+    var tk_base  = (d.tk_md_base  !== undefined && String(d.tk_md_base).trim() !== '')  ? d.tk_md_base  : (AUTO_DATA_1_A_1_A.md_tk_base || '');
+    var tk_end   = (d.tk_md_end   !== undefined && String(d.tk_md_end).trim() !== '')   ? d.tk_md_end   : (AUTO_DATA_1_A_1_A.md_tk_end || '');
+    var tpt_base = (d.tpt_md_base !== undefined && String(d.tpt_md_base).trim() !== '') ? d.tpt_md_base : (AUTO_DATA_1_A_1_A.md_tpt_base || '');
+    var tpt_end  = (d.tpt_md_end  !== undefined && String(d.tpt_md_end).trim() !== '')  ? d.tpt_md_end  : (AUTO_DATA_1_A_1_A.md_tpt_end || '');
+
+    var items = [
+      { id: 'lpe', hasData: (String(lpe_base).trim() !== '' || String(lpe_end).trim() !== '') },
+      { id: 'tk',  hasData: (String(tk_base).trim() !== ''  || String(tk_end).trim() !== '') },
+      { id: 'tpt', hasData: (String(tpt_base).trim() !== '' || String(tpt_end).trim() !== '') }
+    ];
+
+    var matched = items.filter(function(i){ return i.hasData; }).length;
+    var total = items.length;
+    var pct = total > 0 ? (matched / total) * 100 : 0;
+
+    var crit = 'A';
+    var score = 0;
+    var label = 'A. Tidak ada keterkaitan';
+
+    if (matched === 0) {
+      crit = 'A';
+      score = 0;
+      label = 'A. Tidak ada keterkaitan';
+    } else if (pct < 50) {
+      crit = 'B';
+      score = 0.3;
+      label = 'B. Kurang dari 50% sesuai dengan PN RPJMN';
+    } else {
+      crit = 'C';
+      score = 0.5;
+      label = 'C. Di atas atau sama dengan 50% sesuai dengan PN RPJMN';
+    }
+
+    return {
+      matched: matched,
+      total: total,
+      pct: pct,
+      crit: crit,
+      score: score,
+      label: label
+    };
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.1.b berdasarkan ketersediaan tabel persandingan
+  function getAutoScore_1_a_1_b(d){
+    d = d || {};
+    var curVal = (d.status_tabel !== undefined && String(d.status_tabel).trim() !== '') ? d.status_tabel : 
+                 (AUTO_DATA_1_A_1_B.status_tabel !== undefined ? AUTO_DATA_1_A_1_B.status_tabel : 
+                 (d.avail == '0' ? 'Tidak Ada' : 'Ada'));
+    var isAda = (curVal === 'Ada');
+    var score = isAda ? 0.5 : 0.0;
+    var crit = isAda ? 'B' : 'A';
+    var label = isAda ? 'B. Ada' : 'A. Tidak ada';
+
+    return {
+      status_tabel: curVal,
+      isAda: isAda,
+      crit: crit,
+      score: score,
+      label: label,
+      dokumen: d.dokumen !== undefined ? d.dokumen : (AUTO_DATA_1_A_1_B.dokumen || (isAda ? 'RPJMD' : '')),
+      halaman: d.halaman !== undefined ? d.halaman : (AUTO_DATA_1_A_1_B.halaman || (isAda ? 'Bab IV' : '')),
+      tabel: d.tabel !== undefined ? d.tabel : (AUTO_DATA_1_A_1_B.tabel || (isAda ? 'Tabel Persandingan Sasaran RPJMD dengan PN RPJMN' : '')),
+      catatan: d.catatan !== undefined ? d.catatan : (AUTO_DATA_1_A_1_B.catatan || ''),
+      screenshot: d.screenshot !== undefined ? d.screenshot : (AUTO_DATA_1_A_1_B.screenshot || '')
+    };
+  }
+
+  // 2. Sheet 1.a.1.b (Tabel Persandingan Sasaran RPJMD vs PN RPJMN)
+  function renderWs_1_a_1_b(d, maxBobot){
+    d = d || {};
+    var autoObj = getAutoScore_1_a_1_b(d);
+    var curVal = (d.status_tabel !== undefined && String(d.status_tabel).trim() !== '') ? d.status_tabel : autoObj.status_tabel;
+    var isAda = (curVal === 'Ada');
+    var curCatatan = d.catatan !== undefined ? d.catatan : autoObj.catatan;
+    var curScore   = isAda ? maxBobot : 0.0;
 
     var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.b</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
+      '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" style="width: 100%;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_1_b" style="width: 100%; min-width: 750px;">' +
         '<thead>' +
           '<tr>' +
             '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-green" style="width: 65%;">Parameter Pemeriksaan Dokumen (RPJMD)</th>' +
-            '<th class="th-blue" style="width: 30%;">Status Ketersediaan Tabel</th>' +
+            '<th class="th-green" style="width: 45%; text-align:left;">Parameter Pemeriksaan Dokumen (RPJMD)</th>' +
+            '<th class="th-blue" style="width: 20%; text-align:center;">Status Ketersediaan</th>' +
+            '<th class="th-green" style="width: 15%; text-align:center;">Keselarasan Terbobot</th>' +
+            '<th class="th-gray" style="width: 20%; text-align:left;">Catatan</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
           '<tr>' +
             '<td class="excel-row-num">1</td>' +
-            '<td><strong>' + labelItem + '</strong></td>' +
             '<td>' +
-              '<select id="wsSelectPersandingan" style="font-weight:700; color:#107c41; width:100%;">' +
-                '<option value="Ada"' + (curVal === 'Ada' ? ' selected' : '') + '>Ada (Tersedia dalam Dokumen)</option>' +
-                '<option value="Tidak Ada"' + (curVal === 'Tidak Ada' ? ' selected' : '') + '>Tidak Ada (Belum Tersedia)</option>' +
+              '<strong style="color:#0f172a; font-size:12px;">Tabel Persandingan antara Sasaran Pembangunan Daerah RPJMD dengan PN RPJMN</strong>' +
+            '</td>' +
+            '<td>' +
+              '<select id="wsSelectPersandingan" class="calc-inp" style="font-weight:700; color:' + (isAda ? '#107c41' : '#dc2626') + '; width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">' +
+                '<option value="Ada"' + (isAda ? ' selected' : '') + '>B. Ada (Tersedia)</option>' +
+                '<option value="Tidak Ada"' + (!isAda ? ' selected' : '') + '>A. Tidak Ada</option>' +
               '</select>' +
+            '</td>' +
+            '<td style="text-align:center; font-weight:700; font-size:13.5px; color:' + (isAda ? '#16a34a' : '#dc2626') + ';">' +
+              '<span id="ws1a1bTerbobotCell">' + numFmt(curScore) + '</span>' +
+            '</td>' +
+            '<td>' +
+              '<input type="text" id="ws1a1bCatatan" class="calc-inp" value="' + escapeHtml(curCatatan) + '" placeholder="Catatan ketersediaan tabel..." style="width:100%; font-size:11.5px; padding:6px 8px; border:1px solid #cbd5e1; border-radius:4px;">' +
             '</td>' +
           '</tr>' +
         '</tbody>' +
       '</table>' +
       '</div>';
 
+    // Keterangan di bawah tabel: Range Nilai sesuai kriteria evaluasi (A: 0, B: 0,5)
+    html += renderStandardCriteriaCard({
+      code: '1.a.1.b',
+      safeId: 'ws1a1b',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.1.b',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Ketersediaan Tabel Persandingan',
+      rows: [
+        { crit: 'A', text: 'Tidak ada', val: '0', color: '#dc2626' },
+        { crit: 'B', text: 'Ada', val: '0,5', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Status Ketersediaan:', id: 'ws1a1bStatusText', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a1bCritText', value: '-' }
+      ]
+    });
+
     return html;
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.1.d berdasarkan ketersediaan tabel persandingan prioritas
+  function getAutoScore_1_a_1_d(d){
+    d = d || {};
+    var curVal = (d.status_tabel !== undefined && String(d.status_tabel).trim() !== '') ? d.status_tabel : 
+                 (AUTO_DATA_1_A_1_D.status_tabel !== undefined ? AUTO_DATA_1_A_1_D.status_tabel : 
+                 (d.avail == '0' ? 'Tidak Ada' : 'Ada'));
+    var isAda = (curVal === 'Ada');
+    var score = isAda ? 0.5 : 0.0;
+    var crit = isAda ? 'B' : 'A';
+    var label = isAda ? 'B. Ada' : 'A. Tidak ada';
+
+    return {
+      status_tabel: curVal,
+      isAda: isAda,
+      crit: crit,
+      score: score,
+      label: label,
+      catatan: d.catatan !== undefined ? d.catatan : (AUTO_DATA_1_A_1_D.catatan || '')
+    };
+  }
+
+  // 2b. Sheet 1.a.1.d (Tabel Persandingan Prioritas Daerah RPJMD vs PN RPJMN)
+  function renderWs_1_a_1_d(d, maxBobot){
+    d = d || {};
+    var autoObj = getAutoScore_1_a_1_d(d);
+    var curVal = (d.status_tabel !== undefined && String(d.status_tabel).trim() !== '') ? d.status_tabel : autoObj.status_tabel;
+    var isAda = (curVal === 'Ada');
+    var curCatatan = d.catatan !== undefined ? d.catatan : autoObj.catatan;
+    var curScore   = isAda ? maxBobot : 0.0;
+
+    var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.d</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_1_d" style="width: 100%; min-width: 750px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-green" style="width: 45%; text-align:left;">Parameter Pemeriksaan Dokumen (RPJMD)</th>' +
+            '<th class="th-blue" style="width: 20%; text-align:center;">Status Ketersediaan</th>' +
+            '<th class="th-green" style="width: 15%; text-align:center;">Keselarasan Terbobot</th>' +
+            '<th class="th-gray" style="width: 20%; text-align:left;">Catatan</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+          '<tr>' +
+            '<td class="excel-row-num">1</td>' +
+            '<td>' +
+              '<strong style="color:#0f172a; font-size:12px;">Tabel Persandingan antara Prioritas Pembangunan Daerah RPJMD dengan PN RPJMN</strong>' +
+            '</td>' +
+            '<td>' +
+              '<select id="wsSelectPersandingan1d" class="calc-inp" style="font-weight:700; color:' + (isAda ? '#107c41' : '#dc2626') + '; width:100%; padding:6px 8px; border-radius:4px; border:1px solid #cbd5e1;">' +
+                '<option value="Ada"' + (isAda ? ' selected' : '') + '>B. Ada (Tersedia)</option>' +
+                '<option value="Tidak Ada"' + (!isAda ? ' selected' : '') + '>A. Tidak Ada</option>' +
+              '</select>' +
+            '</td>' +
+            '<td style="text-align:center; font-weight:700; font-size:13.5px; color:' + (isAda ? '#16a34a' : '#dc2626') + ';">' +
+              '<span id="ws1a1dTerbobotCell">' + numFmt(curScore) + '</span>' +
+            '</td>' +
+            '<td>' +
+              '<input type="text" id="ws1a1dCatatan" class="calc-inp" value="' + escapeHtml(curCatatan) + '" placeholder="Catatan ketersediaan tabel..." style="width:100%; font-size:11.5px; padding:6px 8px; border:1px solid #cbd5e1; border-radius:4px;">' +
+            '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>' +
+      '</div>';
+
+    // Keterangan di bawah tabel: Range Nilai sesuai kriteria evaluasi (A: 0, B: 0,5)
+    html += renderStandardCriteriaCard({
+      code: '1.a.1.d',
+      safeId: 'ws1a1d',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.1.d',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Ketersediaan Tabel Persandingan',
+      rows: [
+        { crit: 'A', text: 'Tidak ada', val: '0', color: '#dc2626' },
+        { crit: 'B', text: 'Ada', val: '0,5', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Status Ketersediaan:', id: 'ws1a1dStatusText', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a1dCritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
+
+  function renderWs_TabelPersandingan(code, d, maxBobot){
+    return renderWs_1_a_1_d(d, maxBobot);
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.1.c berdasarkan keselarasan Prioritas Daerah vs Prioritas Nasional
+  function getAutoScore_1_a_1_c(d){
+    d = d || {};
+    var pns = d.pn_list || (AUTO_DATA_1_A_1_C && AUTO_DATA_1_A_1_C.length > 0 ? AUTO_DATA_1_A_1_C : []);
+    var total = pns.length > 0 ? pns.length : 8;
+    var matched = 0;
+
+    pns.forEach(function(pn){
+      var pds = pn.pds || [];
+      var hasMatched = pds.some(function(pd){
+        return (pd.score !== undefined && parseFloat(pd.score) > 0) || (pd.title && pd.title.trim() !== '' && !pd.title.toLowerCase().includes('tidak ada') && !pd.title.toLowerCase().includes('belum'));
+      });
+      if (hasMatched) matched++;
+    });
+
+    var pct = total > 0 ? (matched / total) * 100 : 0;
+    var crit = 'A';
+    var score = 0.0;
+    var label = 'A. Tidak ada keterkaitan';
+
+    if (matched === 0) {
+      crit = 'A';
+      score = 0.0;
+      label = 'A. Tidak ada keterkaitan';
+    } else if (pct < 50.0) {
+      crit = 'B';
+      score = 0.3;
+      label = 'B. Kurang dari 50% sesuai dengan PN RPJMN';
+    } else {
+      crit = 'C';
+      score = 0.5;
+      label = 'C. Di atas atau sama dengan 50% sesuai dengan PN RPJMN';
+    }
+
+    return {
+      pns: pns,
+      matched: matched,
+      total: total,
+      pct: pct,
+      crit: crit,
+      score: score,
+      label: label
+    };
   }
 
   // 3. Sheet 1.a.1.c (Prioritas Pembangunan Daerah vs Prioritas Nasional RPJMN)
   function renderWs_1_a_1_c(d, maxBobot){
     d = d || {};
-    var pns = d.pn_list || (AUTO_DATA_1_A_1_C && AUTO_DATA_1_A_1_C.length > 0 ? AUTO_DATA_1_A_1_C : []);
+    var autoObj = getAutoScore_1_a_1_c(d);
+    var pns = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : autoObj.pns;
 
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
-        '<span style="font-weight:700;"><i class="fa fa-table"></i> Matriks Prioritas Daerah vs Prioritas Nasional</span>' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.c - Matriks Keselarasan PN RPJMN vs Prioritas Daerah (RPJMD)</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_1_c" style="width: 100%; min-width: 800px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_1_c" style="width: 100%; min-width: 950px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-blue" style="width: 35%;">Prioritas Pembangunan Nasional (RPJMN)</th>' +
-            '<th class="th-amber" style="width: 35%;">Prioritas Pembangunan Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
-            '<th class="th-gray" style="width: 15%;">Keterangan</th>' +
-            '<th class="th-gray" style="width: 50px;">Aksi</th>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 40px; text-align:center;">No</th>' +
+            '<th class="th-blue" style="width: 26%;">RPJMN</th>' +
+            '<th class="th-amber" style="width: 26%;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan (0% / 100%)</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 18%;">Keterangan</th>' +
+            '<th class="th-green" rowspan="2" style="width: 90px; text-align:center;">Nilai Keselarasan Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 65px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 85px; text-align:center;">Keselarasan Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 14%;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber">Prioritas Pembangunan Daerah</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     if (!pns || pns.length === 0){
-      return html + '<tr><td colspan="6" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Prioritas Daerah vs Prioritas Nasional pada menu terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
-    }
+      html += '<tr><td colspan="9" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Prioritas Daerah vs Prioritas Nasional pada menu terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr>';
+    } else {
+      var rowCounter = 1;
+      pns.forEach(function(pn, pnIdx){
+        var pdsToRender = (pn.pds && pn.pds.length > 0) ? pn.pds : [{ title: '', score: 0, ket: 'Tidak ada Prioritas Pembangunan Daerah untuk mendukung Prioritas Pembangunan Nasional terkait' }];
+        var pdCount = pdsToRender.length;
+        var hasMatchPn = pdsToRender.some(function(p){ return (p.score !== undefined && parseFloat(p.score) > 0) || (p.title && p.title.trim() !== ''); });
+        var pnTitleClean = pn.pn_title || ('Prioritas Nasional ' + (pnIdx + 1));
 
-    var rowCounter = 1;
-    pns.forEach(function(pn, pnIdx){
-      var pdsToRender = (pn.pds && pn.pds.length > 0) ? pn.pds : [{ title: '', score: 0, ket: 'Tidak Ada Misi Daerah' }];
-      var pdCount = pdsToRender.length;
-      pdsToRender.forEach(function(pd, pdIdx){
-        html += 
-          '<tr class="ws-matrix-row" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '">' +
-            '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+        pdsToRender.forEach(function(pd, pdIdx){
+          var curScore = (pd.score !== undefined) ? parseFloat(pd.score) : 0;
+          var curTitle = pd.title || '';
+          var curKet = pd.ket || (curScore > 0 ? 'Terdapat Prioritas Pembangunan Daerah untuk mendukung Prioritas Pembangunan Nasional terkait' : 'Tidak ada Prioritas Pembangunan Daerah untuk mendukung Prioritas Pembangunan Nasional terkait');
 
-        if (pdIdx === 0){
+          html += '<tr class="ws-matrix-row" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '">';
+
+          if (pdIdx === 0){
+            html += 
+              '<td class="excel-row-num" rowspan="' + pdCount + '" style="text-align:center; vertical-align:top; font-weight:bold;">' + (pnIdx + 1) + '</td>' +
+              '<td rowspan="' + pdCount + '" class="cell-pn-wrap" style="vertical-align:top; background:#f0f7ff; padding:8px;">' +
+                '<input type="hidden" class="pn-title-inp" value="' + escapeHtml(pnTitleClean) + '">' +
+                '<div style="font-size:12px; line-height:1.45; color:#1e3a8a;">' +
+                  '<strong>PN ' + (pnIdx + 1) + ' :</strong> ' + escapeHtml(pnTitleClean.replace(/^PN\s*\d+\s*:\s*/i, '')) +
+                '</div>' +
+              '</td>';
+          }
+
           html += 
-            '<td rowspan="' + pdCount + '" class="cell-pn-wrap" style="vertical-align:top; background:#f0f7ff;">' +
-              '<textarea class="calc-inp pn-title-inp" rows="2" style="font-weight:700; color:#1e3a8a; background:transparent; border:none;" placeholder="Prioritas Nasional..." readonly>' + escapeHtml(pn.pn_title) + '</textarea>' +
-            '</td>';
-        }
-
-        html += 
-            '<td><textarea class="calc-inp pd-title-inp" rows="3" style="width:100%; background:transparent; border:none; resize:vertical;" placeholder="Prioritas Daerah..." readonly>' + escapeHtml(pd.title) + '</textarea></td>' +
-            '<td>' +
-              '<select class="calc-inp pd-score-sel">' +
-                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Selaras)</option>' +
-                '<option value="0.75"' + (pd.score == 0.75 ? ' selected' : '') + '>75% (Sebagian Besar)</option>' +
-                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-                '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak Selaras)</option>' +
+            '<td style="vertical-align:top; padding:6px 8px;">' +
+              '<textarea class="calc-inp pd-title-inp" rows="2" style="width:100%; font-size:11.5px; background:transparent; border:none; resize:vertical;" placeholder="Tidak ada PD..." readonly>' + escapeHtml(curTitle) + '</textarea>' +
+            '</td>' +
+            '<td style="vertical-align:middle; text-align:center; padding:4px 6px;">' +
+              '<select class="calc-inp pd-score-sel" style="font-weight:700; width:100%; font-size:11.5px; padding:4px; border-radius:4px; border:1px solid #cbd5e1; color:' + (curScore > 0 ? '#16a34a' : '#dc2626') + ';">' +
+                '<option value="1.0"' + (curScore > 0 ? ' selected' : '') + '>100.00%</option>' +
+                '<option value="0.0"' + (curScore == 0 ? ' selected' : '') + '>0.00%</option>' +
               '</select>' +
             '</td>' +
-            '<td><input type="text" class="pd-ket-inp" value="' + escapeHtml(pd.ket || '') + '" placeholder="Keterangan..."></td>';
-
-        if (pdIdx === 0){
-          html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center;">' +
-              '<span style="color:#cbd5e1; font-size:12px;">(Otomatis)</span>' +
+            '<td style="vertical-align:top; padding:6px 8px;">' +
+              '<textarea class="calc-inp pd-ket-inp" rows="2" style="width:100%; font-size:11px; background:transparent; border:none; resize:vertical;" placeholder="Keterangan keselarasan...">' + escapeHtml(curKet) + '</textarea>' +
             '</td>';
-        } else {
-          html += 
-            '<td style="text-align:center;"><span style="color:#cbd5e1; font-size:12px;">(Otomatis)</span></td>';
-        }
 
-        html += '</tr>';
+          if (pdIdx === 0){
+            html += 
+              '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#fafafa; font-weight:700;">' +
+                '<span class="pn-avg-cell" style="font-size:12px; color:#1e293b;">' + (hasMatchPn ? '100%' : '0%') + '</span>' +
+              '</td>' +
+              '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#fafafa; color:#64748b; font-weight:600; font-size:11.5px;">' +
+                numFmt(maxBobot) +
+              '</td>' +
+              '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#fafafa; font-weight:700;">' +
+                '<span class="pn-terbobot-cell" style="font-size:12px; color:' + (hasMatchPn ? '#16a34a' : '#dc2626') + ';">' + numFmt(hasMatchPn ? maxBobot : 0) + '</span>' +
+              '</td>' +
+              '<td rowspan="' + pdCount + '" style="vertical-align:top; padding:6px 8px;">' +
+                '<input type="text" class="calc-inp pn-catatan-inp" value="' + escapeHtml(pn.catatan || '') + '" placeholder="Catatan..." style="width:100%; font-size:11px; padding:5px 7px; border:1px solid #cbd5e1; border-radius:4px;">' +
+              '</td>';
+          }
+
+          html += '</tr>';
+        });
+      });
+    }
+
+    html += 
+        '</tbody>' +
+        '<tfoot>' +
+          '<tr style="background:#f8fafc; font-weight:bold; border-top:2px solid #cbd5e1;">' +
+            '<td class="excel-row-num" style="text-align:center;"></td>' +
+            '<td colspan="4" style="text-align:right; padding:9px 12px; color:#1e293b; font-size:12px;">Rata-rata Nilai Keselarasan:</td>' +
+            '<td style="text-align:center; padding:9px; font-size:13px; color:#dc2626; font-weight:bold;">' +
+              '<span id="ws1a1cAvgPctCell">' + autoObj.pct.toFixed(2) + '%</span>' +
+            '</td>' +
+            '<td style="text-align:center; color:#64748b; font-size:11px;">Rata-rata Terbobot:</td>' +
+            '<td style="text-align:center; padding:9px; font-size:13px; color:#0f172a; font-weight:bold;">' +
+              '<span id="ws1a1cGrandTerbobot">' + numFmt((autoObj.matched * maxBobot) / (autoObj.total || 8)) + '</span>' +
+            '</td>' +
+            '<td></td>' +
+          '</tr>' +
+        '</tfoot>' +
+      '</table>' +
+      '</div>';
+
+    // Keterangan di bawah tabel: Range Nilai sesuai kriteria evaluasi (A: 0, B: 0.3, C: 0.5)
+    html += renderStandardCriteriaCard({
+      code: '1.a.1.c',
+      safeId: 'ws1a1c',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.1.c',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Keselarasan Prioritas Daerah dengan PN RPJMN',
+      rows: [
+        { crit: 'A', text: 'Tidak ada keterkaitan sasaran daerah', val: '0', color: '#dc2626' },
+        { crit: 'B', text: 'Kurang dari 50% sesuai dengan PN RPJMN', val: '0,3', color: '#d97706' },
+        { crit: 'C', text: 'Di atas atau sama dengan 50% sesuai dengan PN RPJMN', val: '0,5', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Menu Keselarasan',
+      infoRows: [
+        { label: 'Jumlah PN Selaras:', id: 'ws1a1cCountMatched', value: '-' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a1cPctMatched', value: '-%' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a1cCritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.2.a berdasarkan keselarasan PP PN 1
+  function getAutoScore_1_a_2_a(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 (AUTO_DATA_1_A_2_A && AUTO_DATA_1_A_2_A.length > 0 ? AUTO_DATA_1_A_2_A : []);
+
+    var totalRows = 0;
+    var sumScore = 0;
+
+    pnList.forEach(function(pn){
+      (pn.pps || []).forEach(function(pp){
+        (pp.pds || []).forEach(function(pd){
+          totalRows++;
+          var s = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          sumScore += s;
+        });
+      });
+    });
+
+    var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+    var pct = avgRatio * 100;
+    var score = 0.375;
+    var crit = 'E';
+    var label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+
+    if (totalRows === 0) {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    } else if (pct >= 100) {
+      crit = 'E';
+      score = 0.375;
+      label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    } else if (pct > 75) {
+      crit = 'D';
+      score = 0.300;
+      label = 'D. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    } else if (pct > 50) {
+      crit = 'C';
+      score = 0.225;
+      label = 'C. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    } else if (pct > 25) {
+      crit = 'B';
+      score = 0.150;
+      label = 'B. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    } else {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 1 RPJMN';
+    }
+
+    return {
+      pnList: pnList,
+      totalRows: totalRows,
+      sumScore: sumScore,
+      avgRatio: avgRatio,
+      pct: pct,
+      score: score,
+      crit: crit,
+      label: label
+    };
+  }
+
+  // 4. Sheet 1.a.2.a (PN 1 Program Prioritas Pembangunan Nasional)
+  function renderWs_1_a_2_a(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var autoObj = getAutoScore_1_a_2_a(d, maxBobot);
+    var savedPpList = d.pp_list || [];
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 ((AUTO_DATA_1_A_2_A && AUTO_DATA_1_A_2_A.length > 0) ? AUTO_DATA_1_A_2_A : autoObj.pnList);
+    
+    if (!pnList || pnList.length === 0) {
+      pnList = [{
+        pn_title: 'PN 1 : Memperkokoh Ideologi Pancasila, Demokrasi, dan Hak Asasi Manusia',
+        pps: [{
+          pp_title: 'PP 2 : Penguatan Komunikasi Publik dan Media',
+          pds: [{
+            title: 'PROGRAM PENGELOLAAN INFORMASI DAN KOMUNIKASI PUBLIK',
+            score: 1.0,
+            ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait'
+          }]
+        }]
+      }];
+    }
+
+    // Merge saved review & score into data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+      pnList.forEach(function(pn){
+        (pn.pps || []).forEach(function(pp) {
+          var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+          if (savedPp) {
+            (pp.pds || []).forEach(function(pd) {
+              var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+              if (savedPd) {
+                if (savedPd.ket) pd.ket = savedPd.ket;
+                if (savedPd.score !== undefined) pd.score = savedPd.score;
+              }
+            });
+          }
+        });
+      });
+    }
+
+    var grandTotalRows = 0;
+    pnList.forEach(function(pn){
+      var pps = (pn.pps && pn.pps.length > 0) ? pn.pps : [{ pds: [{}] }];
+      pps.forEach(function(pp){
+        grandTotalRows += (pp.pds && pp.pds.length > 0) ? pp.pds.length : 1;
+      });
+    });
+
+    var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.a - Pemetaan Program Prioritas PN 1 RPJMN vs Program Daerah</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas)</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 1050px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 45px; text-align:center;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center;">RPJMN</th>' +
+            '<th class="th-amber" colspan="1" style="text-align:center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 140px; text-align:center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+            '<th class="th-green" rowspan="2" style="width: 220px; text-align:center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 75px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Keselarasan<br>Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 140px; text-align:center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 240px; text-align:left;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 240px; text-align:left;">Program Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber" style="width: 240px; text-align:left;">Dukungan Program Pembangunan Daerah</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    var rowCounter = 1;
+    var isFirstGrandRow = true;
+
+    pnList.forEach(function(pn, pnIdx) {
+      var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [{}] }];
+      var totalRowsForPn = pps.reduce(function(acc, pp) {
+        return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      }, 0);
+
+      pps.forEach(function(pp, ppIdx) {
+        var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ket: '' }];
+        var pdCount = pds.length;
+        var globalPpIdx = pnIdx + "_" + ppIdx;
+
+        pds.forEach(function(pd, pdIdx) {
+          var sVal = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          var isSelaras = (sVal >= 1.0);
+          var defaultKet = isSelaras ? 
+            'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' : 
+            'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
+          var curKet = pd.ket ? pd.ket : defaultKet;
+
+          html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+          html += '<td class="excel-row-num" style="text-align:center;">' + (rowCounter++) + '</td>';
+
+          if (ppIdx === 0 && pdIdx === 0) {
+            html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2a" style="vertical-align:top; background:#f0f7ff; font-weight:700; color:#1e3a8a;">' +
+                    escapeHtml(pn.pn_title) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2a" style="vertical-align:top; background:#f8fafc; font-weight:700; color:#0f172a;">' +
+                    '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                    '</td>';
+          }
+
+          html += '<td style="vertical-align:middle;">' +
+                    '<textarea class="calc-inp pd-title-inp" style="width:100%; font-weight:600; color:#334155; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle; text-align:center;">' +
+                    '<select class="calc-inp pd-score-sel" style="font-weight:700; color:' + (isSelaras ? '#16a34a' : '#dc2626') + '; width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:5px 6px;">' +
+                      '<option value="1.0"' + (isSelaras ? ' selected' : '') + '>100.00%</option>' +
+                      '<option value="0.0"' + (!isSelaras ? ' selected' : '') + '>0.00%</option>' +
+                    '</select>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle;">' +
+                    '<input type="text" class="calc-inp pd-ket-inp" value="' + escapeHtml(curKet) + '" placeholder="Keterangan..." style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:5px 8px;">' +
+                  '</td>';
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2aAvgCell" style="font-weight:700; font-size:13.5px; color:#1e3a8a;">100%</span>' +
+                    '</td>';
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff; font-weight:700;">' +
+                      numFmt(maxBobot) +
+                    '</td>';
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2aTerbobotCell" style="font-weight:700; font-size:13.5px; color:#16a34a;">' + numFmt(maxBobot) + '</span>' +
+                    '</td>';
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<input type="text" id="ws1a2aCatatan" class="calc-inp" value="' + escapeHtml(d.catatan || '') + '" placeholder="Catatan keselarasan..." style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:6px 8px;">' +
+                    '</td>';
+            isFirstGrandRow = false;
+          }
+
+          html += '</tr>';
+        });
       });
     });
 
@@ -2636,108 +4092,1180 @@ tr.type-sub:hover td {
       '</table>' +
       '</div>';
 
+    // Keterangan & Range Penilaian Poin 1.a.2.a di bawah tabel
+    html += renderStandardCriteriaCard({
+      code: '1.a.2.a',
+      safeId: 'ws1a2a',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.2.a',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam PN 1 RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 1 RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 1 RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 1 RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 1 RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 1 RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: 'PN 1 RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2aPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2aCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
-  // 4. Sheet 1.a.2.a (PN 1 Kegiatan Prioritas PP 1 s.d PP 8)
-  function renderWs_1_a_2_a(d, maxBobot){
+  // Helper untuk menghitung capaian otomatis 1.a.2.b berdasarkan keselarasan PP PN 2
+  function getAutoScore_1_a_2_b(d, maxBobot){
     d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 (AUTO_DATA_1_A_2_B && AUTO_DATA_1_A_2_B.length > 0 ? AUTO_DATA_1_A_2_B : 
+                 (AUTO_DATA_1_A_2_ALL && AUTO_DATA_1_A_2_ALL['1.a.2.b'] ? [AUTO_DATA_1_A_2_ALL['1.a.2.b']] : []));
+
+    var totalRows = 0;
+    var sumScore = 0;
+
+    pnList.forEach(function(pn){
+      (pn.pps || []).forEach(function(pp){
+        (pp.pds || []).forEach(function(pd){
+          totalRows++;
+          var s = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          sumScore += s;
+        });
+      });
+    });
+
+    var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+    var pct = avgRatio * 100;
+    var score = 0.375;
+    var crit = 'E';
+    var label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+
+    if (totalRows === 0) {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan. atau kurang dari 25% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    } else if (pct >= 100) {
+      crit = 'E';
+      score = 0.375;
+      label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    } else if (pct > 75) {
+      crit = 'D';
+      score = 0.300;
+      label = 'D. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    } else if (pct > 50) {
+      crit = 'C';
+      score = 0.225;
+      label = 'C. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    } else if (pct > 25) {
+      crit = 'B';
+      score = 0.150;
+      label = 'B. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    } else {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan. atau kurang dari 25% terhadap kegiatan prioritas dalam PN 2 RPJMN';
+    }
+
+    return {
+      pnList: pnList,
+      totalRows: totalRows,
+      sumScore: sumScore,
+      avgRatio: avgRatio,
+      pct: pct,
+      score: score,
+      crit: crit,
+      label: label
+    };
+  }
+
+  // Sheet 1.a.2.b (PN 2 Program Prioritas Pembangunan Nasional) Sesuai Isian File HTML
+  function renderWs_1_a_2_b(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var autoObj = getAutoScore_1_a_2_b(d, maxBobot);
     var savedPpList = d.pp_list || [];
-    var pnList = (AUTO_DATA_1_A_2_A && AUTO_DATA_1_A_2_A.length > 0) ? AUTO_DATA_1_A_2_A : (d.pn_list || []);
-    
-    // Fallback if no dynamic data
-    if (pnList.length === 0) {
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 ((AUTO_DATA_1_A_2_B && AUTO_DATA_1_A_2_B.length > 0) ? AUTO_DATA_1_A_2_B : autoObj.pnList);
+
+    if (!pnList || pnList.length === 0) {
       pnList = [{
-        pn_title: 'Belum ada data Keselarasan Prioritas (silakan isi di menu Keselarasan Kegiatan Prioritas Utama)',
-        pps: []
+        pn_title: 'PN 2 : Memantapkan Sistem Pertahanan Keamanan Negara dan Mendorong Kemandirian Bangsa melalui Swasembada Pangan, Energi, Air, Ekonomi Syariah, Ekonomi Digital, Ekonomi Hijau, dan Ekonomi Biru',
+        pps: [
+          {
+            pp_title: 'PP 10 : Swasembada Pangan',
+            pds: [
+              { title: 'PROGRAM PENGELOLAAN PERIKANAN TANGKAP', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' }
+            ]
+          }
+        ]
       }];
     }
 
-    // Merge saved review & score into the fresh data
+    // Merge saved review & score into data
     if (pnList.length > 0 && savedPpList.length > 0) {
-        pnList[0].pps.forEach(function(pp) {
-            var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
-            if (savedPp) {
-                pp.pds.forEach(function(pd) {
-                    var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
-                    if (savedPd) {
-                        pd.ta_review = savedPd.ta_review;
-                        pd.score = savedPd.score;
-                    }
-                });
-            }
+      pnList.forEach(function(pn){
+        (pn.pps || []).forEach(function(pp) {
+          var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+          if (savedPp) {
+            if (savedPp.keterangan) pp.keterangan = savedPp.keterangan;
+            (pp.pds || []).forEach(function(pd) {
+              var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+              if (savedPd) {
+                if (savedPd.ket) pd.ket = savedPd.ket;
+                if (savedPd.score !== undefined) pd.score = savedPd.score;
+              }
+            });
+          }
         });
+      });
     }
 
+    var grandTotalRows = 0;
+    pnList.forEach(function(pn){
+      var pps = (pn.pps && pn.pps.length > 0) ? pn.pps : [{ pds: [{}] }];
+      pps.forEach(function(pp){
+        grandTotalRows += (pp.pds && pp.pds.length > 0) ? pp.pds.length : 1;
+      });
+    });
+
     var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.b - Pemetaan Program Prioritas PN 2 RPJMN vs Program Daerah</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 2)</span>' +
+      '</div>' +
       '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 900px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_b" style="width: 100%; min-width: 1050px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-blue" style="width: 25%;">Prioritas Nasional (RPJMN)</th>' +
-            '<th class="th-blue" style="width: 25%;">Program Prioritas (PP)</th>' +
-            '<th class="th-amber" style="width: 25%;">Dukungan Program Daerah (RPJMD)</th>' +
-            '<th class="th-green" style="width: 15%;">Hasil Review TA Bidang</th>' +
-            '<th class="th-green" style="width: 10%;">Keselarasan</th>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 40px; text-align:center;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center;">RPJMN</th>' +
+            '<th class="th-amber" colspan="1" style="text-align:center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+            '<th class="th-green" rowspan="2" style="width: 200px; text-align:center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 100px; text-align:center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 70px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 100px; text-align:center;">Keselarasan<br>Terbobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Rata-rata Keselarasan<br>Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 140px; text-align:center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 230px; text-align:left;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 210px; text-align:left;">Program Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber" style="width: 230px; text-align:left;">Dukungan Program Pembangunan Daerah</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     var rowCounter = 1;
+    var isFirstGrandRow = true;
+
     pnList.forEach(function(pn, pnIdx) {
-        var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [] }];
-        
-        var totalRowsForPn = pps.reduce(function(acc, pp) {
-            return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [{}] }];
+      var totalRowsForPn = pps.reduce(function(acc, pp) {
+        return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      }, 0);
+
+      pps.forEach(function(pp, ppIdx) {
+        var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ket: '' }];
+        var pdCount = pds.length;
+        var globalPpIdx = pnIdx + "_" + ppIdx;
+
+        var ppSumScore = pds.reduce(function(acc, item){
+          var s = (item.score !== undefined && item.score !== null) ? parseFloat(item.score) : 1.0;
+          return acc + s;
         }, 0);
+        var ppAvgRatio = pdCount > 0 ? (ppSumScore / pdCount) : 1.0;
+        var ppTerbobotVal = ppAvgRatio * maxBobot;
 
-        pps.forEach(function(pp, ppIdx) {
-            var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ta_review: '' }];
-            var pdCount = pds.length;
-            var globalPpIdx = pnIdx + "_" + ppIdx;
+        var defaultPpKet = pp.keterangan || 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
 
-            pds.forEach(function(pd, pdIdx) {
-                html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
-                html += '<td class="excel-row-num">' + (rowCounter++) + '</td>';
+        pds.forEach(function(pd, pdIdx) {
+          var sVal = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          var isSelaras = (sVal >= 1.0);
 
-                if (ppIdx === 0 && pdIdx === 0) {
-                    html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2a" style="vertical-align:top; background:#f0f7ff; font-weight:800; color:#1e3a8a;">' +
-                            escapeHtml(pn.pn_title) +
-                            '</td>';
-                }
+          html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+          html += '<td class="excel-row-num" style="text-align:center;">' + (rowCounter++) + '</td>';
 
-                if (pdIdx === 0) {
-                    html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2a" style="vertical-align:top; background:#fdfdfd;">' +
-                            '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
-                            '</td>';
-                }
+          if (ppIdx === 0 && pdIdx === 0) {
+            html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2b" style="vertical-align:top; background:#f0f7ff; font-weight:700; color:#1e3a8a; font-size:11.5px; line-height:1.4; padding:8px;">' +
+                    escapeHtml(pn.pn_title) +
+                    '</td>';
+          }
 
-                html += '<td><textarea class="calc-inp pd-title-inp" style="width:100%; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea></td>';
-                html += '<td><input type="text" class="pd-review-inp" value="' + escapeHtml(pd.ta_review || '') + '" placeholder="Review TA..."></td>';
-                html += '<td>' +
-                            '<select class="calc-inp pd-score-sel">' +
-                                '<option value="1.0"' + (pd.score == 1.0 || pd.score === undefined ? ' selected' : '') + '>100% (Iya / Selaras)</option>' +
-                                '<option value="0.75"' + (pd.score == 0.75 ? ' selected' : '') + '>75% (Sebagian Besar)</option>' +
-                                '<option value="0.5"' + (pd.score == 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-                                '<option value="0"' + (pd.score == 0 ? ' selected' : '') + '>0% (Tidak)</option>' +
-                            '</select>' +
-                        '</td>';
-                
-                html += '</tr>';
-            });
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2b" style="vertical-align:top; background:#f8fafc; font-weight:700; color:#0f172a; font-size:11.5px; padding:8px;">' +
+                    '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                    '</td>';
+          }
+
+          html += '<td style="vertical-align:middle; padding:6px 8px;">' +
+                    '<textarea class="calc-inp pd-title-inp" style="width:100%; font-weight:600; font-size:11.5px; color:#334155; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle; text-align:center;">' +
+                    '<select class="calc-inp pd-score-sel" style="font-weight:700; font-size:11.5px; color:' + (isSelaras ? '#16a34a' : '#dc2626') + '; width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:4px 5px;">' +
+                      '<option value="1.0"' + (isSelaras ? ' selected' : '') + '>100.00%</option>' +
+                      '<option value="0.0"' + (!isSelaras ? ' selected' : '') + '>0.00%</option>' +
+                    '</select>' +
+                  '</td>';
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; font-size:11px; padding:6px 8px; color:#334155;">' +
+                      '<textarea class="calc-inp pp-ket-inp" style="width:100%; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; padding:4px 6px;" rows="3" placeholder="Keterangan...">' + escapeHtml(defaultPpKet) + '</textarea>' +
+                    '</td>';
+
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2bPpAvg_' + globalPpIdx + '" class="pp-avg-val" style="font-weight:700; font-size:12px; color:#1e3a8a;">' + Math.round(ppAvgRatio * 100) + '%</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff; font-weight:700; font-size:12px;">' +
+                      numFmt(maxBobot) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2bPpTerb_' + globalPpIdx + '" class="pp-terbobot-val" style="font-weight:700; font-size:12px; color:#16a34a;">' + numFmt(ppTerbobotVal) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2bGrandRataTerbobotCell" style="font-weight:700; font-size:13.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<textarea id="ws1a2bCatatan" class="calc-inp" style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:6px 8px;" rows="8" placeholder="Catatan keselarasan...">' + escapeHtml(d.catatan || '') + '</textarea>' +
+                    '</td>';
+            isFirstGrandRow = false;
+          }
+
+          html += '</tr>';
         });
+      });
     });
+
+    // Summary bottom row matching HTML row 23
+    html += 
+        '<tr style="background:#f8fafc; font-weight:700; border-top:2px solid #cbd5e1;">' +
+          '<td colspan="6" style="text-align:right; padding:8px 12px; color:#1e293b; font-size:12px;">Rata-rata Keselarasan:</td>' +
+          '<td style="text-align:center; padding:8px 4px;"><span id="ws1a2bAvgCell" style="font-weight:700; font-size:13px; color:#dc2626;">' + Math.round(autoObj.pct) + '%</span></td>' +
+          '<td style="text-align:center; font-size:12px; color:#334155;">' + numFmt(maxBobot) + '</td>' +
+          '<td style="text-align:center;"><span id="ws1a2bTerbobotCell" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td style="text-align:center;"><span id="ws1a2bTerbobotCell2" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td></td>' +
+        '</tr>';
 
     html += 
         '</tbody>' +
       '</table>' +
       '</div>';
 
+    // Keterangan & Range Penilaian Poin 1.a.2.b di bawah tabel sesuai isian file HTML
+    html += renderStandardCriteriaCard({
+      code: '1.a.2.b',
+      safeId: 'ws1a2b',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.2.b',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam PN 2 RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 2 RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 2 RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 2 RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 2 RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 2 RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: 'PN 2 RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2bPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2bCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
-  // 5. Sheets 1.a.2.b s.d 1.a.2.g (PN 2 s.d PN 7 dengan Kolom Review TA Bidang)
+  // Helper untuk menghitung capaian otomatis 1.a.2.c berdasarkan keselarasan PP PN 3
+  function getAutoScore_1_a_2_c(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 (AUTO_DATA_1_A_2_C && AUTO_DATA_1_A_2_C.length > 0 ? AUTO_DATA_1_A_2_C : []);
+
+    var totalRows = 0;
+    var sumScore = 0;
+
+    pnList.forEach(function(pn){
+      (pn.pps || []).forEach(function(pp){
+        (pp.pds || []).forEach(function(pd){
+          totalRows++;
+          var s = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          sumScore += s;
+        });
+      });
+    });
+
+    var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+    var pct = avgRatio * 100;
+    var score = 0.375;
+    var crit = 'E';
+    var label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+
+    if (totalRows === 0) {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    } else if (pct >= 100) {
+      crit = 'E';
+      score = 0.375;
+      label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    } else if (pct > 75) {
+      crit = 'D';
+      score = 0.300;
+      label = 'D. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    } else if (pct > 50) {
+      crit = 'C';
+      score = 0.225;
+      label = 'C. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    } else if (pct > 25) {
+      crit = 'B';
+      score = 0.150;
+      label = 'B. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    } else {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 3 RPJMN';
+    }
+
+    return {
+      pnList: pnList,
+      totalRows: totalRows,
+      sumScore: sumScore,
+      avgRatio: avgRatio,
+      pct: pct,
+      crit: crit,
+      score: score,
+      label: label
+    };
+  }
+
+  // Lembar Kerja Khusus Poin 1.a.2.c (Pemetaan Program Prioritas PN 3 RPJMN vs Program Daerah)
+  function renderWs_1_a_2_c(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var savedPpList = d.pp_list || [];
+
+    var pnList = (AUTO_DATA_1_A_2_C && AUTO_DATA_1_A_2_C.length > 0) ? 
+                 JSON.parse(JSON.stringify(AUTO_DATA_1_A_2_C)) : 
+                 ((d.pn_list && d.pn_list.length > 0) ? JSON.parse(JSON.stringify(d.pn_list)) : []);
+
+    if (pnList.length === 0) {
+      pnList = [{
+        pn_title: 'PN 3 : Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif serta mengembangkan agroindustri maritim industri di sentra produksi melalui peran aktif koperasi,',
+        pps: [
+          {
+            pp_title: 'PP 3 : Peningkatan Produktivitas UMKM dan Koperasi',
+            pds: [
+              { title: 'PROGRAM PENDIDIKAN DANLATIHAN PERKOPERASIAN', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' },
+              { title: 'PROGRAM PEMBERDAYAAN DANPERLINDUNGAN KOPERASI', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' }
+            ]
+          }
+        ]
+      }];
+    }
+
+    // Merge saved review & score into data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+      pnList.forEach(function(pn){
+        (pn.pps || []).forEach(function(pp) {
+          var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+          if (savedPp) {
+            if (savedPp.keterangan) pp.keterangan = savedPp.keterangan;
+            (pp.pds || []).forEach(function(pd) {
+              var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+              if (savedPd) {
+                if (savedPd.ket) pd.ket = savedPd.ket;
+                if (savedPd.score !== undefined) pd.score = savedPd.score;
+              }
+            });
+          }
+        });
+      });
+    }
+
+    var grandTotalRows = 0;
+    pnList.forEach(function(pn){
+      var pps = (pn.pps && pn.pps.length > 0) ? pn.pps : [{ pds: [{}] }];
+      pps.forEach(function(pp){
+        grandTotalRows += (pp.pds && pp.pds.length > 0) ? pp.pds.length : 1;
+      });
+    });
+
+    var autoObj = getAutoScore_1_a_2_c(d, maxBobot);
+
+    var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.c - Pemetaan Program Prioritas PN 3 RPJMN vs Program Daerah</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 3)</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_c" style="width: 100%; min-width: 1050px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 40px; text-align:center;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center;">RPJMN</th>' +
+            '<th class="th-amber" colspan="1" style="text-align:center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+            '<th class="th-green" rowspan="2" style="width: 200px; text-align:center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 100px; text-align:center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 70px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 100px; text-align:center;">Keselarasan<br>Terbobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Rata-rata Keselarasan<br>Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 140px; text-align:center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 230px; text-align:left;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 210px; text-align:left;">Program Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber" style="width: 230px; text-align:left;">Dukungan Program Pembangunan Daerah</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    var rowCounter = 1;
+    var isFirstGrandRow = true;
+
+    pnList.forEach(function(pn, pnIdx) {
+      var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [{}] }];
+      var totalRowsForPn = pps.reduce(function(acc, pp) {
+        return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      }, 0);
+
+      pps.forEach(function(pp, ppIdx) {
+        var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ket: '' }];
+        var pdCount = pds.length;
+        var globalPpIdx = pnIdx + "_" + ppIdx;
+
+        var ppSumScore = pds.reduce(function(acc, item){
+          var s = (item.score !== undefined && item.score !== null) ? parseFloat(item.score) : 1.0;
+          return acc + s;
+        }, 0);
+        var ppAvgRatio = pdCount > 0 ? (ppSumScore / pdCount) : 1.0;
+        var ppTerbobotVal = ppAvgRatio * maxBobot;
+
+        var defaultPpKet = pp.keterangan || 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
+
+        pds.forEach(function(pd, pdIdx) {
+          var sVal = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          var isSelaras = (sVal >= 1.0);
+
+          html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+          html += '<td class="excel-row-num" style="text-align:center;">' + (rowCounter++) + '</td>';
+
+          if (ppIdx === 0 && pdIdx === 0) {
+            html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2c" style="vertical-align:top; background:#f0f7ff; font-weight:700; color:#1e3a8a; font-size:11.5px; line-height:1.4; padding:8px;">' +
+                    escapeHtml(pn.pn_title) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2c" style="vertical-align:top; background:#f8fafc; font-weight:700; color:#0f172a; font-size:11.5px; padding:8px;">' +
+                    '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                    '</td>';
+          }
+
+          html += '<td style="vertical-align:middle; padding:6px 8px;">' +
+                    '<textarea class="calc-inp pd-title-inp" style="width:100%; font-weight:600; font-size:11.5px; color:#334155; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle; text-align:center;">' +
+                    '<select class="calc-inp pd-score-sel" style="font-weight:700; font-size:11.5px; color:' + (isSelaras ? '#16a34a' : '#dc2626') + '; width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:4px 5px;">' +
+                      '<option value="1.0"' + (isSelaras ? ' selected' : '') + '>100.00%</option>' +
+                      '<option value="0.0"' + (!isSelaras ? ' selected' : '') + '>0.00%</option>' +
+                    '</select>' +
+                  '</td>';
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; font-size:11px; padding:6px 8px; color:#334155;">' +
+                      '<textarea class="calc-inp pp-ket-inp" style="width:100%; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; padding:4px 6px;" rows="3" placeholder="Keterangan...">' + escapeHtml(defaultPpKet) + '</textarea>' +
+                    '</td>';
+
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2cPpAvg_' + globalPpIdx + '" class="pp-avg-val" style="font-weight:700; font-size:12px; color:#1e3a8a;">' + Math.round(ppAvgRatio * 100) + '%</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff; font-weight:700; font-size:12px;">' +
+                      numFmt(maxBobot) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2cPpTerb_' + globalPpIdx + '" class="pp-terbobot-val" style="font-weight:700; font-size:12px; color:#16a34a;">' + numFmt(ppTerbobotVal) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2cGrandRataTerbobotCell" style="font-weight:700; font-size:13.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<textarea id="ws1a2cCatatan" class="calc-inp" style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:6px 8px;" rows="8" placeholder="Catatan keselarasan...">' + escapeHtml(d.catatan || '') + '</textarea>' +
+                    '</td>';
+            isFirstGrandRow = false;
+          }
+
+          html += '</tr>';
+        });
+      });
+    });
+
+    // Summary bottom row matching HTML row 6
+    html += 
+        '<tr style="background:#f8fafc; font-weight:700; border-top:2px solid #cbd5e1;">' +
+          '<td colspan="6" style="text-align:right; padding:8px 12px; color:#1e293b; font-size:12px;">Rata-rata Keselarasan:</td>' +
+          '<td style="text-align:center; padding:8px 4px;"><span id="ws1a2cAvgCell" style="font-weight:700; font-size:13px; color:#dc2626;">' + Math.round(autoObj.pct) + '%</span></td>' +
+          '<td style="text-align:center; font-size:12px; color:#334155;">' + numFmt(maxBobot) + '</td>' +
+          '<td style="text-align:center;"><span id="ws1a2cTerbobotCell" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td style="text-align:center;"><span id="ws1a2cTerbobotCell2" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td></td>' +
+        '</tr>';
+
+    html += 
+        '</tbody>' +
+      '</table>' +
+      '</div>';
+
+    // Keterangan & Range Penilaian Poin 1.a.2.c di bawah tabel
+    html += renderStandardCriteriaCard({
+      code: '1.a.2.c',
+      safeId: 'ws1a2c',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.2.c',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam PN 3 RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 3 RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 3 RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 3 RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 3 RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 3 RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: 'PN 3 RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2cPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2cCritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.2.d berdasarkan keselarasan PP PN 4
+  function getAutoScore_1_a_2_d(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 (AUTO_DATA_1_A_2_D && AUTO_DATA_1_A_2_D.length > 0 ? AUTO_DATA_1_A_2_D : 
+                 (AUTO_DATA_1_A_2_ALL && AUTO_DATA_1_A_2_ALL['1.a.2.d'] ? [AUTO_DATA_1_A_2_ALL['1.a.2.d']] : []));
+
+    var totalRows = 0;
+    var sumScore = 0;
+
+    pnList.forEach(function(pn){
+      (pn.pps || []).forEach(function(pp){
+        (pp.pds || []).forEach(function(pd){
+          totalRows++;
+          var s = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          sumScore += s;
+        });
+      });
+    });
+
+    var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+    var pct = avgRatio * 100;
+    var score = 0.375;
+    var crit = 'E';
+    var label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+
+    if (totalRows === 0) {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    } else if (pct >= 100) {
+      crit = 'E';
+      score = 0.375;
+      label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    } else if (pct > 75) {
+      crit = 'D';
+      score = 0.300;
+      label = 'D. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    } else if (pct > 50) {
+      crit = 'C';
+      score = 0.225;
+      label = 'C. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    } else if (pct > 25) {
+      crit = 'B';
+      score = 0.150;
+      label = 'B. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    } else {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 4 RPJMN';
+    }
+
+    return {
+      pnList: pnList,
+      totalRows: totalRows,
+      sumScore: sumScore,
+      avgRatio: avgRatio,
+      pct: pct,
+      crit: crit,
+      score: score,
+      label: label
+    };
+  }
+
+  // Sheet 1.a.2.d (PN 4 Program Prioritas Pembangunan Nasional) Sesuai Isian File HTML
+  function renderWs_1_a_2_d(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var autoObj = getAutoScore_1_a_2_d(d, maxBobot);
+    var savedPpList = d.pp_list || [];
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 ((AUTO_DATA_1_A_2_D && AUTO_DATA_1_A_2_D.length > 0) ? AUTO_DATA_1_A_2_D : autoObj.pnList);
+
+    if (!pnList || pnList.length === 0) {
+      pnList = [{
+        pn_title: 'PN 4 : Memperkuat Pembangunan Sumber Daya Manusia (SDM), Sains, Teknologi, Pendidikan, Kesehatan, Prestasi Olahraga, Kesetaraan Gender, serta Penguatan Peran Perempuan, Pemuda (Generasi Milenial dan Generasi Z), dan Penyandang Disabilitas',
+        pps: [
+          {
+            pp_title: 'PP 1 : Percepatan Wajib Belajar 13 Tahun (1 Prasekolah dan 12 Tahun Pendidikan Tahun Pendidikan Dasar dan Pendidikan Menengah)',
+            pds: [
+              { title: 'PROGRAM PENGELOLAANPENDIDIKAN', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' }
+            ]
+          }
+        ]
+      }];
+    }
+
+    // Merge saved review & score into data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+      pnList.forEach(function(pn){
+        (pn.pps || []).forEach(function(pp) {
+          var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+          if (savedPp) {
+            if (savedPp.keterangan) pp.keterangan = savedPp.keterangan;
+            (pp.pds || []).forEach(function(pd) {
+              var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+              if (savedPd) {
+                if (savedPd.ket) pd.ket = savedPd.ket;
+                if (savedPd.score !== undefined) pd.score = savedPd.score;
+              }
+            });
+          }
+        });
+      });
+    }
+
+    var grandTotalRows = 0;
+    pnList.forEach(function(pn){
+      var pps = (pn.pps && pn.pps.length > 0) ? pn.pps : [{ pds: [{}] }];
+      pps.forEach(function(pp){
+        grandTotalRows += (pp.pds && pp.pds.length > 0) ? pp.pds.length : 1;
+      });
+    });
+
+    var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.d - Pemetaan Program Prioritas PN 4 RPJMN vs Program Daerah</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 4)</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_d" style="width: 100%; min-width: 1050px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 40px; text-align:center;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center;">RPJMN</th>' +
+            '<th class="th-amber" colspan="1" style="text-align:center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+            '<th class="th-green" rowspan="2" style="width: 200px; text-align:center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 100px; text-align:center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 70px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 100px; text-align:center;">Keselarasan<br>Terbobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Rata-rata Keselarasan<br>Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 140px; text-align:center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 230px; text-align:left;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 210px; text-align:left;">Program Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber" style="width: 230px; text-align:left;">Dukungan Program Pembangunan Daerah</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    var rowCounter = 1;
+    var isFirstGrandRow = true;
+
+    pnList.forEach(function(pn, pnIdx) {
+      var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [{}] }];
+      var totalRowsForPn = pps.reduce(function(acc, pp) {
+        return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      }, 0);
+
+      pps.forEach(function(pp, ppIdx) {
+        var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ket: '' }];
+        var pdCount = pds.length;
+        var globalPpIdx = pnIdx + "_" + ppIdx;
+
+        var ppSumScore = pds.reduce(function(acc, item){
+          var s = (item.score !== undefined && item.score !== null) ? parseFloat(item.score) : 1.0;
+          return acc + s;
+        }, 0);
+        var ppAvgRatio = pdCount > 0 ? (ppSumScore / pdCount) : 1.0;
+        var ppTerbobotVal = ppAvgRatio * maxBobot;
+
+        var defaultPpKet = pp.keterangan || (pp.pp_title.indexOf('PP 6') !== -1 ? 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' : 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait');
+
+        pds.forEach(function(pd, pdIdx) {
+          var sVal = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          var isSelaras = (sVal >= 1.0);
+
+          html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+          html += '<td class="excel-row-num" style="text-align:center;">' + (rowCounter++) + '</td>';
+
+          if (ppIdx === 0 && pdIdx === 0) {
+            html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2b" style="vertical-align:top; background:#f0f7ff; font-weight:700; color:#1e3a8a; font-size:11.5px; line-height:1.4; padding:8px;">' +
+                    escapeHtml(pn.pn_title) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2b" style="vertical-align:top; background:#f8fafc; font-weight:700; color:#0f172a; font-size:11.5px; padding:8px;">' +
+                    '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                    '</td>';
+          }
+
+          html += '<td style="vertical-align:middle; padding:6px 8px;">' +
+                    '<textarea class="calc-inp pd-title-inp" style="width:100%; font-weight:600; font-size:11.5px; color:#334155; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle; text-align:center;">' +
+                    '<select class="calc-inp pd-score-sel" style="font-weight:700; font-size:11.5px; color:' + (isSelaras ? '#16a34a' : '#dc2626') + '; width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:4px 5px;">' +
+                      '<option value="1.0"' + (isSelaras ? ' selected' : '') + '>100.00%</option>' +
+                      '<option value="0.0"' + (!isSelaras ? ' selected' : '') + '>0.00%</option>' +
+                    '</select>' +
+                  '</td>';
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; font-size:11px; padding:6px 8px; color:#334155;">' +
+                      '<textarea class="calc-inp pp-ket-inp" style="width:100%; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; padding:4px 6px;" rows="3" placeholder="Keterangan...">' + escapeHtml(defaultPpKet) + '</textarea>' +
+                    '</td>';
+
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2dPpAvg_' + globalPpIdx + '" class="pp-avg-val" style="font-weight:700; font-size:12px; color:#1e3a8a;">' + Math.round(ppAvgRatio * 100) + '%</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff; font-weight:700; font-size:12px;">' +
+                      numFmt(maxBobot) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2dPpTerb_' + globalPpIdx + '" class="pp-terbobot-val" style="font-weight:700; font-size:12px; color:#16a34a;">' + numFmt(ppTerbobotVal) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2dGrandRataTerbobotCell" style="font-weight:700; font-size:13.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<textarea id="ws1a2dCatatan" class="calc-inp" style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:6px 8px;" rows="8" placeholder="Catatan keselarasan...">' + escapeHtml(d.catatan || '') + '</textarea>' +
+                    '</td>';
+            isFirstGrandRow = false;
+          }
+
+          html += '</tr>';
+        });
+      });
+    });
+
+    // Summary bottom row matching HTML row 19
+    html += 
+        '<tr style="background:#f8fafc; font-weight:700; border-top:2px solid #cbd5e1;">' +
+          '<td colspan="6" style="text-align:right; padding:8px 12px; color:#1e293b; font-size:12px;">Rata-rata Keselarasan:</td>' +
+          '<td style="text-align:center; padding:8px 4px;"><span id="ws1a2dAvgCell" style="font-weight:700; font-size:13px; color:#dc2626;">' + Math.round(autoObj.pct) + '%</span></td>' +
+          '<td style="text-align:center; font-size:12px; color:#334155;">' + numFmt(maxBobot) + '</td>' +
+          '<td style="text-align:center;"><span id="ws1a2dTerbobotCell" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td style="text-align:center;"><span id="ws1a2dTerbobotCell2" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td></td>' +
+        '</tr>';
+
+    html += 
+        '</tbody>' +
+      '</table>' +
+      '</div>';
+
+    // Keterangan & Range Penilaian Poin 1.a.2.d di bawah tabel sesuai isian file HTML
+    html += renderStandardCriteriaCard({
+      code: '1.a.2.d',
+      safeId: 'ws1a2d',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.2.d',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam PN 4 RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 4 RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 4 RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 4 RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 4 RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 4 RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: 'PN 4 RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2dPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2dCritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
+
+  // Helper untuk menghitung capaian otomatis 1.a.2.e berdasarkan keselarasan PP PN 5
+  function getAutoScore_1_a_2_e(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 (AUTO_DATA_1_A_2_E && AUTO_DATA_1_A_2_E.length > 0 ? AUTO_DATA_1_A_2_E : 
+                 (AUTO_DATA_1_A_2_ALL && AUTO_DATA_1_A_2_ALL['1.a.2.e'] ? [AUTO_DATA_1_A_2_ALL['1.a.2.e']] : []));
+
+    // Filter hanya PP 1 sesuai permintaan dan isian file HTML
+    if (pnList && pnList.length > 0) {
+      pnList.forEach(function(pn){
+        if (pn.pps && pn.pps.length > 0) {
+          pn.pps = pn.pps.filter(function(pp){
+            return (pp.pp_title && (pp.pp_title.indexOf('PP 1') !== -1 || pp.pp_title.indexOf('Hilirisasi') !== -1));
+          });
+        }
+      });
+    }
+
+    var totalRows = 0;
+    var sumScore = 0;
+
+    pnList.forEach(function(pn){
+      (pn.pps || []).forEach(function(pp){
+        (pp.pds || []).forEach(function(pd){
+          totalRows++;
+          var s = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          sumScore += s;
+        });
+      });
+    });
+
+    var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+    var pct = avgRatio * 100;
+    var score = 0.375;
+    var crit = 'E';
+    var label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+
+    if (totalRows === 0) {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    } else if (pct >= 100) {
+      crit = 'E';
+      score = 0.375;
+      label = 'E. Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    } else if (pct > 75) {
+      crit = 'D';
+      score = 0.300;
+      label = 'D. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    } else if (pct > 50) {
+      crit = 'C';
+      score = 0.225;
+      label = 'C. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    } else if (pct > 25) {
+      crit = 'B';
+      score = 0.150;
+      label = 'B. Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    } else {
+      crit = 'A';
+      score = 0.075;
+      label = 'A. Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 5 RPJMN';
+    }
+
+    return {
+      pnList: pnList,
+      totalRows: totalRows,
+      sumScore: sumScore,
+      avgRatio: avgRatio,
+      pct: pct,
+      crit: crit,
+      score: score,
+      label: label
+    };
+  }
+
+  // Sheet 1.a.2.e (PN 5 Program Prioritas Pembangunan Nasional) Sesuai Isian File HTML
+  function renderWs_1_a_2_e(d, maxBobot){
+    d = d || {};
+    maxBobot = maxBobot !== undefined ? parseFloat(maxBobot) : 0.375;
+    var autoObj = getAutoScore_1_a_2_e(d, maxBobot);
+    var savedPpList = d.pp_list || [];
+    var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : 
+                 ((AUTO_DATA_1_A_2_E && AUTO_DATA_1_A_2_E.length > 0) ? AUTO_DATA_1_A_2_E : autoObj.pnList);
+
+    // Filter agar hanya memunculkan Program Prioritas yang sesuai saja (PP 1)
+    if (pnList && pnList.length > 0) {
+      pnList.forEach(function(pn){
+        if (pn.pps && pn.pps.length > 0) {
+          pn.pps = pn.pps.filter(function(pp){
+            return (pp.pp_title && (pp.pp_title.indexOf('PP 1') !== -1 || pp.pp_title.indexOf('Hilirisasi') !== -1));
+          });
+          if (pn.pps.length === 0) {
+            pn.pps = [
+              {
+                pp_title: 'PP 1 : Pengembangan Hilirisasi Industri berbasis SDA Unggulan, Industri Padat Karya Terampil, Padat Teknologi Inovasi, serta Berorientasi Ekspor',
+                pds: [
+                  { title: 'PROGRAM PENINGKATAN KAPASITAS SUMBER DAYA MANUSIA KESEHATAN', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' }
+                ]
+              }
+            ];
+          }
+        }
+      });
+    }
+
+    if (!pnList || pnList.length === 0) {
+      pnList = [{
+        pn_title: 'PN 5 : Melanjutkan Hilirisasi dan Mengembangkan Industri Berbasis Sumber Daya Alam untuk Meningkatkan Nilai Tambah di Dalam Negeri',
+        pps: [
+          {
+            pp_title: 'PP 1 : Pengembangan Hilirisasi Industri berbasis SDA Unggulan, Industri Padat Karya Terampil, Padat Teknologi Inovasi, serta Berorientasi Ekspor',
+            pds: [
+              { title: 'PROGRAM PENINGKATAN KAPASITAS SUMBER DAYA MANUSIA KESEHATAN', score: 1.0, ket: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' }
+            ]
+          }
+        ]
+      }];
+    }
+
+    // Merge saved review & score into data
+    if (pnList.length > 0 && savedPpList.length > 0) {
+      pnList.forEach(function(pn){
+        (pn.pps || []).forEach(function(pp) {
+          var savedPp = savedPpList.find(function(s) { return s.pp_title === pp.pp_title; });
+          if (savedPp) {
+            if (savedPp.keterangan) pp.keterangan = savedPp.keterangan;
+            (pp.pds || []).forEach(function(pd) {
+              var savedPd = savedPp.pds ? savedPp.pds.find(function(s) { return s.title === pd.title; }) : null;
+              if (savedPd) {
+                if (savedPd.ket) pd.ket = savedPd.ket;
+                if (savedPd.score !== undefined) pd.score = savedPd.score;
+              }
+            });
+          }
+        });
+      });
+    }
+
+    var grandTotalRows = 0;
+    pnList.forEach(function(pn){
+      var pps = (pn.pps && pn.pps.length > 0) ? pn.pps : [{ pds: [{}] }];
+      pps.forEach(function(pp){
+        grandTotalRows += (pp.pds && pp.pds.length > 0) ? pp.pds.length : 1;
+      });
+    });
+
+    var html = 
+      '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.e - Pemetaan Program Prioritas PN 5 RPJMN vs Program Daerah</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 5)</span>' +
+      '</div>' +
+      '<div style="overflow-x:auto;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_2_e" style="width: 100%; min-width: 1050px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 40px; text-align:center;">No</th>' +
+            '<th class="th-blue" colspan="2" style="text-align:center;">RPJMN</th>' +
+            '<th class="th-amber" colspan="1" style="text-align:center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+            '<th class="th-green" rowspan="2" style="width: 200px; text-align:center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 100px; text-align:center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 70px; text-align:center;">Bobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 100px; text-align:center;">Keselarasan<br>Terbobot</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; text-align:center;">Rata-rata Keselarasan<br>Terbobot</th>' +
+            '<th class="th-gray" rowspan="2" style="width: 140px; text-align:center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 230px; text-align:left;">Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-blue" style="width: 210px; text-align:left;">Program Prioritas Pembangunan Nasional</th>' +
+            '<th class="th-amber" style="width: 230px; text-align:left;">Dukungan Program Pembangunan Daerah</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    var rowCounter = 1;
+    var isFirstGrandRow = true;
+
+    pnList.forEach(function(pn, pnIdx) {
+      var pps = pn.pps && pn.pps.length > 0 ? pn.pps : [{ pp_title: '-', pds: [{}] }];
+      var totalRowsForPn = pps.reduce(function(acc, pp) {
+        return acc + (pp.pds && pp.pds.length > 0 ? pp.pds.length : 1);
+      }, 0);
+
+      pps.forEach(function(pp, ppIdx) {
+        var pds = pp.pds && pp.pds.length > 0 ? pp.pds : [{ title: '-', score: 1.0, ket: '' }];
+        var pdCount = pds.length;
+        var globalPpIdx = pnIdx + "_" + ppIdx;
+
+        var ppSumScore = pds.reduce(function(acc, item){
+          var s = (item.score !== undefined && item.score !== null) ? parseFloat(item.score) : 1.0;
+          return acc + s;
+        }, 0);
+        var ppAvgRatio = pdCount > 0 ? (ppSumScore / pdCount) : 1.0;
+        var ppTerbobotVal = ppAvgRatio * maxBobot;
+
+        var defaultPpKet = pp.keterangan || 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
+
+        pds.forEach(function(pd, pdIdx) {
+          var sVal = (pd.score !== undefined && pd.score !== null) ? parseFloat(pd.score) : 1.0;
+          var isSelaras = (sVal >= 1.0);
+
+          html += '<tr class="ws-pp-row" data-pp-idx="' + globalPpIdx + '">';
+          html += '<td class="excel-row-num" style="text-align:center;">' + (rowCounter++) + '</td>';
+
+          if (ppIdx === 0 && pdIdx === 0) {
+            html += '<td rowspan="' + totalRowsForPn + '" class="cell-pn-wrap-2b" style="vertical-align:top; background:#f0f7ff; font-weight:700; color:#1e3a8a; font-size:11.5px; line-height:1.4; padding:8px;">' +
+                    escapeHtml(pn.pn_title) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" class="cell-pp-wrap-2b" style="vertical-align:top; background:#f8fafc; font-weight:700; color:#0f172a; font-size:11.5px; padding:8px;">' +
+                    '<textarea class="calc-inp pp-title-inp" style="font-weight:700; color:#203764; width:100%; resize:none; border:none; background:transparent;" rows="3" readonly>' + escapeHtml(pp.pp_title) + '</textarea>' +
+                    '</td>';
+          }
+
+          html += '<td style="vertical-align:middle; padding:6px 8px;">' +
+                    '<textarea class="calc-inp pd-title-inp" style="width:100%; font-weight:600; font-size:11.5px; color:#334155; resize:none; border:none; background:transparent;" rows="2" readonly>' + escapeHtml(pd.title) + '</textarea>' +
+                  '</td>';
+
+          html += '<td style="vertical-align:middle; text-align:center;">' +
+                    '<select class="calc-inp pd-score-sel" style="font-weight:700; font-size:11.5px; color:' + (isSelaras ? '#16a34a' : '#dc2626') + '; width:100%; border:1px solid #cbd5e1; border-radius:4px; padding:4px 5px;">' +
+                      '<option value="1.0"' + (isSelaras ? ' selected' : '') + '>100.00%</option>' +
+                      '<option value="0.0"' + (!isSelaras ? ' selected' : '') + '>0.00%</option>' +
+                    '</select>' +
+                  '</td>';
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; font-size:11px; padding:6px 8px; color:#334155;">' +
+                      '<textarea class="calc-inp pp-ket-inp" style="width:100%; font-size:11px; border:1px solid #cbd5e1; border-radius:4px; padding:4px 6px;" rows="3" placeholder="Keterangan...">' + escapeHtml(defaultPpKet) + '</textarea>' +
+                    '</td>';
+
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2ePpAvg_' + globalPpIdx + '" class="pp-avg-val" style="font-weight:700; font-size:12px; color:#1e3a8a;">' + Math.round(ppAvgRatio * 100) + '%</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff; font-weight:700; font-size:12px;">' +
+                      numFmt(maxBobot) +
+                    '</td>';
+          }
+
+          if (pdIdx === 0) {
+            html += '<td rowspan="' + pdCount + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2ePpTerb_' + globalPpIdx + '" class="pp-terbobot-val" style="font-weight:700; font-size:12px; color:#16a34a;">' + numFmt(ppTerbobotVal) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<span id="ws1a2eGrandRataTerbobotCell" style="font-weight:700; font-size:13.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span>' +
+                    '</td>';
+          }
+
+          if (isFirstGrandRow) {
+            html += '<td rowspan="' + grandTotalRows + '" style="vertical-align:middle; text-align:center; background:#ffffff;">' +
+                      '<textarea id="ws1a2eCatatan" class="calc-inp" style="width:100%; font-size:11.5px; border:1px solid #cbd5e1; border-radius:4px; padding:6px 8px;" rows="8" placeholder="Catatan keselarasan...">' + escapeHtml(d.catatan || '') + '</textarea>' +
+                    '</td>';
+            isFirstGrandRow = false;
+          }
+
+          html += '</tr>';
+        });
+      });
+    });
+
+    // Summary bottom row matching HTML row 5
+    html += 
+        '<tr style="background:#f8fafc; font-weight:700; border-top:2px solid #cbd5e1;">' +
+          '<td colspan="6" style="text-align:right; padding:8px 12px; color:#1e293b; font-size:12px;">Rata-rata Keselarasan:</td>' +
+          '<td style="text-align:center; padding:8px 4px;"><span id="ws1a2eAvgCell" style="font-weight:700; font-size:13px; color:#dc2626;">' + Math.round(autoObj.pct) + '%</span></td>' +
+          '<td style="text-align:center; font-size:12px; color:#334155;">' + numFmt(maxBobot) + '</td>' +
+          '<td style="text-align:center;"><span id="ws1a2eTerbobotCell" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td style="text-align:center;"><span id="ws1a2eTerbobotCell2" style="font-weight:700; font-size:12.5px; color:#16a34a;">' + numFmt(autoObj.score) + '</span></td>' +
+          '<td></td>' +
+        '</tr>';
+
+    html += 
+        '</tbody>' +
+      '</table>' +
+      '</div>';
+
+    // Keterangan & Range Penilaian Poin 1.a.2.e di bawah tabel sesuai isian file HTML
+    html += renderStandardCriteriaCard({
+      code: '1.a.2.e',
+      safeId: 'ws1a2e',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.2.e',
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam PN 5 RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam PN 5 RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam PN 5 RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam PN 5 RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam PN 5 RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam PN 5 RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: 'PN 5 RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2ePctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2eCritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
+
+  // 5. Sheets 1.a.2.e s.d 1.a.2.h (PN 5 s.d PN 8 dengan Kolom Review TA Bidang)
   function renderWs_1_a_2_b_to_g(code, d, maxBobot){
     d = d || {};
     var savedPpList = d.pp_list || [];
@@ -2826,6 +5354,37 @@ tr.type-sub:hover td {
       '</table>' +
       '</div>';
 
+    var pnMap = {
+      '1.a.2.d': 'PN 4',
+      '1.a.2.e': 'PN 5',
+      '1.a.2.f': 'PN 6',
+      '1.a.2.g': 'PN 7',
+      '1.a.2.h': 'PN 8'
+    };
+    var pnLabel = pnMap[code] || ('PN ' + code);
+
+    html += renderStandardCriteriaCard({
+      code: code,
+      safeId: 'ws1a2bg',
+      title: 'Keterangan & Kriteria Penilaian Poin ' + code,
+      badgeText: 'Evaluasi Form Terkait',
+      colTitle: 'Kriteria Dukungan Program Daerah terhadap Kegiatan Prioritas dalam ' + pnLabel + ' RPJMN',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan dukungan program daerah dalam RPJMD sama dengan atau kurang dari 25% terhadap kegiatan prioritas dalam ' + pnLabel + ' RPJMN', val: '0,075', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 25% dan sama dengan atau kurang dari 50% terhadap kegiatan prioritas dalam ' + pnLabel + ' RPJMN', val: '0,150', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 50% dan sama dengan atau kurang dari 75% terhadap kegiatan prioritas dalam ' + pnLabel + ' RPJMN', val: '0,225', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan dukungan program daerah dalam RPJMD lebih dari 75% dan sama dengan atau kurang dari 99% terhadap kegiatan prioritas dalam ' + pnLabel + ' RPJMN', val: '0,300', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan dukungan program daerah dalam RPJMD 100% terhadap kegiatan prioritas dalam ' + pnLabel + ' RPJMN', val: '0,375', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Kelengkapan Sinkronisasi Form Terkait',
+      infoRows: [
+        { label: 'Sumber Data:', value: '/Daerah/DukunganKegiatanPrioritas' },
+        { label: 'Program Prioritas:', value: pnLabel + ' RPJMN' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a2bgPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a2bgCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
@@ -2882,252 +5441,429 @@ tr.type-sub:hover td {
       '</table>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: code,
+      safeId: 'ws1a3',
+      title: 'Keterangan & Kriteria Penilaian Poin ' + code,
+      badgeText: 'Perhitungan Otomatis Margin',
+      colTitle: 'Kriteria Keselarasan Target ' + indName + ' RPJMD terhadap RPJMN',
+      rows: [
+        { crit: 'A', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' kurang dari 25% terhadap RPJMN', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 25% dan kurang dari 50% terhadap RPJMN', val: '0,125', color: '#d97706' },
+        { crit: 'C', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 50% dan kurang dari 75% terhadap RPJMN', val: '0,250', color: '#2563eb' },
+        { crit: 'D', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 75% dan kurang dari 100% terhadap RPJMN', val: '0,375', color: '#0891b2' },
+        { crit: 'E', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' mencapai 100% (selaras penuh / melampaui target nasional)', val: '0,500', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Target Makro',
+      infoRows: [
+        { label: 'Indikator:', value: indName },
+        { label: 'Sumber Data:', value: 'Data Makro RPJMN & RPJMD Daerah' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1a3AvgScore', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a3CritText', value: '-' }
+      ]
+    });
+
     return html;
+  }
+
+  // Helper Kalkulasi Otomatis Skor & Kriteria Poin 1.a.4
+  function getAutoScore_1_a_4(d){
+    d = d || {};
+    var rawAutoList = (typeof AUTO_DATA_1_A_4 !== 'undefined' && AUTO_DATA_1_A_4 && Array.isArray(AUTO_DATA_1_A_4.kpu_list) && AUTO_DATA_1_A_4.kpu_list.length > 0) ? AUTO_DATA_1_A_4.kpu_list :
+                      ((typeof AUTO_DATA_1_A_4 !== 'undefined' && Array.isArray(AUTO_DATA_1_A_4) && AUTO_DATA_1_A_4.length > 0) ? AUTO_DATA_1_A_4 : []);
+    var kpuList = rawAutoList.length > 0 ? rawAutoList : 
+                  ((d.kpu_list && Array.isArray(d.kpu_list) && d.kpu_list.length > 0) ? d.kpu_list : []);
+
+    var totalKpu = kpuList.length;
+    var sumTerbobot = 0;
+    kpuList.forEach(function(km){
+      var pdList = (km.pds && km.pds.length > 0) ? km.pds : [];
+      var hasSupport = pdList.some(function(p){ return p.title && p.title !== '-' && (p.score === undefined || parseFloat(p.score) > 0.5); });
+      var terb = (km.keselarasan_terbobot !== undefined && km.keselarasan_terbobot !== null) ? parseFloat(km.keselarasan_terbobot) : (hasSupport ? 1.0 : 0.5);
+      sumTerbobot += terb;
+    });
+
+    var avgTerbobot = totalKpu > 0 ? (sumTerbobot / totalKpu) : 0.50;
+    var crit = (avgTerbobot >= 0.50) ? 'B' : 'A';
+    var score = (avgTerbobot >= 0.50) ? 1.0 : 0.5;
+    var label = (avgTerbobot >= 0.50) ? 'Ya (Nilai keselarasan >= 0,50)' : 'Tidak (Nilai keselarasan < 0,50)';
+    var aksi = (avgTerbobot >= 0.50) ? 'Ya' : 'Tidak';
+
+    return {
+      kpuList: kpuList,
+      total: totalKpu,
+      avg: avgTerbobot,
+      crit: crit,
+      score: score,
+      label: label,
+      aksi: aksi
+    };
+  }
+
+  // Helper Kalkulasi Otomatis Skor & Kriteria Poin 1.a.5
+  function getAutoScore_1_a_5(d){
+    d = d || {};
+    var rawAutoList = (typeof AUTO_DATA_1_A_5 !== 'undefined' && AUTO_DATA_1_A_5 && Array.isArray(AUTO_DATA_1_A_5.bidang_list) && AUTO_DATA_1_A_5.bidang_list.length > 0) ? AUTO_DATA_1_A_5.bidang_list :
+                      ((typeof AUTO_DATA_1_A_5 !== 'undefined' && Array.isArray(AUTO_DATA_1_A_5) && AUTO_DATA_1_A_5.length > 0) ? AUTO_DATA_1_A_5 : []);
+    var spmList = (d.spm_list && Array.isArray(d.spm_list) && d.spm_list.length > 0) ? d.spm_list : 
+                  (rawAutoList.length > 0 ? rawAutoList : []);
+
+    var totalBidang = spmList.length;
+    var sumTerbobot = 0;
+    spmList.forEach(function(bm){
+      var indList = (bm.ind_list && bm.ind_list.length > 0) ? bm.ind_list : [];
+      var hasSupport = indList.some(function(p){ return p.name && p.name !== '-' && (p.score === undefined || parseFloat(p.score) > 0.5); });
+      var terb = (bm.keselarasan_terbobot !== undefined && bm.keselarasan_terbobot !== null) ? parseFloat(bm.keselarasan_terbobot) : (hasSupport ? 1.0 : 0.5);
+      sumTerbobot += terb;
+    });
+
+    var avgTerbobot = totalBidang > 0 ? (sumTerbobot / totalBidang) : 0.50;
+    var crit = (avgTerbobot >= 0.50) ? 'B' : 'A';
+    var score = (avgTerbobot >= 0.50) ? 1.0 : 0.5;
+    var label = (avgTerbobot >= 0.50) ? 'Ya (Nilai keselarasan >= 0,50)' : 'Tidak (Nilai keselarasan < 0,50)';
+    var aksi = (avgTerbobot >= 0.50) ? 'Ya' : 'Tidak';
+
+    return {
+      spmList: spmList,
+      total: totalBidang,
+      avg: avgTerbobot,
+      crit: crit,
+      score: score,
+      label: label,
+      aksi: aksi
+    };
+  }
+
+  // Helper Kalkulasi Otomatis Skor & Kriteria Poin 1.a.6 (Target SPM)
+  function getAutoScore_1_a_6(d){
+    d = d || {};
+    var rawAutoList = (typeof AUTO_DATA_1_A_6 !== 'undefined' && AUTO_DATA_1_A_6 && Array.isArray(AUTO_DATA_1_A_6.bidang_list) && AUTO_DATA_1_A_6.bidang_list.length > 0) ? AUTO_DATA_1_A_6.bidang_list :
+                      ((typeof AUTO_DATA_1_A_6 !== 'undefined' && Array.isArray(AUTO_DATA_1_A_6) && AUTO_DATA_1_A_6.length > 0) ? AUTO_DATA_1_A_6 : []);
+    var spmList = (d.spm_list && Array.isArray(d.spm_list) && d.spm_list.length > 0) ? d.spm_list : 
+                  (rawAutoList.length > 0 ? rawAutoList : []);
+
+    var totalBidang = spmList.length;
+    var sumTerbobot = 0;
+    spmList.forEach(function(bm){
+      var indList = (bm.ind_list && bm.ind_list.length > 0) ? bm.ind_list : [];
+      var hasSupport = indList.some(function(p){ return p.name && p.name !== '-' && (p.score === undefined || parseFloat(p.score) > 0.5); });
+      var terb = (bm.keselarasan_terbobot !== undefined && bm.keselarasan_terbobot !== null) ? parseFloat(bm.keselarasan_terbobot) : (hasSupport ? 1.0 : 0.5);
+      sumTerbobot += terb;
+    });
+
+    var avgTerbobot = totalBidang > 0 ? (sumTerbobot / totalBidang) : 0.50;
+    var crit = (avgTerbobot >= 0.50) ? 'B' : 'A';
+    var score = (avgTerbobot >= 0.50) ? 1.0 : 0.5;
+    var label = (avgTerbobot >= 0.50) ? 'Ya (Nilai keselarasan >= 0,50)' : 'Tidak (Nilai keselarasan < 0,50)';
+    var aksi = (avgTerbobot >= 0.50) ? 'Ya' : 'Tidak';
+
+    return {
+      spmList: spmList,
+      total: totalBidang,
+      avg: avgTerbobot,
+      crit: crit,
+      score: score,
+      label: label,
+      aksi: aksi
+    };
   }
 
   // 7. Sheet 1.a.4 (Kegiatan Prioritas Utama KPU RPJMN vs Dukungan Program Daerah RPJMD)
   function renderWs_1_a_4(d, maxBobot){
     d = d || {};
-    var kpuList = (d.kpu_list && Array.isArray(d.kpu_list) && d.kpu_list.length > 0) ? d.kpu_list : 
-                  ((Array.isArray(AUTO_DATA_1_A_4) && AUTO_DATA_1_A_4.length > 0) ? AUTO_DATA_1_A_4 : []);
+    var rawAutoList = (AUTO_DATA_1_A_4 && Array.isArray(AUTO_DATA_1_A_4.kpu_list) && AUTO_DATA_1_A_4.kpu_list.length > 0) ? AUTO_DATA_1_A_4.kpu_list :
+                      ((Array.isArray(AUTO_DATA_1_A_4) && AUTO_DATA_1_A_4.length > 0) ? AUTO_DATA_1_A_4 : []);
+
+    var kpuList = rawAutoList.length > 0 ? rawAutoList : 
+                  ((d.kpu_list && Array.isArray(d.kpu_list) && d.kpu_list.length > 0) ? d.kpu_list : []);
+
+    // Sinkronisasi catatan yang pernah diinputkan user sebelumnya
+    if (d.kpu_list && Array.isArray(d.kpu_list)) {
+      var savedNoteMap = {};
+      d.kpu_list.forEach(function(sk){
+        if (sk.kpu_title && sk.catatan) savedNoteMap[sk.kpu_title] = sk.catatan;
+      });
+      kpuList.forEach(function(k){
+        if (savedNoteMap[k.kpu_title] && !k.catatan) k.catatan = savedNoteMap[k.kpu_title];
+      });
+    }
+
+    var totalRowCount = 0;
+    var totalKpuCount = kpuList.length;
+    var sumTerbobotInitial = 0;
+
+    kpuList.forEach(function(kpu){
+      var pdList = (kpu.pds && kpu.pds.length > 0) ? kpu.pds : [{ title: '-', score: 0.50 }];
+      totalRowCount += pdList.length;
+      var curTerbobot = (kpu.keselarasan_terbobot !== undefined && kpu.keselarasan_terbobot !== null) ? parseFloat(kpu.keselarasan_terbobot) : (pdList[0].score !== undefined ? parseFloat(pdList[0].score) : 0.50);
+      sumTerbobotInitial += curTerbobot;
+    });
+
+    var grandAvgInitial = totalKpuCount > 0 ? (sumTerbobotInitial / totalKpuCount) : 0.50;
 
     var html = 
       '<div style="overflow-x:auto; padding-bottom:10px;">' +
-      '<table class="excel-grid-table" id="wsTable_1_a_4" style="min-width: 950px; font-size: 13px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_4" style="min-width: 1050px; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="th-blue" style="width: 320px; min-width: 320px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">RPJMN<br><small style="font-weight:600; font-size:12px; color:#1e3a8a;">Kegiatan Prioritas Utama (KPU)</small></th>' +
-            '<th class="th-amber" style="width: 340px; min-width: 340px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">RPJMD<br><small style="font-weight:600; font-size:12px; color:#78350f;">Dukungan Program Pembangunan Daerah</small></th>' +
-            '<th class="th-green" style="width: 140px; min-width: 140px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Nilai Keselarasan (0,5 / 1,0)</th>' +
-            '<th class="th-amber" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">RPJMN<br><small style="font-weight:600; font-size:11.5px; color:#1e3a8a;">Kegiatan Prioritas Utama (KPU)</small></th>' +
+            '<th class="th-amber" rowspan="2" style="width: 300px; min-width: 300px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">RPJMD<br><small style="font-weight:600; font-size:11.5px; color:#78350f;">Dukungan Program Pembangunan Daerah</small></th>' +
+            '<th class="th-green" rowspan="2" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Nilai Keselarasan<br><small style="font-weight:600;">(0,5 / 1,0)</small></th>' +
+            '<th class="th-amber" rowspan="2" style="width: 260px; min-width: 260px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 110px; min-width: 110px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keselarasan Terbobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th class="th-blue" colspan="3" style="display:none;">Referensi</th>' +
+            '<th class="th-amber" rowspan="2" style="width: 160px; min-width: 160px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Catatan</th>' +
+          '</tr>' +
+          '<tr style="display:none;">' +
+            '<th>Dokumen</th>' +
+            '<th>Halaman</th>' +
+            '<th>Tabel</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     if (!kpuList || kpuList.length === 0){
-      return html + '<tr><td colspan="4" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data KPU RPJMN / Dukungan Program Daerah RPJMD pada menu terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
-    }
+      html += '<tr><td colspan="7" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data KPU RPJMN / Dukungan Program Daerah RPJMD pada menu terkait (/Daerah/DukunganKegiatanPrioritas). Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr>';
+    } else {
+      var isOverallFirstRow = true;
 
-    kpuList.forEach(function(kpu, kpuIdx){
-      var pdList = (kpu.pds && kpu.pds.length > 0) ? kpu.pds : [{ title: '-', score: 0.50 }];
-      var pdCount = pdList.length;
+      kpuList.forEach(function(kpu, kpuIdx){
+        var pdList = (kpu.pds && kpu.pds.length > 0) ? kpu.pds : [{ title: '-', score: 0.50 }];
+        var pdCount = pdList.length;
+        var kpuTerbobot = (kpu.keselarasan_terbobot !== undefined && kpu.keselarasan_terbobot !== null) ? parseFloat(kpu.keselarasan_terbobot) : (pdList[0].score !== undefined ? parseFloat(pdList[0].score) : 0.50);
 
-      pdList.forEach(function(pd, pdIdx){
-        html += 
-          '<tr class="ws-1a4-row" data-kpu-idx="' + kpuIdx + '" data-pd-idx="' + pdIdx + '" data-kpu-title="' + escapeHtml(kpu.kpu_title || '') + '">';
+        pdList.forEach(function(pd, pdIdx){
+          var isStrip = (!pd.title || pd.title === '-');
+          var curScore = (pd.score !== null && pd.score !== undefined) ? parseFloat(pd.score) : (isStrip ? 0.50 : 1.00);
 
-        if (pdIdx === 0){
           html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13px; padding: 12px 10px; line-height: 1.55;">' +
-              escapeHtml(kpu.kpu_title || '') +
-            '</td>';
-        }
+            '<tr class="ws-1a4-row" data-kpu-idx="' + kpuIdx + '" data-pd-idx="' + pdIdx + '" data-kpu-title="' + escapeHtml(kpu.kpu_title || '') + '">';
 
-        var isStrip = (!pd.title || pd.title === '-');
-        html += 
-          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.55; color: ' + (isStrip ? '#94a3b8' : '#1e293b') + ';">' +
-            '<span class="kpu-prog-title" style="font-weight: ' + (isStrip ? '400; font-style:italic' : '600') + ';">' + escapeHtml(pd.title || '-') + '</span>' +
-          '</td>';
+          // Col A: KPU RPJMN (Rowspan per KPU)
+          if (pdIdx === 0){
+            html += 
+              '<td rowspan="' + pdCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 12.5px; padding: 10px 8px; line-height: 1.5;">' +
+                escapeHtml(kpu.kpu_title || '') +
+              '</td>';
+          }
 
-        var curScore = (pd.score !== null && pd.score !== undefined) ? parseFloat(pd.score) : (isStrip ? 0.50 : 1.00);
-        html += 
-          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
-            '<select class="calc-inp kpu-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
-              '<option value="1.00"' + (curScore === 1.0 ? ' selected' : '') + '>1.00 (Selaras)</option>' +
-              '<option value="0.50"' + (curScore === 0.5 ? ' selected' : '') + '>0.50 (Sebagian)</option>' +
-              '<option value="0.00"' + (curScore === 0.0 ? ' selected' : '') + '>0.00 (Tidak)</option>' +
-            '</select>' +
-          '</td>';
-
-        if (pdIdx === 0){
+          // Col B: RPJMD Dukungan Program Pembangunan Daerah
           html += 
-            '<td rowspan="' + pdCount + '" style="vertical-align: top; padding: 10px 8px;">' +
-              '<textarea class="calc-inp kpu-ket-inp" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: 6px; min-height: 85px;">' + escapeHtml(kpu.keterangan || (isStrip ? 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait' : 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait')) + '</textarea>' +
+            '<td style="vertical-align: middle; padding: 8px 10px; font-size: 12.5px; line-height: 1.5; color: ' + (isStrip ? '#94a3b8' : '#1e293b') + ';">' +
+              '<span class="kpu-prog-title" style="font-weight: ' + (isStrip ? '400; font-style:italic' : '600') + ';">' + escapeHtml(pd.title || '-') + '</span>' +
             '</td>';
-        }
 
-        html += '</tr>';
+          // Col C: Nilai Keselarasan (0,5 / 1,0)
+          html += 
+            '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+              '<select class="calc-inp kpu-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 36px; padding: 4px 6px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
+                '<option value="1.00"' + (curScore >= 1.0 ? ' selected' : '') + '>1</option>' +
+                '<option value="0.50"' + (curScore < 1.0 ? ' selected' : '') + '>0.5</option>' +
+              '</select>' +
+            '</td>';
+
+          // Col D: Keterangan (Rowspan per KPU)
+          if (pdIdx === 0){
+            var defaultKet = isStrip ? 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait' : 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait';
+            html += 
+              '<td rowspan="' + pdCount + '" style="vertical-align: top; padding: 8px 6px;">' +
+                '<textarea class="calc-inp kpu-ket-inp" rows="3" style="width: 100%; resize: vertical; font-size: 12px; line-height: 1.45; padding: 6px 8px; border-radius: 6px; min-height: 70px;">' + escapeHtml(kpu.keterangan || defaultKet) + '</textarea>' +
+              '</td>';
+
+            // Col E: Keselarasan Terbobot (Rowspan per KPU)
+            html += 
+              '<td rowspan="' + pdCount + '" class="kpu-terbobot" data-kpu-idx="' + kpuIdx + '" style="text-align: center; vertical-align: middle; font-weight: 700; color: #1e3a8a; font-size: 13px; background: #f8fafc;">' +
+                kpuTerbobot.toFixed(2) +
+              '</td>';
+          }
+
+          // Col F: Rata-rata Keselarasan Terbobot (Rowspan across all rows pada baris pertama)
+          if (isOverallFirstRow){
+            html += 
+              '<td rowspan="' + totalRowCount + '" class="kpu-grand-avg" style="text-align: center; vertical-align: middle; font-weight: 800; color: #dc2626; font-size: 16px; background: #ffffff; border-left: 2px solid #e2e8f0; border-right: 2px solid #e2e8f0;">' +
+                grandAvgInitial.toFixed(2) +
+              '</td>';
+          }
+
+          // Col G, H, I: Referensi (Hidden via style="display:none;" tetapi ada di DOM)
+          if (pdIdx === 0){
+            html += 
+              '<td style="display:none;"><input type="hidden" class="kpu-dok-inp" value="' + escapeHtml(kpu.dokumen || 'RPJMN Tahun 2025-2029') + '"></td>' +
+              '<td style="display:none;"><input type="hidden" class="kpu-hal-inp" value="' + escapeHtml(kpu.halaman || '270') + '"></td>' +
+              '<td style="display:none;"><input type="hidden" class="kpu-tbl-inp" value="' + escapeHtml(kpu.tabel || 'Daftar Kegiatan Utama Pembangunan') + '"></td>';
+
+            // Col J: Catatan (Rowspan per KPU)
+            html += 
+              '<td rowspan="' + pdCount + '" style="vertical-align: top; padding: 8px 6px;">' +
+                '<textarea class="calc-inp kpu-catatan-inp" rows="3" style="width: 100%; resize: vertical; font-size: 12px; line-height: 1.45; padding: 6px 8px; border-radius: 6px; min-height: 70px;" placeholder="Catatan...">' + escapeHtml(kpu.catatan || '') + '</textarea>' +
+              '</td>';
+          }
+
+          html += '</tr>';
+          isOverallFirstRow = false;
+        });
       });
-    });
+    }
 
     html += 
         '</tbody>' +
+        '<tfoot>' +
+          '<tr style="background: #f1f5f9; font-weight: 700; border-top: 2px solid #cbd5e1;">' +
+            '<td colspan="4" style="text-align: right; padding: 10px 14px; font-size: 13px; color: #1e293b;">Rata-rata Keselarasan Terbobot KPU:</td>' +
+            '<td colspan="2" style="text-align: center; padding: 10px 12px; font-size: 15px; font-weight: 800; color: #dc2626;" id="ws1a4GrandTerbobotFooter">' + grandAvgInitial.toFixed(2) + '</td>' +
+            '<td style="display:none;" colspan="3"></td>' +
+            '<td></td>' +
+          '</tr>' +
+        '</tfoot>' +
       '</table>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: '1.a.4',
+      safeId: 'ws1a4',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.4',
+      badgeText: 'Proyek Prioritas Strategis (KPU)',
+      colTitle: 'Kriteria',
+      rows: [
+        { crit: 'A', text: 'Tidak', val: 'A = 0, 5', color: '#dc2626' },
+        { crit: 'B', text: 'Ya', val: 'B = 1', color: '#16a34a' }
+      ],
+      notes: [
+        'Tidak artinya nilai keselarasan dibawah 0,50',
+        'Ya artinya nilai keselarasan diatas 0,50'
+      ],
+      sourceTitle: 'Hasil Pemetaan KPU RPJMN (/Daerah/DukunganKegiatanPrioritas)',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Dukungan Kegiatan Prioritas Utama (KPU) RPJMN' },
+        { label: 'Total KPU Terdata:', id: 'ws1a4CountMatched', value: '-' },
+        { label: 'Rata-rata Keselarasan Terbobot:', id: 'ws1a4AvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a4CritText', value: '-' }
+      ]
+    });
+
     return html;
-}
+  }
 
-  // 8. Sheet 1.a.5 (Komponen SPM RPJMD) & Sheet 1.a.6 (Target SPM)
-  function renderWs_SPM(code, d, maxBobot){
+  // 8. Sheet 1.a.5 (Komponen SPM RPJMD) sesuai Template HTML media_1793030444857.html
+  function renderWs_1_a_5(d, maxBobot){
     d = d || {};
-    var is1a5 = (code === '1.a.5');
+    var autoScore = getAutoScore_1_a_5(d);
+    var spmData = autoScore.spmList;
+    var grandAvg = autoScore.avg;
 
-    var defaultSPM = [
-      {
-        bidang_nasional: 'Bidang 1 : pendidikan',
-        bidang_daerah: 'Bidang 1 : pendidikan',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Jumlah anak usia 5-6 tahun yang berpartisipasi dalam pendidikan anak usia dini (APS)', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Jumlah anak usia 7-15 Tahun yang berpartisipasi dalam pendidikan dasar (APS)', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 3, name: 'Indikator 3 : Jumlah anak usia 7-18 Tahun yang berpartisipasi dalam pendidikan kesetaraan (Paket A/B/C) (APS)', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 4, name: 'Indikator 4 : Skor kemampuan Literasi SD', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 5, name: 'Indikator 5 : Skor kemampuan Numerasi SD', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 6, name: 'Indikator 6 : Skor kemampuan Literasi SMP', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 7, name: 'Indikator 7 : Skor kemampuan Numerasi SMP', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 8, name: 'Indikator 8 : Pertumbuhan Pendidik PAUD yang Memiliki Kualifikasi Akademik Paling Rendah D-IV/S1', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 9, name: 'Indikator 9 : Indeks Iklim Keamanan SD', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 10, name: 'Indikator 10 : Indeks Iklim Kebinekaan SD', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 11, name: 'Indikator 11 : Indeks Inklusivitas SD', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 12, name: 'Indikator 12 : Indeks Iklim Keamanan SMP', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 13, name: 'Indikator 13 : Indeks Iklim Kebinekaan SMP', target: '100', unit: 'Angka', score: 1.0 },
-          { no: 14, name: 'Indikator 14 : Indeks Inklusivitas SMP', target: '100', unit: 'Angka', score: 1.0 }
-        ]
-      },
-      {
-        bidang_nasional: 'Bidang 2 : kesehatan',
-        bidang_daerah: 'Bidang 2 : kesehatan',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Pelayanan Kesehatan Ibu Hamil', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Pelayanan Kesehatan Ibu Bersalin', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 3, name: 'Indikator 3 : Pelayanan Kesehatan Bayi Baru Lahir', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 4, name: 'Indikator 4 : Pelayanan Kesehatan Balita', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 5, name: 'Indikator 5 : Pelayanan Kesehatan pada Usia Pendidikan Dasar', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 6, name: 'Indikator 6 : Pelayanan Kesehatan pada Usia Produktif', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 7, name: 'Indikator 7 : Pelayanan Kesehatan pada Usia Lanjut', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 8, name: 'Indikator 8 : Pelayanan Kesehatan Penderita Hipertensi', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 9, name: 'Indikator 9 : Pelayanan Kesehatan Penderita Diabetes Melitus (DM)', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 10, name: 'Indikator 10 : Pelayanan Kesehatan Orang dengan Gangguan Jiwa (ODGJ) Berat', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 11, name: 'Indikator 11 : Pelayanan Kesehatan Orang Terduga Tuberkulosis', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 12, name: 'Indikator 12 : Pelayanan Kesehatan Orang Dengan Risiko Terinfeksi Virus yang Melemahkan Daya Tahan Tubuh Manusia (HIV)', target: '100%', unit: 'Persen', score: 1.0 }
-        ]
-      },
-      {
-        bidang_nasional: 'Bidang 3 : pekerjaan umum',
-        bidang_daerah: 'Bidang 3 : pekerjaan umum',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Persentase Penyediaan Kebutuhan Pokok Air Minum Sehari-hari', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Persentase Penyediaan Pelayanan Pengolahan Air Limbah Domestik', target: '100%', unit: 'Persen', score: 1.0 }
-        ]
-      },
-      {
-        bidang_nasional: 'Bidang 4 : perumahan rakyat',
-        bidang_daerah: 'Bidang 4 : perumahan rakyat',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Persentase Penyediaan Rumah Layak Huni bagi Korban Bencana Kabupaten/Kota', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Persentase Fasilitasi Penyediaan Rumah Layak Huni bagi Masyarakat yang Terkena Relokasi Program Pemerintah Daerah Kabupaten/Kota', target: '100%', unit: 'Persen', score: 1.0 }
-        ]
-      },
-      {
-        bidang_nasional: 'Bidang 5 : ketenteraman, ketertiban umum, dan pelindungan masyarakat',
-        bidang_daerah: 'Bidang 5 : ketenteraman, ketertiban umum, dan pelindungan masyarakat',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Persentase Pelayanan Ketenteraman dan Ketertiban Umum', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Persentase Pelayanan Penyelamatan dan Evakuasi Korban Bencana', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 3, name: 'Indikator 3 : Persentase Pelayanan Penyelamatan dan Evakuasi Korban Kebakaran', target: '100%', unit: 'Persen', score: 1.0 }
-        ]
-      },
-      {
-        bidang_nasional: 'Bidang 6 : sosial',
-        bidang_daerah: 'Bidang 6 : sosial',
-        keterangan: 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait',
-        ind_list: [
-          { no: 1, name: 'Indikator 1 : Persentase Penyandang Disabilitas Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 2, name: 'Indikator 2 : Persentase Anak Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 3, name: 'Indikator 3 : Persentase Lanjut Usia Terlantar yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 4, name: 'Indikator 4 : Persentase Gelandangan dan Pengemis yang Terpenuhi Kebutuhan Dasarnya', target: '100%', unit: 'Persen', score: 1.0 },
-          { no: 5, name: 'Indikator 5 : Persentase Korban Bencana Daerah yang Terpenuhi Kebutuhan Dasarnya Saat dan Setelah Tanggap Darurat Bencana', target: '100%', unit: 'Persen', score: 1.0 }
-        ]
-      }
-    ];
-
-    var autoSource = is1a5 ? (AUTO_DATA_1_A_5 || []) : (AUTO_DATA_1_A_6 || []);
-    var spmData = (d.spm_list && Array.isArray(d.spm_list) && d.spm_list.length > 0) ? d.spm_list : 
-                  (Array.isArray(autoSource) && autoSource.length > 0 ? autoSource : []);
+    // Hitung total row untuk rowspan Rata-rata Keselarasan Terbobot
+    var totalRowCount = 0;
+    spmData.forEach(function(b){
+      var len = (b.ind_list && b.ind_list.length > 0) ? b.ind_list.length : 1;
+      totalRowCount += len;
+    });
+    if (totalRowCount === 0) totalRowCount = 1;
 
     var html = 
       '<div style="overflow-x:auto; padding-bottom:12px;">' +
-      '<table class="excel-grid-table" id="wsTable_SPM" style="min-width: 1250px; font-size: 13px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_5" style="min-width: 1250px; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th rowspan="2" class="th-green" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">PP No. 2 Tahun 2018 tentang SPM<br><small style="font-weight:600; font-size:12px; color:#14532d;">Nasional</small></th>' +
-            '<th rowspan="2" class="th-blue" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">' + (is1a5 ? 'RPJMD' : 'RKPD') + '<br><small style="font-weight:600; font-size:12px; color:#1e3a8a;">Bidang SPM Daerah</small></th>' +
-            '<th rowspan="2" class="th-blue" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Indikator SPM</th>' +
-            '<th colspan="2" class="th-blue" style="vertical-align: middle; font-size: 13.5px; padding: 10px 8px;">Target ' + (is1a5 ? 'RPJMD' : 'RKPD') + '</th>' +
-            '<th rowspan="2" class="th-green" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Nilai Keselarasan<br><small style="font-size:11px;">(0% / 50% / 100%)</small></th>' +
-            '<th rowspan="2" class="th-amber" style="width: 240px; min-width: 240px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px;">Keterangan</th>' +
-            '<th rowspan="2" class="th-green" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13.5px; padding: 12px 10px; background:#dcfce7; color:#15803d; border: 2px solid #86efac;">Nilai Keselarasan per Bidang</th>' +
+            '<th class="th-green" rowspan="2" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">PP No. 2 Tahun 2018 tentang SPM<br><small style="font-weight:600; font-size:11.5px; color:#14532d;">Bidang SPM</small></th>' +
+            '<th class="th-blue" colspan="2" style="vertical-align: middle; font-size: 13px; padding: 8px; text-align: center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Nilai Keselarasan<br><small style="font-weight:600;">(0,5 / 1,0)</small></th>' +
+            '<th class="th-amber" rowspan="2" style="width: 260px; min-width: 260px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 110px; min-width: 110px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keselarasan Terbobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th class="th-blue" colspan="3" style="display:none;">Referensi</th>' +
+            '<th class="th-amber" rowspan="2" style="width: 160px; min-width: 160px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Catatan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12.5px; padding: 8px 6px;">Target</th>' +
-            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12.5px; padding: 8px 6px;">Satuan</th>' +
+            '<th class="th-blue" style="width: 200px; min-width: 200px; font-size: 12.5px; padding: 8px; text-align: center;">Bidang SPM</th>' +
+            '<th class="th-blue" style="width: 280px; min-width: 280px; font-size: 12.5px; padding: 8px; text-align: center;">Indikator SPM</th>' +
+            '<th style="display:none;">Dokumen</th>' +
+            '<th style="display:none;">Halaman</th>' +
+            '<th style="display:none;">Tabel</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     if (!spmData || spmData.length === 0){
-      return html + '<tr><td colspan="7" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data SPM pada dokumen perencanaan terkait. Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
+      return html + '<tr><td colspan="8" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Komponen Indikator SPM RPJMD pada menu <b>/Daerah/SPM</b>. Silakan lengkapi data indikator SPM daerah terlebih dahulu.</td></tr></tbody></table></div>';
     }
 
+    var isFirstGlobalRow = true;
+
     spmData.forEach(function(bid, bidIdx){
-      var indList = (bid.ind_list && bid.ind_list.length > 0) ? bid.ind_list : [{ no: 1, name: 'Indikator...', target: '-', unit: 'Persen', score: 0.50 }];
+      var indList = (bid.ind_list && bid.ind_list.length > 0) ? bid.ind_list : [{ no: 1, name: '-', score: 0.50 }];
       var indCount = indList.length;
+      var curTerb = (bid.keselarasan_terbobot !== undefined && bid.keselarasan_terbobot !== null) ? parseFloat(bid.keselarasan_terbobot) : 1.0;
+      var curKet = bid.keterangan || (curTerb >= 1.0 ? 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait' : 'Tidak ada Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait');
+      var curDok = bid.dokumen || 'RPJMD Kab Banyuwangi 2025-2029';
+      var curHal = bid.halaman || '';
+      var curTbl = bid.tabel || '';
+      var curCat = bid.catatan || '';
 
       indList.forEach(function(ind, indIdx){
+        var curScore = (ind.score !== null && ind.score !== undefined) ? parseFloat(ind.score) : 1.00;
+
         html += 
-          '<tr class="ws-spm-row" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" data-bid-title="' + escapeHtml(bid.bidang_daerah || bid.bidang_nasional || '') + '" data-bid-nasional="' + escapeHtml(bid.bidang_nasional || '') + '">';
+          '<tr class="ws-1a5-row" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" data-bid-title="' + escapeHtml(bid.bidang_daerah || bid.bidang_nasional || '') + '" data-bid-nasional="' + escapeHtml(bid.bidang_nasional || '') + '">';
 
         if (indIdx === 0){
           html += 
-            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #166534; background: #f0fdf4; font-size: 13.5px; padding: 12px 10px; line-height: 1.55;">' +
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #166534; background: #f0fdf4; font-size: 13px; padding: 10px 8px; line-height: 1.5;">' +
               escapeHtml(bid.bidang_nasional || '') +
             '</td>';
 
           html += 
-            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13.5px; padding: 12px 10px; line-height: 1.55;">' +
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13px; padding: 10px 8px; line-height: 1.5;">' +
               escapeHtml(bid.bidang_daerah || '') +
             '</td>';
         }
 
         html += 
-          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.55; color: #1e293b;">' +
-            '<span class="ind-name-text" style="font-weight: 500;">' + escapeHtml(ind.name || '') + '</span>' +
+          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: #1e293b;">' +
+            '<span class="spm-ind-name" style="font-weight: 500;">' + escapeHtml(ind.name || '') + '</span>' +
           '</td>';
 
         html += 
           '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
-            '<input type="text" class="calc-inp ind-target-inp" value="' + escapeHtml(ind.target || '-') + '" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px;">' +
-          '</td>';
-
-        html += 
-          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
-            '<input type="text" class="calc-inp ind-unit-inp" value="' + escapeHtml(ind.unit || 'Persen') + '" style="text-align: center; font-size: 13px; font-weight: 600; height: 38px; padding: 6px 8px; border-radius: 6px;">' +
-          '</td>';
-
-        var curScore = (ind.score !== null && ind.score !== undefined) ? parseFloat(ind.score) : 0.50;
-        html += 
-          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
-            '<select class="calc-inp ind-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 6px 8px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
-              '<option value="1.00"' + (curScore === 1.0 ? ' selected' : '') + '>100% (Selaras)</option>' +
-              '<option value="0.50"' + (curScore === 0.5 ? ' selected' : '') + '>50% (Sebagian)</option>' +
-              '<option value="0.00"' + (curScore === 0.0 ? ' selected' : '') + '>0% (Tidak)</option>' +
+            '<select class="calc-inp ind-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 4px 6px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
+              '<option value="1.00"' + (curScore >= 1.0 ? ' selected' : '') + '>1</option>' +
+              '<option value="0.50"' + (curScore < 1.0 ? ' selected' : '') + '>0.5</option>' +
             '</select>' +
           '</td>';
 
         if (indIdx === 0){
           html += 
-            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 10px 8px;">' +
-              '<textarea class="calc-inp ind-ket-inp" rows="6" style="resize: vertical; font-size: 12.5px; line-height: 1.5; padding: 8px 10px; border-radius: 6px; min-height: 110px;">' + escapeHtml(bid.keterangan || 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait') + '</textarea>' +
+            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 8px;">' +
+              '<textarea class="calc-inp spm-ket-inp" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.45; padding: 6px 8px; border-radius: 6px; min-height: 80px;">' + escapeHtml(curKet) + '</textarea>' +
             '</td>';
 
           html += 
-            '<td rowspan="' + indCount + '" style="vertical-align: middle; text-align: center; padding: 10px 8px; background: #f0fdf4;">' +
-              '<span class="bid-avg badge-verif-pill" data-bid-idx="' + bidIdx + '" style="font-size: 14px; font-weight: 800; padding: 8px 14px; border-radius: 6px; font-family: \'Roboto Mono\', monospace; background: #dcfce7; color: #15803d; border: 1.5px solid #86efac;">100%</span>' +
+            '<td rowspan="' + indCount + '" class="spm-bid-terbobot" data-bid-idx="' + bidIdx + '" style="vertical-align: middle; text-align: center; font-weight: 800; font-size: 14px; font-family: \'Roboto Mono\', monospace; background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac; padding: 8px;">' +
+              curTerb.toFixed(2) +
+            '</td>';
+
+          if (isFirstGlobalRow){
+            html += 
+              '<td rowspan="' + totalRowCount + '" class="spm-grand-avg" style="vertical-align: middle; text-align: center; font-weight: 900; font-size: 15px; font-family: \'Roboto Mono\', monospace; background: #eff6ff; color: #1d4ed8; border: 2px solid #93c5fd; padding: 10px;">' +
+                grandAvg.toFixed(2) +
+              '</td>';
+            isFirstGlobalRow = false;
+          }
+
+          html += 
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-dok-inp" value="' + escapeHtml(curDok) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-hal-inp" value="' + escapeHtml(curHal) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-tbl-inp" value="' + escapeHtml(curTbl) + '">' +
+            '</td>';
+
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 8px;">' +
+              '<textarea class="calc-inp spm-catatan-inp" rows="4" placeholder="Catatan bidang..." style="resize: vertical; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 6px; min-height: 80px;">' + escapeHtml(curCat) + '</textarea>' +
             '</td>';
         }
 
@@ -3137,11 +5873,223 @@ tr.type-sub:hover td {
 
     html += 
         '</tbody>' +
+        '<tfoot>' +
+          '<tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #cbd5e1;">' +
+            '<td colspan="5" style="text-align: right; padding: 10px 12px; font-size: 13px; color: #334155;">Rata-rata Keselarasan Terbobot Seluruh Bidang SPM:</td>' +
+            '<td colspan="2" id="ws1a5GrandTerbobotFooter" style="text-align: center; padding: 10px; font-size: 15px; font-weight: 800; color: #1d4ed8; font-family: \'Roboto Mono\', monospace; background: #dbeafe;">' +
+              grandAvg.toFixed(2) +
+            '</td>' +
+            '<td style="display:none;" colspan="3"></td>' +
+            '<td></td>' +
+          '</tr>' +
+        '</tfoot>' +
       '</table>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: '1.a.5',
+      safeId: 'ws1a5',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.5',
+      badgeText: 'Komponen SPM di RPJMD',
+      colTitle: 'Kriteria',
+      rows: [
+        { crit: 'A', text: 'Tidak', val: 'A = 0, 5', color: '#dc2626' },
+        { crit: 'B', text: 'Ya', val: 'B = 1', color: '#16a34a' }
+      ],
+      notes: [
+        'Tidak artinya nilai keselarasan dibawah 0,50',
+        'Ya artinya nilai keselarasan diatas 0,50'
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Data SPM (/Daerah/SPM)',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Tabel Standar Pelayanan Minimal (SPM) RPJMD' },
+        { label: 'Total Bidang SPM:', id: 'ws1a5CountMatched', value: '-' },
+        { label: 'Rata-rata Keselarasan Terbobot:', id: 'ws1a5AvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a5CritText', value: '-' }
+      ]
+    });
+
     return html;
-}
+  }
+
+  // 8.b Sheet 1.a.6 (Target SPM RPJMD/RKPD diselaraskan dengan Target SPM Nasional) sesuai Template HTML
+  function renderWs_1_a_6(d, maxBobot){
+    d = d || {};
+    var autoScore = getAutoScore_1_a_6(d);
+    var spmData = autoScore.spmList;
+    var grandAvg = autoScore.avg;
+
+    // Hitung total row untuk rowspan Rata-rata Keselarasan Terbobot
+    var totalRowCount = 0;
+    spmData.forEach(function(b){
+      var len = (b.ind_list && b.ind_list.length > 0) ? b.ind_list.length : 1;
+      totalRowCount += len;
+    });
+    if (totalRowCount === 0) totalRowCount = 1;
+
+    var html = 
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_a_6" style="min-width: 1350px; font-size: 13px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="th-green" rowspan="2" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">PP No. 2 Tahun 2018 tentang SPM<br><small style="font-weight:600; font-size:11.5px; color:#14532d;">Bidang SPM</small></th>' +
+            '<th class="th-blue" colspan="4" style="vertical-align: middle; font-size: 13px; padding: 8px; text-align: center;">RPJMD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Nilai Keselarasan<br><small style="font-weight:600;">(0,5 / 1,0)</small></th>' +
+            '<th class="th-amber" rowspan="2" style="width: 240px; min-width: 240px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keterangan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 110px; min-width: 110px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Keselarasan Terbobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th class="th-blue" colspan="3" style="display:none;">Referensi</th>' +
+            '<th class="th-amber" rowspan="2" style="width: 160px; min-width: 160px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-blue" style="width: 180px; min-width: 180px; font-size: 12.5px; padding: 8px; text-align: center;">Bidang SPM</th>' +
+            '<th class="th-blue" style="width: 260px; min-width: 260px; font-size: 12.5px; padding: 8px; text-align: center;">Indikator SPM</th>' +
+            '<th class="th-blue" style="width: 90px; min-width: 90px; font-size: 12.5px; padding: 8px; text-align: center;">Target</th>' +
+            '<th class="th-blue" style="width: 80px; min-width: 80px; font-size: 12.5px; padding: 8px; text-align: center;">Satuan</th>' +
+            '<th style="display:none;">Dokumen</th>' +
+            '<th style="display:none;">Halaman</th>' +
+            '<th style="display:none;">Tabel</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    if (!spmData || spmData.length === 0){
+      return html + '<tr><td colspan="10" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Target SPM RPJMD pada menu <b>/Daerah/SPM</b>. Silakan lengkapi data target SPM daerah terlebih dahulu.</td></tr></tbody></table></div>';
+    }
+
+    var isFirstGlobalRow = true;
+
+    spmData.forEach(function(bid, bidIdx){
+      var indList = (bid.ind_list && bid.ind_list.length > 0) ? bid.ind_list : [{ no: 1, name: '-', target: '-', satuan: '-', score: 0.50 }];
+      var indCount = indList.length;
+      var curTerb = (bid.keselarasan_terbobot !== undefined && bid.keselarasan_terbobot !== null) ? parseFloat(bid.keselarasan_terbobot) : 1.0;
+      var curKet = bid.keterangan || (curTerb >= 1.0 ? 'Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait' : 'Tidak ada Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait');
+      var curDok = bid.dokumen || 'RPJMD Kab Banyuwangi 2025-2029';
+      var curHal = bid.halaman || '';
+      var curTbl = bid.tabel || '';
+      var curCat = bid.catatan || 'Tidak ada target SPM pada dokumen RPJMD/RKPD';
+
+      indList.forEach(function(ind, indIdx){
+        var curScore = (ind.score !== null && ind.score !== undefined) ? parseFloat(ind.score) : 1.00;
+
+        html += 
+          '<tr class="ws-1a6-row" data-bid-idx="' + bidIdx + '" data-ind-idx="' + indIdx + '" data-bid-title="' + escapeHtml(bid.bidang_daerah || bid.bidang_nasional || '') + '" data-bid-nasional="' + escapeHtml(bid.bidang_nasional || '') + '">';
+
+        if (indIdx === 0){
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #166534; background: #f0fdf4; font-size: 13px; padding: 10px 8px; line-height: 1.5;">' +
+              escapeHtml(bid.bidang_nasional || '') +
+            '</td>';
+
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; font-weight: 700; color: #1e3a8a; background: #f0f7ff; font-size: 13px; padding: 10px 8px; line-height: 1.5;">' +
+              escapeHtml(bid.bidang_daerah || '') +
+            '</td>';
+        }
+
+        html += 
+          '<td style="vertical-align: middle; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: #1e293b;">' +
+            '<span class="spm-ind-name" style="font-weight: 500;">' + escapeHtml(ind.name || '') + '</span>' +
+          '</td>';
+
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<input type="text" class="calc-inp ind-target-inp" value="' + escapeHtml(ind.target || '-') + '" style="text-align: center; font-weight: 700; font-size: 12.5px; height: 36px; padding: 4px 6px; border-radius: 6px; width: 100%;">' +
+          '</td>';
+
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<input type="text" class="calc-inp ind-unit-inp" value="' + escapeHtml(ind.satuan || ind.unit || 'persen') + '" style="text-align: center; font-size: 12px; font-weight: 600; height: 36px; padding: 4px 6px; border-radius: 6px; width: 100%; color: #475569;">' +
+          '</td>';
+
+        html += 
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 8px;">' +
+            '<select class="calc-inp ind-score-sel" style="text-align: center; font-weight: 700; font-size: 13px; height: 38px; padding: 4px 6px; border-radius: 6px; background: #ffffff; cursor: pointer;">' +
+              '<option value="1.00"' + (curScore >= 1.0 ? ' selected' : '') + '>1</option>' +
+              '<option value="0.50"' + (curScore < 1.0 ? ' selected' : '') + '>0.5</option>' +
+            '</select>' +
+          '</td>';
+
+        if (indIdx === 0){
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 8px;">' +
+              '<textarea class="calc-inp spm-ket-inp" rows="4" style="resize: vertical; font-size: 12.5px; line-height: 1.45; padding: 6px 8px; border-radius: 6px; min-height: 80px;">' + escapeHtml(curKet) + '</textarea>' +
+            '</td>';
+
+          html += 
+            '<td rowspan="' + indCount + '" class="spm-bid-terbobot" data-bid-idx="' + bidIdx + '" style="vertical-align: middle; text-align: center; font-weight: 800; font-size: 14px; font-family: \'Roboto Mono\', monospace; background: #f0fdf4; color: #15803d; border: 1.5px solid #86efac; padding: 8px;">' +
+              curTerb.toFixed(2) +
+            '</td>';
+
+          if (isFirstGlobalRow){
+            html += 
+              '<td rowspan="' + totalRowCount + '" class="spm-grand-avg" style="vertical-align: middle; text-align: center; font-weight: 900; font-size: 15px; font-family: \'Roboto Mono\', monospace; background: #eff6ff; color: #1d4ed8; border: 2px solid #93c5fd; padding: 10px;">' +
+                grandAvg.toFixed(2) +
+              '</td>';
+            isFirstGlobalRow = false;
+          }
+
+          html += 
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-dok-inp" value="' + escapeHtml(curDok) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-hal-inp" value="' + escapeHtml(curHal) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="hidden" class="spm-tbl-inp" value="' + escapeHtml(curTbl) + '">' +
+            '</td>';
+
+          html += 
+            '<td rowspan="' + indCount + '" style="vertical-align: top; padding: 8px;">' +
+              '<textarea class="calc-inp spm-catatan-inp" rows="4" placeholder="Catatan bidang..." style="resize: vertical; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 6px; min-height: 80px;">' + escapeHtml(curCat) + '</textarea>' +
+            '</td>';
+        }
+
+        html += '</tr>';
+      });
+    });
+
+    html += 
+        '</tbody>' +
+        '<tfoot>' +
+          '<tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #cbd5e1;">' +
+            '<td colspan="7" style="text-align: right; padding: 10px 12px; font-size: 13px; color: #334155;">Rata-rata Keselarasan Terbobot Seluruh Bidang SPM:</td>' +
+            '<td colspan="2" id="ws1a6GrandTerbobotFooter" style="text-align: center; padding: 10px; font-size: 15px; font-weight: 800; color: #1d4ed8; font-family: \'Roboto Mono\', monospace; background: #dbeafe;">' +
+              grandAvg.toFixed(2) +
+            '</td>' +
+            '<td style="display:none;" colspan="3"></td>' +
+            '<td></td>' +
+          '</tr>' +
+        '</tfoot>' +
+      '</table>' +
+      '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: '1.a.6',
+      safeId: 'ws1a6',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.a.6',
+      badgeText: 'Target SPM di RPJMD',
+      colTitle: 'Kriteria',
+      rows: [
+        { crit: 'A', text: 'Tidak', val: 'A = 0, 5', color: '#dc2626' },
+        { crit: 'B', text: 'Ya', val: 'B = 1', color: '#16a34a' }
+      ],
+      notes: [
+        'Tidak artinya nilai keselarasan dibawah 0,50',
+        'Ya artinya nilai keselarasan diatas 0,50'
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Data SPM (/Daerah/SPM)',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Tabel Standar Pelayanan Minimal (SPM) RPJMD/RKPD' },
+        { label: 'Total Bidang SPM:', id: 'ws1a6CountMatched', value: '-' },
+        { label: 'Rata-rata Keselarasan Terbobot:', id: 'ws1a6AvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1a6CritText', value: '-' }
+      ]
+    });
+
+    return html;
+  }
 
   // 9. Sheet 1.b.8.a (TPT) & 1.b.8.b (TK) (RKP vs RKPD)
       // 9.a Sheet 1.b.10.a (Tingkat Pengangguran Terbuka TPT RKP vs RKPD) - Tampilan Ringkas sampai Nilai Keselarasan
@@ -3151,40 +6099,53 @@ tr.type-sub:hover td {
     var mn_tgt  = d.mn_target !== undefined ? d.mn_target : (AUTO_DATA_1_B_10_A.mn_target || '');
     var md_real = d.md_real !== undefined ? d.md_real : (AUTO_DATA_1_B_10_A.md_real || '');
     var md_tgt  = d.md_target !== undefined ? d.md_target : (AUTO_DATA_1_B_10_A.md_target || '');
+    var bobotVal = maxBobot !== undefined ? maxBobot : 0.75;
+    var terbVal = d.score_terbobot !== undefined ? d.score_terbobot : (d.score !== undefined ? numFmt(d.score) : '0,75');
+    var ref_dok = d.dokumen || AUTO_DATA_1_B_10_A.dokumen || 'RKPD Kab Banyuwangi 2026';
+    var ref_hal = d.halaman || AUTO_DATA_1_B_10_A.halaman || 'IV-7';
+    var ref_tbl = d.tabel || AUTO_DATA_1_B_10_A.tabel || 'Tabel 4.1';
+    var catatan = d.catatan || AUTO_DATA_1_B_10_A.catatan || 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap';
 
     var html = 
       '<div style="overflow-x:auto; padding-bottom:12px;">' +
-      '<table class="excel-grid-table" id="wsTable_1_b_10_a" style="min-width: 1650px; font-size: 13px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_10_a" style="min-width: 1100px; width: 100%; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
             '<th colspan="5" class="th-blue" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #e0f2fe; color: #0369a1; text-align: center; border-right: 2px solid #0284c7;">RKP</th>' +
             '<th colspan="5" class="th-amber" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #fef3c7; color: #92400e; text-align: center; border-right: 2px solid #d97706;">RKPD</th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Realisasi 2023</th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Tahun 2024</th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek <i>Gap</i> Target 2023 dan 2024<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;"><i>Cek</i> Gap Target 2023 dan 2024<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan <i>Gap</i> Target</th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Realisasi 2023 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Realisasi 2023 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Target Realisasi 2023</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Tahun 2024 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Tahun 2024 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Target Tahun 2024</th>' +
+            '<th rowspan="3" style="display:none;">Cek Gap Target 2023 dan 2024 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Gap Target 2023 dan 2024 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Gap Target</th>' +
+            '<th rowspan="3" style="width: 140px; min-width: 140px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+            '<th rowspan="3" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Bobot</th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #e0f2fe; color: #0369a1; text-align: center; padding: 8px; border: 1.5px solid #7dd3fc;">Keselarasan Terbobot</th>' +
+            '<th colspan="3" style="display:none;">Referensi</th>' +
+            '<th rowspan="3" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Catatan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th rowspan="2" class="th-blue" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
             '<th colspan="3" class="th-blue" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
-            '<th rowspan="2" class="th-blue" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
-            '<th rowspan="2" class="th-amber" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 75px; min-width: 75px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
             '<th colspan="3" class="th-amber" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
-            '<th rowspan="2" class="th-amber" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 75px; min-width: 75px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+            '<th rowspan="2" style="display:none;">Dokumen</th>' +
+            '<th rowspan="2" style="display:none;">Halaman</th>' +
+            '<th rowspan="2" style="display:none;">Tabel</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
-            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
-            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
-            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
-            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
-            '<th class="th-amber" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-blue" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-blue" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-blue" style="width: 80px; min-width: 80px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-amber" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-amber" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-amber" style="width: 80px; min-width: 80px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
@@ -3197,7 +6158,7 @@ tr.type-sub:hover td {
               '<input type="text" class="calc-inp rkp-tgt" value="' + escapeHtml(mn_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #f8fafc;">' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
-              '<span class="cell-formula rkp-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.47</span>' +
+              '<span class="cell-formula rkp-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.32</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #0284c7;">Persen</td>' +
             '<td style="vertical-align: middle; font-weight: 700; color: #92400e; background: #fffbeb; padding: 12px 10px;">Tingkat Pengangguran Terbuka (TPT)</td>' +
@@ -3208,46 +6169,83 @@ tr.type-sub:hover td {
               '<input type="text" class="calc-inp rkpd-tgt" value="' + escapeHtml(md_tgt) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; padding: 8px 6px; background: #f1f5f9;">' +
-              '<span class="cell-formula rkpd-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.26</span>' +
+              '<span class="cell-formula rkpd-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.18</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #d97706;">Persen</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="margin-real-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-real-calc">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="margin-real-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-real-ket">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="badge-verif-pill score-real-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fee2e2; color: #991b1b; border-radius: 6px;">100.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-real-val">100.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-tgt-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-tgt-calc">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-tgt-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-tgt-ket">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="badge-verif-pill score-tgt-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #e0f2fe; color: #0369a1; border-radius: 6px;">100.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-tgt-val">100.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-gap-calc" style="font-weight: 700; font-size: 13px; color: #334155;">-44.68%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-gap-calc">-43.75%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-gap-ket" style="font-weight: 700; font-size: 13px; color: #334155;">44.68%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-gap-ket">43.75%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="badge-verif-pill score-gap-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fef3c7; color: #92400e; border-radius: 6px;">55.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-gap-val">55.00%</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; background: #f0fdf4;">' +
               '<span class="badge-verif-pill avg-score-val" style="font-weight: 900; font-size: 14.5px; padding: 8px 14px; background: #dcfce7; color: #15803d; border-radius: 6px; border: 1.5px solid #86efac;">85.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 700; background: #f8fafc;">' +
+              numFmt(bobotVal) +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #eff6ff;">' +
+              '<span class="badge-verif-pill terb-val" style="font-weight: 900; font-size: 14px; padding: 6px 12px; background: #dbeafe; color: #1e40af; border-radius: 6px; border: 1px solid #93c5fd;">' + escapeHtml(terbVal) + '</span>' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-dok-inp" value="' + escapeHtml(ref_dok) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-hal-inp" value="' + escapeHtml(ref_hal) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-tbl-inp" value="' + escapeHtml(ref_tbl) + '">' +
+            '</td>' +
+            '<td style="vertical-align: middle; padding: 6px 8px;">' +
+              '<input type="text" class="form-control catatan-inp" value="' + escapeHtml(catatan) + '" style="font-size: 12px; padding: 6px 8px; height: 36px; min-width: 180px;">' +
             '</td>' +
           '</tr>' +
         '</tbody>' +
       '</table>' +
       '<div style="margin-top: 10px; padding: 10px 14px; background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #f43f5e; border-radius: 6px; color: #9f1239; font-size: 12.5px; font-weight: 600; font-style: italic;">' +
-        '<i class="fa fa-info-circle"></i> Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
+        '<i class="fa fa-info-circle"></i> Catatan: Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
       '</div>' +
       '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: '1.b.10.a',
+      safeId: 'ws1b10a',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.b.10.a',
+      badgeText: 'A. Tidak Selaras | B. Selaras',
+      colTitle: 'Kriteria Keselarasan Target Tingkat Pengangguran Terbuka (TPT) RKPD terhadap RKP',
+      rows: [
+        { crit: 'A', text: 'Tidak Selaras (Nilai keselarasan di bawah 50%)', val: '0,375', color: '#dc2626' },
+        { crit: 'B', text: 'Selaras (Nilai keselarasan di atas 50%)', val: '0,75', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Target Makro Tahunan',
+      infoRows: [
+        { label: 'Indikator:', value: 'Tingkat Pengangguran Terbuka (TPT)' },
+        { label: 'Sumber Data:', value: 'Dokumen RKP (Nasional) & RKPD Daerah' },
+        { label: 'Nilai Keselarasan:', id: 'ws1b10aAvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1b10aCritText', value: '-' }
+      ]
+    });
 
     return html;
   }
@@ -3255,44 +6253,57 @@ tr.type-sub:hover td {
       // 9.b Sheet 1.b.10.b (Tingkat Kemiskinan RKP vs RKPD) - Tampilan Ringkas sampai Nilai Keselarasan
   function renderWs_1_b_10_b(d, maxBobot){
     d = d || {};
-    var mn_real = d.mn_real !== undefined ? d.mn_real : (AUTO_DATA_1_B_10_B.mn_real || '');
-    var mn_tgt  = d.mn_target !== undefined ? d.mn_target : (AUTO_DATA_1_B_10_B.mn_target || '');
-    var md_real = d.md_real !== undefined ? d.md_real : (AUTO_DATA_1_B_10_B.md_real || '');
-    var md_tgt  = d.md_target !== undefined ? d.md_target : (AUTO_DATA_1_B_10_B.md_target || '');
+    var mn_real = d.mn_real !== undefined ? d.mn_real : (AUTO_DATA_1_B_10_B.mn_real || '8.57');
+    var mn_tgt  = d.mn_target !== undefined ? d.mn_target : (AUTO_DATA_1_B_10_B.mn_target || '7.50');
+    var md_real = d.md_real !== undefined ? d.md_real : (AUTO_DATA_1_B_10_B.md_real || '6.54');
+    var md_tgt  = d.md_target !== undefined ? d.md_target : (AUTO_DATA_1_B_10_B.md_target || '5.59');
+    var bobotVal = maxBobot !== undefined ? maxBobot : 0.75;
+    var terbVal = d.score_terbobot !== undefined ? d.score_terbobot : (d.score !== undefined ? numFmt(d.score) : '0,75');
+    var ref_dok = d.dokumen || AUTO_DATA_1_B_10_B.dokumen || 'RKPD Kab Banyuwangi 2026';
+    var ref_hal = d.halaman || AUTO_DATA_1_B_10_B.halaman || 'IV-8';
+    var ref_tbl = d.tabel || AUTO_DATA_1_B_10_B.tabel || 'Tabel 4.1';
+    var catatan = d.catatan || AUTO_DATA_1_B_10_B.catatan || 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap';
 
     var html = 
       '<div style="overflow-x:auto; padding-bottom:12px;">' +
-      '<table class="excel-grid-table" id="wsTable_1_b_10_b" style="min-width: 1650px; font-size: 13px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_10_b" style="min-width: 1100px; width: 100%; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
             '<th colspan="5" class="th-blue" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #e0f2fe; color: #0369a1; text-align: center; border-right: 2px solid #0284c7;">RKP</th>' +
             '<th colspan="5" class="th-amber" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #fef3c7; color: #92400e; text-align: center; border-right: 2px solid #d97706;">RKPD</th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Cek Target Realisasi 2023<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #f4cccc; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Realisasi 2023</th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek Target Tahun 2024<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan Target Tahun 2024</th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Cek <i>Gap</i> Target 2023 dan 2024<br><i>(Margin Hitung)</i></th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;"><i>Cek</i> Gap Target 2023 dan 2024<br><i>(Keterangan)</i></th>' +
-            '<th rowspan="3" style="width: 125px; min-width: 125px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Nilai Keselarasan <i>Gap</i> Target</th>' +
-            '<th rowspan="3" style="width: 130px; min-width: 130px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Realisasi 2023 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Realisasi 2023 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Target Realisasi 2023</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Tahun 2024 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Target Tahun 2024 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Target Tahun 2024</th>' +
+            '<th rowspan="3" style="display:none;">Cek Gap Target 2023 dan 2024 (Margin Hitung)</th>' +
+            '<th rowspan="3" style="display:none;">Cek Gap Target 2023 dan 2024 (Keterangan)</th>' +
+            '<th rowspan="3" style="display:none;">Nilai Keselarasan Gap Target</th>' +
+            '<th rowspan="3" style="width: 140px; min-width: 140px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #dcfce7; color: #15803d; text-align: center; padding: 8px; border: 2px solid #86efac;">Nilai Keselarasan Rata-rata</th>' +
+            '<th rowspan="3" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Bobot</th>' +
+            '<th rowspan="3" style="width: 120px; min-width: 120px; vertical-align: middle; font-size: 13px; font-weight: 800; background: #e0f2fe; color: #0369a1; text-align: center; padding: 8px; border: 1.5px solid #7dd3fc;">Keselarasan Terbobot</th>' +
+            '<th colspan="3" style="display:none;">Referensi</th>' +
+            '<th rowspan="3" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 12.5px; font-weight: 700; background: #efefef; color: #000000; text-align: center; padding: 8px;">Catatan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th rowspan="2" class="th-blue" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
             '<th colspan="3" class="th-blue" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
-            '<th rowspan="2" class="th-blue" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
-            '<th rowspan="2" class="th-amber" style="width: 220px; min-width: 220px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
+            '<th rowspan="2" class="th-blue" style="width: 75px; min-width: 75px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #0284c7;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 200px; min-width: 200px; vertical-align: middle; font-size: 13px; padding: 8px;">Indikator Makro</th>' +
             '<th colspan="3" class="th-amber" style="vertical-align: middle; font-size: 13px; padding: 6px;">Nilai</th>' +
-            '<th rowspan="2" class="th-amber" style="width: 80px; min-width: 80px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+            '<th rowspan="2" class="th-amber" style="width: 75px; min-width: 75px; vertical-align: middle; font-size: 13px; padding: 8px; border-right: 2px solid #d97706;">Satuan</th>' +
+            '<th rowspan="2" style="display:none;">Dokumen</th>' +
+            '<th rowspan="2" style="display:none;">Halaman</th>' +
+            '<th rowspan="2" style="display:none;">Tabel</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
-            '<th class="th-blue" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
-            '<th class="th-blue" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
-            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
-            '<th class="th-amber" style="width: 95px; min-width: 95px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
-            '<th class="th-amber" style="width: 85px; min-width: 85px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-blue" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-blue" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-blue" style="width: 80px; min-width: 80px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
+            '<th class="th-amber" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Realisasi (2024)</th>' +
+            '<th class="th-amber" style="width: 90px; min-width: 90px; font-size: 12px; padding: 6px;">Target Tahun Terakhir (2026)</th>' +
+            '<th class="th-amber" style="width: 80px; min-width: 80px; font-size: 12px; font-style: italic; padding: 6px;">Gap</th>' +
           '</tr>' +
         '</thead>' +
         '<tbody>' +
@@ -3308,7 +6319,7 @@ tr.type-sub:hover td {
               '<span class="cell-formula rkp-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-1.07</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #0284c7;">Persen</td>' +
-            '<td style="vertical-align: middle; font-weight: 700; color: #92400e; background: #fffbeb; padding: 12px 10px;">Tingkat Kemiskinan (%)</td>' +
+            '<td style="vertical-align: middle; font-weight: 700; color: #92400e; background: #fffbeb; padding: 12px 10px;">Persentase Penduduk Miskin</td>' +
             '<td style="vertical-align: middle; text-align: center; padding: 8px 6px;">' +
               '<input type="text" class="calc-inp rkpd-real" value="' + escapeHtml(md_real) + '" style="text-align: center; font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; background: #ffffff;">' +
             '</td>' +
@@ -3319,46 +6330,226 @@ tr.type-sub:hover td {
               '<span class="cell-formula rkpd-gap" style="font-weight: 800; font-size: 13.5px; color: #1e293b;">-0.95</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; font-weight: 600; color: #475569; border-right: 2px solid #d97706;">Persen</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="margin-real-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-real-calc">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="margin-real-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-real-ket">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center; background: #fff5f5;">' +
-              '<span class="badge-verif-pill score-real-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fee2e2; color: #991b1b; border-radius: 6px;">100.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-real-val">100.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-tgt-calc" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-tgt-calc">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-tgt-ket" style="font-weight: 700; font-size: 13px; color: #334155;">0.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-tgt-ket">0.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="badge-verif-pill score-tgt-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #e0f2fe; color: #0369a1; border-radius: 6px;">100.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-tgt-val">100.00%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-gap-calc" style="font-weight: 700; font-size: 13px; color: #334155;">-11.21%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-gap-calc">-11.21%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="margin-gap-ket" style="font-weight: 700; font-size: 13px; color: #334155;">11.21%</span>' +
+            '<td style="display:none;">' +
+              '<span class="margin-gap-ket">11.21%</span>' +
             '</td>' +
-            '<td style="vertical-align: middle; text-align: center;">' +
-              '<span class="badge-verif-pill score-gap-val" style="font-weight: 800; font-size: 13px; padding: 6px 10px; background: #fef3c7; color: #92400e; border-radius: 6px;">90.00%</span>' +
+            '<td style="display:none;">' +
+              '<span class="score-gap-val">85.00%</span>' +
             '</td>' +
             '<td style="vertical-align: middle; text-align: center; background: #f0fdf4;">' +
-              '<span class="badge-verif-pill avg-score-val" style="font-weight: 900; font-size: 14.5px; padding: 8px 14px; background: #dcfce7; color: #15803d; border-radius: 6px; border: 1.5px solid #86efac;">96.67%</span>' +
+              '<span class="badge-verif-pill avg-score-val" style="font-weight: 900; font-size: 14.5px; padding: 8px 14px; background: #dcfce7; color: #15803d; border-radius: 6px; border: 1.5px solid #86efac;">95.00%</span>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; font-weight: 700; background: #f8fafc;">' +
+              numFmt(bobotVal) +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #eff6ff;">' +
+              '<span class="badge-verif-pill terb-val" style="font-weight: 900; font-size: 14px; padding: 6px 12px; background: #dbeafe; color: #1e40af; border-radius: 6px; border: 1px solid #93c5fd;">' + escapeHtml(terbVal) + '</span>' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-dok-inp" value="' + escapeHtml(ref_dok) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-hal-inp" value="' + escapeHtml(ref_hal) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="ref-tbl-inp" value="' + escapeHtml(ref_tbl) + '">' +
+            '</td>' +
+            '<td style="vertical-align: middle; padding: 6px 8px;">' +
+              '<input type="text" class="form-control catatan-inp" value="' + escapeHtml(catatan) + '" style="font-size: 12px; padding: 6px 8px; height: 36px; min-width: 180px;">' +
             '</td>' +
           '</tr>' +
         '</tbody>' +
       '</table>' +
       '<div style="margin-top: 10px; padding: 10px 14px; background: #fff1f2; border: 1px solid #fecdd3; border-left: 4px solid #f43f5e; border-radius: 6px; color: #9f1239; font-size: 12.5px; font-weight: 600; font-style: italic;">' +
-        '<i class="fa fa-info-circle"></i> Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
+        '<i class="fa fa-info-circle"></i> Catatan: Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap' +
       '</div>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: '1.b.10.b',
+      safeId: 'ws1b10b',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.b.10.b',
+      badgeText: 'A. Tidak Selaras | B. Selaras',
+      colTitle: 'Kriteria Keselarasan Target Tingkat Kemiskinan RKPD terhadap RKP',
+      rows: [
+        { crit: 'A', text: 'Tidak Selaras (Nilai keselarasan di bawah 50%)', val: '0,375', color: '#dc2626' },
+        { crit: 'B', text: 'Selaras (Nilai keselarasan di atas 50%)', val: '0,75', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Target Makro Tahunan',
+      infoRows: [
+        { label: 'Indikator:', value: 'Tingkat Kemiskinan (%)' },
+        { label: 'Sumber Data:', value: 'Dokumen RKP (Nasional) & RKPD Daerah' },
+        { label: 'Nilai Keselarasan:', id: 'ws1b10bAvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1b10bCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
+
+  // 9. Persandingan Keterkaitan Program/Kegiatan Prioritas RKP dengan Program Daerah (1.b.1.b, 1.b.1.d s.d 1.b.9.b)
+  function renderWs_Persandingan_1b(code, d, maxBobot){
+    d = d || {};
+    var safeCode = code.replace(/\./g, '');
+    var autoMap = {
+      '1.b.1.b': typeof AUTO_DATA_1_B_1_B !== 'undefined' ? AUTO_DATA_1_B_1_B : {},
+      '1.b.1.d': typeof AUTO_DATA_1_B_1_D !== 'undefined' ? AUTO_DATA_1_B_1_D : {},
+      '1.b.2.b': typeof AUTO_DATA_1_B_2_B !== 'undefined' ? AUTO_DATA_1_B_2_B : {},
+      '1.b.3.b': typeof AUTO_DATA_1_B_3_B !== 'undefined' ? AUTO_DATA_1_B_3_B : {},
+      '1.b.4.b': typeof AUTO_DATA_1_B_4_B !== 'undefined' ? AUTO_DATA_1_B_4_B : {},
+      '1.b.5.b': typeof AUTO_DATA_1_B_5_B !== 'undefined' ? AUTO_DATA_1_B_5_B : {},
+      '1.b.6.b': typeof AUTO_DATA_1_B_6_B !== 'undefined' ? AUTO_DATA_1_B_6_B : {},
+      '1.b.7.b': typeof AUTO_DATA_1_B_7_B !== 'undefined' ? AUTO_DATA_1_B_7_B : {},
+      '1.b.8.b': typeof AUTO_DATA_1_B_8_B !== 'undefined' ? AUTO_DATA_1_B_8_B : {},
+      '1.b.9.b': typeof AUTO_DATA_1_B_9_B !== 'undefined' ? AUTO_DATA_1_B_9_B : {}
+    };
+    var pnLabelMap = {
+      '1.b.1.b': 'Sasaran Daerah vs PN RKP',
+      '1.b.1.d': 'Prioritas Daerah vs PN RKP',
+      '1.b.2.b': 'PN 1 RKP',
+      '1.b.3.b': 'PN 2 RKP',
+      '1.b.4.b': 'PN 3 RKP',
+      '1.b.5.b': 'PN 4 RKP',
+      '1.b.6.b': 'PN 5 RKP',
+      '1.b.7.b': 'PN 6 RKP',
+      '1.b.8.b': 'PN 7 RKP',
+      '1.b.9.b': 'PN 8 RKP'
+    };
+    var auto = autoMap[code] || {};
+    var statusTabel = d.status_tabel !== undefined ? d.status_tabel : (auto.status_tabel || (auto.is_ada ? 'Ada' : 'Tidak Ada'));
+    var isAda = (statusTabel === 'Ada');
+    var bobotVal = maxBobot !== undefined ? maxBobot : 0.625;
+    var terbVal = isAda ? numFmt(bobotVal) : '0,000';
+    if (d.score_terbobot !== undefined) {
+      terbVal = d.score_terbobot;
+    } else if (d.score !== undefined) {
+      terbVal = numFmt(d.score);
+    }
+    var ref_dok = d.dokumen !== undefined ? d.dokumen : (auto.dokumen || '');
+    var ref_hal = d.halaman !== undefined ? d.halaman : (auto.halaman || '');
+    var ref_tbl = d.tabel !== undefined ? d.tabel : (auto.tabel || '');
+    var catatan = d.catatan !== undefined ? d.catatan : (auto.catatan || '');
+
+    var subTitle = (code === '1.b.1.d')
+      ? 'Tabel Persandingan antara Prioritas Pembangunan Daerah RKPD dengan PN RKP'
+      : ((code === '1.b.1.b') 
+        ? 'Tersedianya persandingan tabel antara Sasaran Pembangunan daerah RKPD dengan PN RKP'
+        : 'Informasi eksplisit persandingan keterkaitan. program prioritas/kegiatan prioritas RKP dengan program daerah');
+
+    var colTitle = (code === '1.b.1.d')
+      ? 'Kriteria Ketersediaan Tabel Persandingan antara Prioritas Pembangunan Daerah RKPD dengan PN RKP'
+      : ((code === '1.b.1.b')
+        ? 'Kriteria Ketersediaan Persandingan Tabel Antara Sasaran Pembangunan Daerah RKPD dengan PN RKP'
+        : ('Kriteria Ketersediaan Informasi Eksplisit Persandingan Keterkaitan Program Prioritas/Kegiatan Prioritas RKP ' + (pnLabelMap[code] || '') + ' dengan Program Daerah'));
+
+    var sourceTitle = 'Hasil Pemeriksaan Dokumen RKPD (' + (pnLabelMap[code] || '') + ')';
+    var indText = (code === '1.b.1.d')
+      ? 'Tersedianya tabel persandingan antara Prioritas Pembangunan Daerah RKPD dengan PN RKP'
+      : ((code === '1.b.1.b')
+        ? 'Tersedianya persandingan tabel antara Sasaran Pembangunan daerah RKPD dengan PN RKP'
+        : 'Tersedianya informasi eksplisit persandingan keterkaitan program prioritas/kegiatan Prioritas RKP dengan program daerah');
+
+    var html = 
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_' + code.replace(/\./g, '_') + '" style="min-width: 850px; width: 100%; font-size: 13px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="th-amber" style="font-size: 13.5px; font-weight: 700; padding: 10px; background: #fef3c7; color: #92400e; text-align: center; border-right: 2px solid #d97706; width: 55%;">RKPD</th>' +
+            '<th rowspan="2" class="th-blue" style="font-size: 13px; font-weight: 800; padding: 10px; background: #e0f2fe; color: #0369a1; text-align: center; vertical-align: middle; border: 1.5px solid #7dd3fc; width: 18%;">Keselarasan Terbobot</th>' +
+            '<th colspan="3" style="display:none;">Referensi</th>' +
+            '<th rowspan="2" class="th-gray" style="font-size: 12.5px; font-weight: 700; padding: 10px; background: #f8fafc; color: #334155; text-align: center; vertical-align: middle; width: 27%;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-amber" style="font-size: 12px; font-weight: 600; padding: 8px; background: #fffbeb; color: #78350f; text-align: center; border-right: 2px solid #d97706;">' + subTitle + '</th>' +
+            '<th style="display:none;">Dokumen</th>' +
+            '<th style="display:none;">Halaman</th>' +
+            '<th style="display:none;">Tabel</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>' +
+          '<tr class="ws-persandingan-row ws-' + safeCode + '-row">' +
+            '<td style="vertical-align: middle; padding: 10px 12px; border-right: 2px solid #d97706;">' +
+              '<select id="wsSelectPersandingan' + safeCode + '" class="calc-inp status-tabel-select" style="font-weight: 700; font-size: 13.5px; height: 38px; border-radius: 6px; width: 100%; color: ' + (isAda ? '#16a34a' : '#dc2626') + '; background: ' + (isAda ? '#f0fdf4' : '#fef2f2') + '; border: 1.5px solid ' + (isAda ? '#86efac' : '#fca5a5') + ';">' +
+                '<option value="Ada"' + (isAda ? ' selected' : '') + '>B. Ada</option>' +
+                '<option value="Tidak Ada"' + (!isAda ? ' selected' : '') + '>A. Tidak ada</option>' +
+              '</select>' +
+            '</td>' +
+            '<td style="vertical-align: middle; text-align: center; background: #eff6ff; border: 1.5px solid #7dd3fc;">' +
+              '<span class="badge-verif-pill terb-val" style="font-weight: 900; font-size: 14px; padding: 6px 12px; background: #dbeafe; color: #1e40af; border-radius: 6px; border: 1px solid #93c5fd;">' + escapeHtml(terbVal) + '</span>' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="form-control ref-dok-inp" value="' + escapeHtml(ref_dok) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="form-control ref-hal-inp" value="' + escapeHtml(ref_hal) + '">' +
+            '</td>' +
+            '<td style="display:none;">' +
+              '<input type="text" class="form-control ref-tbl-inp" value="' + escapeHtml(ref_tbl) + '">' +
+            '</td>' +
+            '<td style="vertical-align: middle; padding: 6px 8px;">' +
+              '<input type="text" class="form-control catatan-inp" value="' + escapeHtml(catatan) + '" placeholder="Catatan..." style="font-size: 12px; padding: 6px 8px; height: 36px;">' +
+            '</td>' +
+          '</tr>' +
+        '</tbody>' +
+      '</table>' +
+      '<div style="margin-top: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e293b; font-size: 12.5px; font-weight: 600;">' +
+        '<i class="fa fa-camera" style="color: #3b82f6;"></i> Screenshot Tabel Persandingan di RKPD dapat diunggah melalui Bukti Dukung di bawah.' +
+      '</div>' +
+      '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: code,
+      safeId: 'ws' + safeCode,
+      title: 'Keterangan & Kriteria Penilaian Poin ' + code,
+      badgeText: 'A. Tidak ada | B. Ada',
+      colTitle: colTitle,
+      rows: [
+        { crit: 'A', text: 'Tidak ada', val: '0', color: '#dc2626' },
+        { crit: 'B', text: 'Ada', val: '0,625', color: '#16a34a' }
+      ],
+      sourceTitle: sourceTitle,
+      infoRows: [
+        { label: 'Indikator:', value: indText },
+        { label: 'Sumber Data:', value: 'Dokumen RKPD Daerah' },
+        { label: 'Status Ketersediaan:', id: 'ws' + safeCode + 'StatusText', value: isAda ? 'Ada' : 'Tidak Ada' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws' + safeCode + 'CritText', value: isAda ? 'Kriteria B (Ada)' : 'Kriteria A (Tidak ada)' }
+      ]
+    });
+
+    return html;
+  }
+
+  function renderWs_1_b_1_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.1.b', d, maxBobot); }
+  function renderWs_1_b_1_d(d, maxBobot){ return renderWs_Persandingan_1b('1.b.1.d', d, maxBobot); }
+  function renderWs_1_b_2_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.2.b', d, maxBobot); }
+  function renderWs_1_b_3_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.3.b', d, maxBobot); }
+  function renderWs_1_b_4_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.4.b', d, maxBobot); }
+  function renderWs_1_b_5_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.5.b', d, maxBobot); }
+  function renderWs_1_b_6_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.6.b', d, maxBobot); }
+  function renderWs_1_b_7_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.7.b', d, maxBobot); }
+  function renderWs_1_b_8_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.8.b', d, maxBobot); }
+  function renderWs_1_b_9_b(d, maxBobot){ return renderWs_Persandingan_1b('1.b.9.b', d, maxBobot); }
 
   function renderWs_1_b_8(code, d, maxBobot){
     d = d || {};
@@ -3412,10 +6603,32 @@ tr.type-sub:hover td {
       '</table>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: code,
+      safeId: 'ws1b8',
+      title: 'Keterangan & Kriteria Penilaian Poin ' + code,
+      badgeText: 'Perhitungan Otomatis Margin',
+      colTitle: 'Kriteria Keselarasan Target ' + indName + ' RKPD terhadap RKP',
+      rows: [
+        { crit: 'A', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' kurang dari 25% terhadap RKP', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 25% dan kurang dari 50% terhadap RKP', val: '0,156', color: '#d97706' },
+        { crit: 'C', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 50% dan kurang dari 75% terhadap RKP', val: '0,313', color: '#2563eb' },
+        { crit: 'D', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' sama dengan atau lebih dari 75% dan kurang dari 100% terhadap RKP', val: '0,469', color: '#0891b2' },
+        { crit: 'E', text: 'Rata-rata keselarasan capaian dan target ' + indName + ' mencapai 100% (selaras penuh / melampaui target nasional)', val: '0,625', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Sinkronisasi Target Makro RKPD',
+      infoRows: [
+        { label: 'Indikator:', value: indName },
+        { label: 'Sumber Data:', value: 'Data Makro RKP & RKPD Daerah' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1b8AvgScore', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1b8CritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
-      // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project) - Tampilan Ringkas sampai Nilai Keselarasan
+  // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project) - Tampilan Ringkas sampai Nilai Keselarasan
   function renderWs_1_c_1(d, maxBobot){
     d = d || {};
     var pnList = (d.pn_list && d.pn_list.length > 0) ? d.pn_list : (AUTO_DATA_1_C_1 && AUTO_DATA_1_C_1.length > 0 ? AUTO_DATA_1_C_1 : []);
@@ -3443,104 +6656,104 @@ tr.type-sub:hover td {
         '<tbody>';
 
     if (!pnList || pnList.length === 0){
-      return html + '<tr><td colspan="9" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Alokasi APBD untuk Prioritas Nasional / Major Project pada menu terkait (dukungan KPU APBD). Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr></tbody></table></div>';
-    }
+      html += '<tr><td colspan="9" style="text-align: center; padding: 35px 20px; color: #64748b; font-size: 14px; background: #f8fafc;"><i class="fa fa-info-circle" style="margin-right: 8px; color: #3b82f6; font-size: 16px;"></i>Belum ada data Alokasi APBD untuk Prioritas Nasional / Major Project pada menu terkait (dukungan KPU APBD). Data akan otomatis terisi saat data diinputkan pada menu terkait.</td></tr>';
+    } else {
+      var globalRowNumber = 1;
 
-    var globalRowNumber = 1;
-
-    pnList.forEach(function(pn, pnIdx){
-      var pnRowspan = 0;
-      if (pn.kpu_list){
-        pn.kpu_list.forEach(function(k){
-          var subLen = (k.subs && k.subs.length > 0) ? k.subs.length : 1;
-          pnRowspan += subLen;
-        });
-      }
-      if (pnRowspan === 0) pnRowspan = 1;
-
-      var isFirstPnRow = true;
-
-      if (pn.kpu_list && pn.kpu_list.length > 0){
-        pn.kpu_list.forEach(function(kpu, kpuIdx){
-          var subList = (kpu.subs && kpu.subs.length > 0) ? kpu.subs : [{ sub_kegiatan: '', pagu: '', score: 1.0 }];
-          var kpuRowspan = subList.length;
-          var isFirstKpuRow = true;
-
-          subList.forEach(function(sub, subIdx){
-            html += 
-              '<tr class="ws-1c1-sub-row" data-pn-idx="' + pnIdx + '" data-kpu-idx="' + kpuIdx + '" data-sub-idx="' + subIdx + '" style="background:#ffffff; border-bottom:1px solid #e2e8f0;">';
-
-            // No Baris
-            html += '<td class="excel-row-num" style="text-align:center; vertical-align:middle; background:#f8fafc; font-weight:600; border:1px solid #cbd5e1;">' + (globalRowNumber++) + '</td>';
-
-            // Col A: Prioritas Pembangunan Nasional (Rowspan per PN)
-            if (isFirstPnRow){
-              html += 
-                '<td rowspan="' + pnRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 700; color: #1e3a8a; background: #f8fafc; border: 1px solid #cbd5e1; line-height: 1.45;">' +
-                  escapeHtml(pn.pn_nama || ('Prioritas Nasional ' + (pnIdx + 1))) +
-                '</td>';
-              isFirstPnRow = false;
-            }
-
-            // Col B: Kegiatan Prioritas Utama (KPU) (Rowspan per KPU)
-            if (isFirstKpuRow){
-              html += 
-                '<td rowspan="' + kpuRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 600; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; line-height: 1.45;">' +
-                  escapeHtml(kpu.kpu_nama || '-') +
-                '</td>';
-            }
-
-            // Col C: Dukungan Program Pembangunan Daerah (Per Subkegiatan)
-            html += 
-              '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
-                '<input type="text" class="calc-inp ws-1c1-sub-inp" value="' + escapeHtml(sub.sub_kegiatan || '') + '" placeholder="Kode & Nama Sub Kegiatan..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; line-height: 1.4;">' +
-              '</td>';
-
-            // Col D: Pagu Indikatif APBD (Rp.) (Per Subkegiatan)
-            html += 
-              '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
-                '<input type="text" class="calc-inp ws-1c1-pagu-inp" value="' + escapeHtml(sub.pagu || '') + '" placeholder="0,00" style="width: 100%; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; font-weight: 600; color: #0f172a;">' +
-              '</td>';
-
-            // Col E: Nilai Keselarasan (0% / 100%) (Per Subkegiatan)
-            var subScore = (sub.score !== undefined && sub.score !== null) ? parseFloat(sub.score) : 1.0;
-            html += 
-              '<td style="vertical-align: middle; text-align: center; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
-                '<select class="calc-inp ws-1c1-score-sel" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 4px; font-size: 12px; font-weight: 600; text-align: center; background: #f0fdf4; color: #166534; cursor: pointer;">' +
-                  '<option value="1.0"' + (subScore === 1.0 ? ' selected' : '') + '>100.00%</option>' +
-                  '<option value="0.0"' + (subScore === 0.0 ? ' selected' : '') + '>0.00%</option>' +
-                '</select>' +
-              '</td>';
-
-            // Kolom Rowspan per KPU (Col F & Col G)
-            if (isFirstKpuRow){
-              // Col F: Keterangan
-              var defaultKet = "Terdapat Dukungan APBD pada Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional / Major Project terkait";
-              html += 
-                '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; padding: 10px; font-size: 12px; line-height: 1.45; color: #334155; border: 1px solid #cbd5e1; background: #ffffff;">' +
-                  escapeHtml(kpu.keterangan || defaultKet) +
-                '</td>';
-
-              // Col G: Nilai Keselarasan (100%)
-              html += 
-                '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; text-align: center; padding: 8px; border: 1px solid #cbd5e1; background: #ffffff;">' +
-                  '<div style="font-weight: 800; color: #15803d; background: #dcfce7; padding: 6px 8px; border-radius: 6px; font-size: 13px; border: 1px solid #86efac;">100%</div>' +
-                '</td>';
-
-              isFirstKpuRow = false;
-            }
-
-            // Tombol Aksi per Subkegiatan
-            html += 
-              '<td style="text-align:center; vertical-align:middle; border:1px solid #cbd5e1; padding:4px;">' +
-                '<button type="button" class="btn-del-1c1-sub" style="border:none; background:transparent; color:#ef4444; cursor:pointer; font-size:14px;" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>' +
-              '</td>';
-
-            html += '</tr>';
+      pnList.forEach(function(pn, pnIdx){
+        var pnRowspan = 0;
+        if (pn.kpu_list){
+          pn.kpu_list.forEach(function(k){
+            var subLen = (k.subs && k.subs.length > 0) ? k.subs.length : 1;
+            pnRowspan += subLen;
           });
-        });
-      }
-    });
+        }
+        if (pnRowspan === 0) pnRowspan = 1;
+
+        var isFirstPnRow = true;
+
+        if (pn.kpu_list && pn.kpu_list.length > 0){
+          pn.kpu_list.forEach(function(kpu, kpuIdx){
+            var subList = (kpu.subs && kpu.subs.length > 0) ? kpu.subs : [{ sub_kegiatan: '', pagu: '', score: 1.0 }];
+            var kpuRowspan = subList.length;
+            var isFirstKpuRow = true;
+
+            subList.forEach(function(sub, subIdx){
+              html += 
+                '<tr class="ws-1c1-sub-row" data-pn-idx="' + pnIdx + '" data-kpu-idx="' + kpuIdx + '" data-sub-idx="' + subIdx + '" style="background:#ffffff; border-bottom:1px solid #e2e8f0;">';
+
+              // No Baris
+              html += '<td class="excel-row-num" style="text-align:center; vertical-align:middle; background:#f8fafc; font-weight:600; border:1px solid #cbd5e1;">' + (globalRowNumber++) + '</td>';
+
+              // Col A: Prioritas Pembangunan Nasional (Rowspan per PN)
+              if (isFirstPnRow){
+                html += 
+                  '<td rowspan="' + pnRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 700; color: #1e3a8a; background: #f8fafc; border: 1px solid #cbd5e1; line-height: 1.45;">' +
+                    escapeHtml(pn.pn_nama || ('Prioritas Nasional ' + (pnIdx + 1))) +
+                  '</td>';
+                isFirstPnRow = false;
+              }
+
+              // Col B: Kegiatan Prioritas Utama (KPU) (Rowspan per KPU)
+              if (isFirstKpuRow){
+                html += 
+                  '<td rowspan="' + kpuRowspan + '" style="vertical-align: top; padding: 12px 10px; font-weight: 600; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; line-height: 1.45;">' +
+                    escapeHtml(kpu.kpu_nama || '-') +
+                  '</td>';
+              }
+
+              // Col C: Dukungan Program Pembangunan Daerah (Per Subkegiatan)
+              html += 
+                '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                  '<input type="text" class="calc-inp ws-1c1-sub-inp" value="' + escapeHtml(sub.sub_kegiatan || '') + '" placeholder="Kode & Nama Sub Kegiatan..." style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; line-height: 1.4;">' +
+                '</td>';
+
+              // Col D: Pagu Indikatif APBD (Rp.) (Per Subkegiatan)
+              html += 
+                '<td style="vertical-align: middle; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                  '<input type="text" class="calc-inp ws-1c1-pagu-inp" value="' + escapeHtml(sub.pagu || '') + '" placeholder="0,00" style="width: 100%; text-align: right; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 8px; font-size: 12.5px; font-weight: 600; color: #0f172a;">' +
+                '</td>';
+
+              // Col E: Nilai Keselarasan (0% / 100%) (Per Subkegiatan)
+              var subScore = (sub.score !== undefined && sub.score !== null) ? parseFloat(sub.score) : 1.0;
+              html += 
+                '<td style="vertical-align: middle; text-align: center; padding: 6px 8px; border: 1px solid #cbd5e1;">' +
+                  '<select class="calc-inp ws-1c1-score-sel" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 4px; font-size: 12px; font-weight: 600; text-align: center; background: #f0fdf4; color: #166534; cursor: pointer;">' +
+                    '<option value="1.0"' + (subScore === 1.0 ? ' selected' : '') + '>100.00%</option>' +
+                    '<option value="0.0"' + (subScore === 0.0 ? ' selected' : '') + '>0.00%</option>' +
+                  '</select>' +
+                '</td>';
+
+              // Kolom Rowspan per KPU (Col F & Col G)
+              if (isFirstKpuRow){
+                // Col F: Keterangan
+                var defaultKet = "Terdapat Dukungan APBD pada Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional / Major Project terkait";
+                html += 
+                  '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; padding: 10px; font-size: 12px; line-height: 1.45; color: #334155; border: 1px solid #cbd5e1; background: #ffffff;">' +
+                    escapeHtml(kpu.keterangan || defaultKet) +
+                  '</td>';
+
+                // Col G: Nilai Keselarasan (100%)
+                html += 
+                  '<td rowspan="' + kpuRowspan + '" style="vertical-align: middle; text-align: center; padding: 8px; border: 1px solid #cbd5e1; background: #ffffff;">' +
+                    '<div style="font-weight: 800; color: #15803d; background: #dcfce7; padding: 6px 8px; border-radius: 6px; font-size: 13px; border: 1px solid #86efac;">100%</div>' +
+                  '</td>';
+
+                isFirstKpuRow = false;
+              }
+
+              // Tombol Aksi per Subkegiatan
+              html += 
+                '<td style="text-align:center; vertical-align:middle; border:1px solid #cbd5e1; padding:4px;">' +
+                  '<button type="button" class="btn-del-1c1-sub" style="border:none; background:transparent; color:#ef4444; cursor:pointer; font-size:14px;" title="Hapus Sub Kegiatan"><i class="fa fa-trash"></i></button>' +
+                '</td>';
+
+              html += '</tr>';
+            });
+          });
+        }
+      });
+    }
 
     html += 
         '</tbody>' +
@@ -3556,6 +6769,28 @@ tr.type-sub:hover td {
         '</div>' +
       '</div>' +
       '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: '1.c.1',
+      safeId: 'ws1c1',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.c.1',
+      badgeText: 'Alokasi APBD untuk Prioritas Nasional',
+      colTitle: 'Kriteria Ketersediaan Dukungan APBD terhadap Prioritas Nasional / Major Project',
+      rows: [
+        { crit: 'A', text: 'Ketersediaan alokasi APBD terhadap Prioritas Nasional / Major Project sama dengan atau kurang dari 25%', val: '2,000', color: '#dc2626' },
+        { crit: 'B', text: 'Ketersediaan alokasi APBD terhadap Prioritas Nasional / Major Project lebih dari 25% dan sama dengan atau kurang dari 50%', val: '4,000', color: '#d97706' },
+        { crit: 'C', text: 'Ketersediaan alokasi APBD terhadap Prioritas Nasional / Major Project lebih dari 50% dan sama dengan atau kurang dari 75%', val: '6,000', color: '#2563eb' },
+        { crit: 'D', text: 'Ketersediaan alokasi APBD terhadap Prioritas Nasional / Major Project lebih dari 75% dan sama dengan atau kurang dari 99%', val: '8,000', color: '#0891b2' },
+        { crit: 'E', text: 'Ketersediaan alokasi APBD terhadap Prioritas Nasional / Major Project 100% (seluruh Major Project terdanai dalam APBD)', val: '10,000', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Pemetaan Alokasi Anggaran APBD',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Dukungan Sub Kegiatan RKPD & Pagu APBD' },
+        { label: 'Subkegiatan Terdanai:', id: 'ws1c1CountMatched', value: '-' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws1c1AvgPct', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1c1CritText', value: '-' }
+      ]
+    });
 
     return html;
   }
@@ -3602,6 +6837,27 @@ tr.type-sub:hover td {
       '</table>' +
       '<button type="button" class="btn-excel-add-row" id="btnAdd3a1aRow"><i class="fa fa-plus"></i> Tambah Program Prioritas OPD</button>' +
       '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: '3.a.1.a',
+      safeId: 'ws3a1a',
+      title: 'Keterangan & Kriteria Penilaian Poin 3.a.1.a',
+      badgeText: 'Penetapan OPD Penanggungjawab',
+      colTitle: 'Kriteria Penetapan OPD Penanggungjawab Program Prioritas Daerah',
+      rows: [
+        { crit: 'A', text: 'Tidak ada atau kurang dari 25% program prioritas daerah yang ditetapkan OPD penanggungjawab', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'Lebih dari 25% dan sama dengan atau kurang dari 50% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,125', color: '#d97706' },
+        { crit: 'C', text: 'Lebih dari 50% dan sama dengan atau kurang dari 75% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,250', color: '#2563eb' },
+        { crit: 'D', text: 'Lebih dari 75% dan sama dengan atau kurang dari 99% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,375', color: '#0891b2' },
+        { crit: 'E', text: '100% seluruh program prioritas daerah telah ditetapkan OPD penanggungjawab secara tepat', val: '0,500', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Penetapan OPD Penanggungjawab',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Program Prioritas Daerah & OPD Penanggungjawab' },
+        { label: 'Persentase Penetapan:', id: 'ws3a1aPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws3a1aCritText', value: '-' }
+      ]
+    });
 
     return html;
   }
@@ -3668,6 +6924,27 @@ tr.type-sub:hover td {
       '<button type="button" class="btn-excel-add-row" id="btnAdd3a1bRow"><i class="fa fa-plus"></i> Tambah Sasaran / IKU OPD</button>' +
       '</div>';
 
+    html += renderStandardCriteriaCard({
+      code: '3.a.1.b',
+      safeId: 'ws3a1b',
+      title: 'Keterangan & Kriteria Penilaian Poin 3.a.1.b',
+      badgeText: 'Target Sasaran Daerah vs IKU OPD',
+      colTitle: 'Kriteria Keselarasan Target Sasaran Daerah dengan IKU Renstra/Renja OPD',
+      rows: [
+        { crit: 'A', text: 'Rata-rata keselarasan target daerah dengan IKU OPD kurang dari 25%', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 25% dan kurang dari 50%', val: '0,125', color: '#d97706' },
+        { crit: 'C', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 50% dan kurang dari 75%', val: '0,250', color: '#2563eb' },
+        { crit: 'D', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 75% dan kurang dari 100%', val: '0,375', color: '#0891b2' },
+        { crit: 'E', text: 'Rata-rata keselarasan target daerah dengan IKU OPD mencapai 100% (selaras penuh / melampaui target daerah)', val: '0,500', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Penyelarasan IKU OPD',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Target RPJMD/RKPD vs IKU Renstra/Renja OPD' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws3a1bPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws3a1bCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
@@ -3718,22 +6995,58 @@ tr.type-sub:hover td {
       '<button type="button" class="btn-excel-add-row" id="btnAddGenRow"><i class="fa fa-plus-circle"></i> Tambah Parameter Kriteria</button>' +
       '</div>';
 
+    var bA = '0,000';
+    var bB = numFmt(0.25 * maxBobot);
+    var bC = numFmt(0.50 * maxBobot);
+    var bD = numFmt(0.75 * maxBobot);
+    var bE = numFmt(maxBobot);
+
+    html += renderStandardCriteriaCard({
+      code: code,
+      safeId: 'wsGen',
+      title: 'Keterangan & Kriteria Penilaian Poin ' + code,
+      badgeText: 'Parameter Pemenuhan Indikator',
+      colTitle: 'Kriteria Tingkat Pemenuhan Parameter Indikator IPPD',
+      rows: [
+        { crit: 'A', text: 'Pemenuhan parameter kriteria indikator sama dengan atau kurang dari 25%', val: bA, color: '#dc2626' },
+        { crit: 'B', text: 'Pemenuhan parameter kriteria indikator lebih dari 25% dan sama dengan atau kurang dari 50%', val: bB, color: '#d97706' },
+        { crit: 'C', text: 'Pemenuhan parameter kriteria indikator lebih dari 50% dan sama dengan atau kurang dari 75%', val: bC, color: '#2563eb' },
+        { crit: 'D', text: 'Pemenuhan parameter kriteria indikator lebih dari 75% dan sama dengan atau kurang dari 99%', val: bD, color: '#0891b2' },
+        { crit: 'E', text: 'Pemenuhan parameter kriteria indikator 100% (seluruh kriteria dan justifikasi terpenuhi lengkap)', val: bE, color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Evaluasi Parameter IPPD',
+      infoRows: [
+        { label: 'Sumber Data:', value: 'Pedoman Penilaian Indikator IPPD' },
+        { label: 'Rata-rata Pemenuhan:', id: 'wsGenPctMatched', value: '-' },
+        { label: 'Kriteria Terpenuhi:', id: 'wsGenCritText', value: '-' }
+      ]
+    });
+
     return html;
   }
 
   // Master Dispatcher for Worksheet Rendering
   function renderDynamicWorksheet(code, maxBobot, detailData){
     if (code === '1.a.1.a') return renderWs_1_a_1_a(detailData, maxBobot);
-    if (code === '1.a.1.b' || code === '1.a.1.d') return renderWs_TabelPersandingan(code, detailData, maxBobot);
+    if (code === '1.a.1.b') return renderWs_1_a_1_b(detailData, maxBobot);
+    if (code === '1.a.1.d') return renderWs_TabelPersandingan(code, detailData, maxBobot);
     if (code === '1.a.1.c') return renderWs_1_a_1_c(detailData, maxBobot);
     if (code === '1.a.2.a') return renderWs_1_a_2_a(detailData, maxBobot);
+    if (code === '1.a.2.b') return renderWs_1_a_2_b(detailData, maxBobot);
+    if (code === '1.a.2.c') return renderWs_1_a_2_c(detailData, maxBobot);
+    if (code === '1.a.2.d') return renderWs_1_a_2_d(detailData, maxBobot);
+    if (code === '1.a.2.e') return renderWs_1_a_2_e(detailData, maxBobot);
     if (code.indexOf('1.a.2.') === 0) return renderWs_1_a_2_b_to_g(code, detailData, maxBobot);
     if (code === '1.a.3.a' || code === '1.a.3.b') return renderWs_1_a_3(code, detailData, maxBobot);
     if (code === '1.a.4') return renderWs_1_a_4(detailData, maxBobot);
-    if (code === '1.a.5' || code === '1.a.6') return renderWs_SPM(code, detailData, maxBobot);
+    if (code === '1.a.5') return renderWs_1_a_5(detailData, maxBobot);
+    if (code === '1.a.6') return renderWs_1_a_6(detailData, maxBobot);
     if (code === '1.b.10.a') return renderWs_1_b_10_a(detailData, maxBobot);
     if (code === '1.b.10.b') return renderWs_1_b_10_b(detailData, maxBobot);
-    if (code === '1.b.8.a' || code === '1.b.8.b') return renderWs_1_b_8(code, detailData, maxBobot);
+    if (code === '1.b.8.a') return renderWs_1_b_8(code, detailData, maxBobot);
+    if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b') {
+      return renderWs_Persandingan_1b(code, detailData, maxBobot);
+    }
     if (code === '1.c.1') return renderWs_1_c_1(detailData, maxBobot);
     if (code === '3.a.1.a') return renderWs_3_a_1_a(detailData, maxBobot);
     if (code === '3.a.1.b') return renderWs_3_a_1_b(detailData, maxBobot);
@@ -3749,151 +7062,615 @@ tr.type-sub:hover td {
     var maxBobot = parseFloat(modalBobotMaks.value) || 0;
     var computedFinalScore = maxBobot;
 
-    // 1. Sheet 1.a.1.a Formula Execution
+    // 1. Sheet 1.a.1.a Formula Execution (Kesesuaian Indikator Sasaran RPJMD vs PN RPJMN)
     if (code === '1.a.1.a'){
       var rows = document.querySelectorAll("#wsTable_1_a_1_a .ws-1a1a-row");
-      var sumAvg = 0;
+      var matchedCount = 0;
+      var totalRows = rows.length || 3;
+
       rows.forEach(function(row){
-        var isPos = row.getAttribute("data-positive") === '1';
         var mnB = parseFloat(row.querySelector(".mn-base").value) || 0;
         var mnE = parseFloat(row.querySelector(".mn-end").value) || 0;
-        var mdB = parseFloat(row.querySelector(".md-base").value) || 0;
-        var mdE = parseFloat(row.querySelector(".md-end").value) || 0;
+        var mdB_val = (row.querySelector(".md-base") ? row.querySelector(".md-base").value : "").trim();
+        var mdE_val = (row.querySelector(".md-end")  ? row.querySelector(".md-end").value  : "").trim();
 
         var mnGap = mnE - mnB;
-        var mdGap = mdE - mdB;
+        var mdGap = (parseFloat(mdE_val) || 0) - (parseFloat(mdB_val) || 0);
         var elMnGap = row.querySelector(".mn-gap"); if (elMnGap) elMnGap.textContent = numFmt(mnGap);
         var elMdGap = row.querySelector(".md-gap"); if (elMdGap) elMdGap.textContent = numFmt(mdGap);
 
-        var marginB = 0;
-        if (mnB !== 0){
-          marginB = isPos ? (mdB >= mnB ? 0 : (Math.abs(mdB - mnB)/Math.abs(mnB))*100) : (mdB <= mnB ? 0 : (Math.abs(mdB - mnB)/Math.abs(mnB))*100);
+        // Indikator dianggap lengkap & selaras jika memiliki data target RPJMD dari sinkronisasi data
+        var hasMdData = (mdB_val !== "" && !isNaN(parseFloat(mdB_val))) || (mdE_val !== "" && !isNaN(parseFloat(mdE_val)));
+        if (hasMdData){
+          matchedCount++;
         }
-        var marginE = 0;
-        if (mnE !== 0){
-          marginE = isPos ? (mdE >= mnE ? 0 : (Math.abs(mdE - mnE)/Math.abs(mnE))*100) : (mdE <= mnE ? 0 : (Math.abs(mdE - mnE)/Math.abs(mnE))*100);
-        }
-        var marginGap = 0;
-        if (mnGap !== 0){
-          marginGap = ((Math.abs(mdGap) - Math.abs(mnGap))/Math.abs(mnGap))*100;
-        }
-
-        var scoreB = calcMarginScore(marginB);
-        var scoreE = calcMarginScore(marginE);
-        var scoreG = calcMarginScore(marginGap);
-        var rowAvg = (scoreB + scoreE + scoreG) / 3;
-        var rowTerbobot = (rowAvg / 100) * maxBobot;
-
-        var elMarginB = row.querySelector(".margin-base"); if (elMarginB) elMarginB.textContent = marginB.toFixed(1) + "%";
-        var elScoreB = row.querySelector(".score-base"); if (elScoreB) elScoreB.textContent = scoreB + "%";
-        var elMarginE = row.querySelector(".margin-end"); if (elMarginE) elMarginE.textContent = marginE.toFixed(1) + "%";
-        var elScoreE = row.querySelector(".score-end"); if (elScoreE) elScoreE.textContent = scoreE + "%";
-        var elMarginG = row.querySelector(".margin-gap"); if (elMarginG) elMarginG.textContent = marginGap.toFixed(1) + "%";
-        var elScoreG = row.querySelector(".score-gap"); if (elScoreG) elScoreG.textContent = scoreG + "%";
-        var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
-        var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowTerbobot);
-
-        sumAvg += rowAvg;
       });
 
-      var grandAvg = rows.length > 0 ? (sumAvg / rows.length) : 100;
-      computedFinalScore = (grandAvg / 100) * maxBobot;
-      var elGrandAvg = document.getElementById("ws1a1aGrandAvg");
-      var elGrandTerbobot = document.getElementById("ws1a1aGrandTerbobot");
-      if (elGrandAvg) elGrandAvg.textContent = grandAvg.toFixed(1) + "%";
-      if (elGrandTerbobot) elGrandTerbobot.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 0;
+      var critLetter = 'A';
+      var critText = 'A. Tidak ada keterkaitan';
+      var critBg = '#f1f5f9';
+      var critColor = '#475569';
+
+      if (matchedCount === 0){
+        computedFinalScore = 0;
+        critLetter = 'A';
+        critText = 'A. Tidak ada keterkaitan';
+        critBg = '#fef2f2';
+        critColor = '#dc2626';
+      } else if (pctMatched < 50){
+        computedFinalScore = 0.3;
+        critLetter = 'B';
+        critText = 'B. Kurang dari 50% sesuai dengan PN RPJMN';
+        critBg = '#fffbeb';
+        critColor = '#d97706';
+      } else {
+        computedFinalScore = 0.5;
+        critLetter = 'C';
+        critText = 'C. Di atas atau sama dengan 50% sesuai dengan PN RPJMN';
+        critBg = '#f0fdf4';
+        critColor = '#16a34a';
+      }
+
+      updateStandardCriteriaHighlight('ws1a1a', critLetter, computedFinalScore, {
+        'ws1a1aCountMatched': matchedCount + " dari " + totalRows + " Indikator",
+        'ws1a1aPctMatched': pctMatched.toFixed(0) + "%",
+        'ws1a1aCritText': "Kriteria " + critLetter
+      }, ['A', 'B', 'C']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Kelengkapan Indikator RPJMD: " + matchedCount + "/" + totalRows + " (" + pctMatched.toFixed(0) + "%) -> Kriteria " + critLetter + " -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
     }
 
-    // 2. Sheet 1.a.1.b & 1.a.1.d Persandingan
-    else if (code === '1.a.1.b' || code === '1.a.1.d'){
+    // 2. Sheet 1.a.1.b (Tabel Persandingan Sasaran RPJMD vs PN RPJMN)
+    else if (code === '1.a.1.b'){
       var sel = document.getElementById("wsSelectPersandingan");
       var isAda = sel ? (sel.value === 'Ada') : true;
-      computedFinalScore = isAda ? maxBobot : 0;
-      var elRes = document.getElementById("wsPersandinganResult");
-      if (elRes) elRes.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      computedFinalScore = isAda ? 0.5 : 0.0;
+      var critLetter = isAda ? 'B' : 'A';
+      var critText = isAda ? 'B. Ada' : 'A. Tidak ada';
+      var critBg = isAda ? '#f0fdf4' : '#fef2f2';
+      var critColor = isAda ? '#16a34a' : '#dc2626';
+
+      var elRes = document.getElementById("ws1a1bTerbobotCell");
+      if (elRes) {
+        elRes.textContent = numFmt(computedFinalScore);
+        elRes.style.color = critColor;
+      }
+
+      updateStandardCriteriaHighlight('ws1a1b', critLetter, computedFinalScore, {
+        'ws1a1bStatusText': isAda ? 'Ada (Tersedia dalam Dokumen)' : 'Tidak Ada (Belum Tersedia)',
+        'ws1a1bCritText': "Kriteria " + critLetter + " (" + (isAda ? "Ada" : "Tidak ada") + ")"
+      }, ['A', 'B']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Status Ketersediaan: " + (isAda ? "Ada (Kriteria B)" : "Tidak Ada (Kriteria A)") + " -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
     }
 
-    // 3. Sheet 1.a.1.c Matrix
-    else if (code === '1.a.1.c'){
-      var pns = document.querySelectorAll("#wsTable_1_a_1_c tbody .cell-pn-wrap");
-      var allTerbobotSum = 0;
-      var pnCount = 0;
+    // 2b. Sheet 1.a.1.d Persandingan Prioritas Daerah RPJMD vs PN RPJMN
+    else if (code === '1.a.1.d'){
+      var sel = document.getElementById("wsSelectPersandingan1d") || document.getElementById("wsSelectPersandingan");
+      var isAda = sel ? (sel.value === 'Ada') : true;
+      computedFinalScore = isAda ? maxBobot : 0.0;
+      var critLetter = isAda ? 'B' : 'A';
+      var critText = isAda ? 'B. Ada' : 'A. Tidak ada';
+      var critBg = isAda ? '#f0fdf4' : '#fef2f2';
+      var critColor = isAda ? '#16a34a' : '#dc2626';
 
-      // Group rows by pn-idx
+      var elTerbCell = document.getElementById("ws1a1dTerbobotCell");
+      if (elTerbCell) {
+        elTerbCell.textContent = numFmt(computedFinalScore);
+        elTerbCell.style.color = critColor;
+      }
+
+      updateStandardCriteriaHighlight('ws1a1d', critLetter, computedFinalScore, {
+        'ws1a1dStatusText': isAda ? "B. Ada (Tersedia)" : "A. Tidak Ada",
+        'ws1a1dCritText': critText
+      }, ['A', 'B']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Status Ketersediaan: " + (isAda ? "Ada (Kriteria B)" : "Tidak Ada (Kriteria A)") + " -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // 3. Sheet 1.a.1.c Matrix (Prioritas Daerah vs PN RPJMN)
+    else if (code === '1.a.1.c'){
+      var allTerbobotSum = 0;
       var pnGroups = {};
+
       document.querySelectorAll("#wsTable_1_a_1_c .ws-matrix-row").forEach(function(row){
         var pnIdx = row.getAttribute("data-pn-idx");
         if (!pnGroups[pnIdx]) pnGroups[pnIdx] = [];
         var scoreSel = row.querySelector(".pd-score-sel");
-        pnGroups[pnIdx].push(scoreSel ? parseFloat(scoreSel.value) : 1.0);
+        var val = scoreSel ? parseFloat(scoreSel.value) : 0;
+        pnGroups[pnIdx].push(val);
       });
+
+      var totalPns = Object.keys(pnGroups).length || 8;
+      var matchedPns = 0;
 
       Object.keys(pnGroups).forEach(function(pnIdx){
         var scores = pnGroups[pnIdx];
-        var avg = scores.reduce(function(a,b){return a+b;},0) / scores.length;
-        var terbobot = avg * maxBobot;
+        var maxScore = Math.max.apply(null, scores);
+        var isAligned = maxScore > 0;
+        if (isAligned) matchedPns++;
+
+        var pnAvgVal = isAligned ? 1.0 : 0.0;
+        var terbobot = pnAvgVal * maxBobot;
         allTerbobotSum += terbobot;
-        pnCount++;
 
         var firstRow = document.querySelector('#wsTable_1_a_1_c .ws-matrix-row[data-pn-idx="' + pnIdx + '"]');
         if (firstRow){
-          var avgCell = firstRow.querySelector(".pn-avg");
-          var terbCell = firstRow.querySelector(".pn-terbobot");
-          if (avgCell) avgCell.textContent = (avg * 100).toFixed(1) + "%";
-          if (terbCell) terbCell.textContent = numFmt(terbobot);
+          var avgCell = firstRow.querySelector(".pn-avg-cell");
+          var terbCell = firstRow.querySelector(".pn-terbobot-cell");
+          if (avgCell) avgCell.textContent = isAligned ? "100%" : "0%";
+          if (terbCell) {
+            terbCell.textContent = numFmt(terbobot);
+            terbCell.style.color = isAligned ? '#16a34a' : '#dc2626';
+          }
         }
       });
 
-      computedFinalScore = pnCount > 0 ? (allTerbobotSum / pnCount) : 0;
+      var pctMatched = totalPns > 0 ? (matchedPns / totalPns) * 100 : 0;
+      var avgTerbobot = totalPns > 0 ? (allTerbobotSum / totalPns) : 0;
+
+      var elAvgPct = document.getElementById("ws1a1cAvgPctCell");
+      if (elAvgPct) elAvgPct.textContent = pctMatched.toFixed(2) + "%";
+
       var elGrand = document.getElementById("ws1a1cGrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      if (elGrand) elGrand.textContent = numFmt(avgTerbobot);
+
+      // Range Penilaian Kriteria:
+      // A. Tidak ada keterkaitan -> 0
+      // B. Kurang dari 50% sesuai dengan PN RPJMN -> 0,3
+      // C. Di atas atau sama dengan 50% sesuai dengan PN RPJMN -> 0,5
+      var crit = 'A';
+      var critScore = 0.0;
+      var critLabel = 'A. Tidak ada keterkaitan';
+
+      if (matchedPns === 0) {
+        crit = 'A';
+        critScore = 0.0;
+        critLabel = 'A. Tidak ada keterkaitan';
+      } else if (pctMatched < 50.0) {
+        crit = 'B';
+        critScore = 0.3;
+        critLabel = 'B. Kurang dari 50% sesuai dengan PN RPJMN';
+      } else {
+        crit = 'C';
+        critScore = maxBobot; // 0.5
+        critLabel = 'C. Di atas atau sama dengan 50% sesuai dengan PN RPJMN';
+      }
+
+      computedFinalScore = critScore;
+
+      updateStandardCriteriaHighlight('ws1a1c', crit, critScore, {
+        'ws1a1cCountMatched': matchedPns + " dari " + totalPns + " PN",
+        'ws1a1cPctMatched': pctMatched.toFixed(2) + "%",
+        'ws1a1cCritText': critLabel
+      }, ['A', 'B', 'C']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pctMatched.toFixed(2) + "% (" + critLabel + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
     }
 
     // 4. Sheet 1.a.2.a
     else if (code === '1.a.2.a'){
-      var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
       document.querySelectorAll("#wsTable_1_a_2_a .ws-pp-row").forEach(function(row){
-        var ppIdx = row.getAttribute("data-pp-idx");
-        if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
+        totalRows++;
         var scoreSel = row.querySelector(".pd-score-sel");
-        ppGroups[ppIdx].push(scoreSel ? parseFloat(scoreSel.value) : 1.0);
-      });
-
-      var allPpSum = 0;
-      var ppCount = 0;
-      Object.keys(ppGroups).forEach(function(ppIdx){
-        var scores = ppGroups[ppIdx];
-        var avg = scores.reduce(function(a,b){return a+b;},0) / scores.length;
-        var terbobot = avg * maxBobot;
-        allPpSum += terbobot;
-        ppCount++;
-
-        var firstRow = document.querySelector('#wsTable_1_a_2_a .ws-pp-row[data-pp-idx="' + ppIdx + '"]');
-        if (firstRow){
-          var avgCell = firstRow.querySelector(".pp-avg");
-          var terbCell = firstRow.querySelector(".pp-terbobot");
-          if (avgCell) avgCell.textContent = (avg * 100).toFixed(1) + "%";
-          if (terbCell) terbCell.textContent = numFmt(terbobot);
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        sumScore += val;
+        if (scoreSel) {
+          scoreSel.style.color = val >= 1.0 ? '#16a34a' : '#dc2626';
         }
       });
 
-      computedFinalScore = ppCount > 0 ? (allPpSum / ppCount) : maxBobot;
-      var elGrand = document.getElementById("ws1a2aGrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100% Selaras';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E';
+        critLabel = '100%';
+        scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D';
+        critLabel = '> 75% s.d <= 99%';
+        scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C';
+        critLabel = '> 50% s.d <= 75%';
+        scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B';
+        critLabel = '> 25% s.d <= 50%';
+        scoreVal = 0.150;
+      } else {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
+
+      // Update table cells
+      var avgCell = document.getElementById("ws1a2aAvgCell");
+      if (avgCell) avgCell.textContent = Math.round(pct) + "%";
+
+      var terbCell = document.getElementById("ws1a2aTerbobotCell");
+      if (terbCell) terbCell.textContent = numFmt(scoreVal);
+
+      updateStandardCriteriaHighlight('ws1a2a', crit, computedFinalScore, {
+        'ws1a2aPctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
     }
 
-    // 5. Sheets 1.a.2.b s.d 1.a.2.g
+    // Sheet 1.a.2.b (PN 2 Program Prioritas Pembangunan Nasional)
+    else if (code === '1.a.2.b'){
+      var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_b .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        ppGroups[ppIdx].push(val);
+        totalRows++;
+        sumScore += val;
+      });
+
+      // Update per-PP averages and terbobot
+      Object.keys(ppGroups).forEach(function(ppIdx){
+        var scores = ppGroups[ppIdx];
+        var avg = scores.reduce(function(a,b){return a+b;}, 0) / (scores.length || 1);
+        var terbobot = avg * maxBobot;
+        var avgCell = document.getElementById("ws1a2bPpAvg_" + ppIdx);
+        var terbCell = document.getElementById("ws1a2bPpTerb_" + ppIdx);
+        if (avgCell) avgCell.textContent = Math.round(avg * 100) + "%";
+        if (terbCell) terbCell.textContent = numFmt(terbobot);
+      });
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100%';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E';
+        critLabel = '100%';
+        scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D';
+        critLabel = '> 75% s/d <= 99%';
+        scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C';
+        critLabel = '> 50% s/d <= 75%';
+        scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B';
+        critLabel = '> 25% s/d <= 50%';
+        scoreVal = 0.150;
+      } else {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
+
+      // Update table bottom summary cells
+      var avgCell = document.getElementById("ws1a2bAvgCell");
+      if (avgCell) avgCell.textContent = Math.round(pct) + "%";
+
+      var terbCell = document.getElementById("ws1a2bTerbobotCell");
+      if (terbCell) terbCell.textContent = numFmt(scoreVal);
+
+      var terbCell2 = document.getElementById("ws1a2bTerbobotCell2");
+      if (terbCell2) terbCell2.textContent = numFmt(scoreVal);
+
+      var rataTerbGrand = document.getElementById("ws1a2bGrandRataTerbobotCell");
+      if (rataTerbGrand) rataTerbGrand.textContent = numFmt(scoreVal);
+
+      updateStandardCriteriaHighlight('ws1a2b', crit, scoreVal, {
+        'ws1a2bPctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // Sheet 1.a.2.c (PN 3 Program Prioritas Pembangunan Nasional)
+    else if (code === '1.a.2.c'){
+      var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_c .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        ppGroups[ppIdx].push(val);
+        totalRows++;
+        sumScore += val;
+      });
+
+      // Update per-PP averages and terbobot
+      Object.keys(ppGroups).forEach(function(ppIdx){
+        var scores = ppGroups[ppIdx];
+        var avg = scores.reduce(function(a,b){return a+b;}, 0) / (scores.length || 1);
+        var terbobot = avg * maxBobot;
+        var avgCell = document.getElementById("ws1a2cPpAvg_" + ppIdx);
+        var terbCell = document.getElementById("ws1a2cPpTerb_" + ppIdx);
+        if (avgCell) avgCell.textContent = Math.round(avg * 100) + "%";
+        if (terbCell) terbCell.textContent = numFmt(terbobot);
+      });
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100%';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E';
+        critLabel = '100%';
+        scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D';
+        critLabel = '> 75% s/d <= 99%';
+        scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C';
+        critLabel = '> 50% s/d <= 75%';
+        scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B';
+        critLabel = '> 25% s/d <= 50%';
+        scoreVal = 0.150;
+      } else {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
+
+      // Update table bottom summary cells
+      var avgCell = document.getElementById("ws1a2cAvgCell");
+      if (avgCell) avgCell.textContent = Math.round(pct) + "%";
+
+      var terbCell = document.getElementById("ws1a2cTerbobotCell");
+      if (terbCell) terbCell.textContent = numFmt(scoreVal);
+
+      var terbCell2 = document.getElementById("ws1a2cTerbobotCell2");
+      if (terbCell2) terbCell2.textContent = numFmt(scoreVal);
+
+      var rataTerbGrand = document.getElementById("ws1a2cGrandRataTerbobotCell");
+      if (rataTerbGrand) rataTerbGrand.textContent = numFmt(scoreVal);
+
+      updateStandardCriteriaHighlight('ws1a2c', crit, scoreVal, {
+        'ws1a2cPctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2cCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // Sheet 1.a.2.d (PN 4 Program Prioritas Pembangunan Nasional)
+    else if (code === '1.a.2.d'){
+      var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_d .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        ppGroups[ppIdx].push(val);
+        totalRows++;
+        sumScore += val;
+      });
+
+      // Update per-PP averages and terbobot
+      Object.keys(ppGroups).forEach(function(ppIdx){
+        var scores = ppGroups[ppIdx];
+        var avg = scores.reduce(function(a,b){return a+b;}, 0) / (scores.length || 1);
+        var terbobot = avg * maxBobot;
+        var avgCell = document.getElementById("ws1a2dPpAvg_" + ppIdx);
+        var terbCell = document.getElementById("ws1a2dPpTerb_" + ppIdx);
+        if (avgCell) avgCell.textContent = Math.round(avg * 100) + "%";
+        if (terbCell) terbCell.textContent = numFmt(terbobot);
+      });
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100%';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E';
+        critLabel = '100%';
+        scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D';
+        critLabel = '> 75% s/d <= 99%';
+        scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C';
+        critLabel = '> 50% s/d <= 75%';
+        scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B';
+        critLabel = '> 25% s/d <= 50%';
+        scoreVal = 0.150;
+      } else {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
+
+      // Update table bottom summary cells
+      var avgCell = document.getElementById("ws1a2dAvgCell");
+      if (avgCell) avgCell.textContent = Math.round(pct) + "%";
+
+      var terbCell = document.getElementById("ws1a2dTerbobotCell");
+      if (terbCell) terbCell.textContent = numFmt(scoreVal);
+
+      var terbCell2 = document.getElementById("ws1a2dTerbobotCell2");
+      if (terbCell2) terbCell2.textContent = numFmt(scoreVal);
+
+      var rataTerbGrand = document.getElementById("ws1a2dGrandRataTerbobotCell");
+      if (rataTerbGrand) rataTerbGrand.textContent = numFmt(scoreVal);
+
+      updateStandardCriteriaHighlight('ws1a2d', crit, scoreVal, {
+        'ws1a2dPctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2dCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // Sheet 1.a.2.e (PN 5 Program Prioritas Pembangunan Nasional)
+    else if (code === '1.a.2.e'){
+      var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_e .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        ppGroups[ppIdx].push(val);
+        totalRows++;
+        sumScore += val;
+      });
+
+      // Update per-PP averages and terbobot
+      Object.keys(ppGroups).forEach(function(ppIdx){
+        var scores = ppGroups[ppIdx];
+        var avg = scores.reduce(function(a,b){return a+b;}, 0) / (scores.length || 1);
+        var terbobot = avg * maxBobot;
+        var avgCell = document.getElementById("ws1a2ePpAvg_" + ppIdx);
+        var terbCell = document.getElementById("ws1a2ePpTerb_" + ppIdx);
+        if (avgCell) avgCell.textContent = Math.round(avg * 100) + "%";
+        if (terbCell) terbCell.textContent = numFmt(terbobot);
+      });
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100%';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E';
+        critLabel = '100%';
+        scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D';
+        critLabel = '> 75% s/d <= 99%';
+        scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C';
+        critLabel = '> 50% s/d <= 75%';
+        scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B';
+        critLabel = '> 25% s/d <= 50%';
+        scoreVal = 0.150;
+      } else {
+        crit = 'A';
+        critLabel = '<= 25%';
+        scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
+
+      // Update table bottom summary cells
+      var avgCell = document.getElementById("ws1a2eAvgCell");
+      if (avgCell) avgCell.textContent = Math.round(pct) + "%";
+
+      var terbCell = document.getElementById("ws1a2eTerbobotCell");
+      if (terbCell) terbCell.textContent = numFmt(scoreVal);
+
+      var terbCell2 = document.getElementById("ws1a2eTerbobotCell2");
+      if (terbCell2) terbCell2.textContent = numFmt(scoreVal);
+
+      var rataTerbGrand = document.getElementById("ws1a2eGrandRataTerbobotCell");
+      if (rataTerbGrand) rataTerbGrand.textContent = numFmt(scoreVal);
+
+      updateStandardCriteriaHighlight('ws1a2e', crit, scoreVal, {
+        'ws1a2ePctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2eCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // 5. Sheets 1.a.2.f s.d 1.a.2.h
     else if (code.indexOf('1.a.2.') === 0){
       var ppGroups = {};
+      var totalRows = 0;
+      var sumScore = 0;
       document.querySelectorAll("#wsTable_1_a_2_bg .ws-ppbg-row").forEach(function(row){
         var ppIdx = row.getAttribute("data-pp-idx");
         if (!ppGroups[ppIdx]) ppGroups[ppIdx] = [];
         var scoreSel = row.querySelector(".pd-score-sel");
-        ppGroups[ppIdx].push(scoreSel ? parseFloat(scoreSel.value) : 1.0);
+        var val = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        ppGroups[ppIdx].push(val);
+        totalRows++;
+        sumScore += val;
       });
 
       var allPpSum = 0;
@@ -3914,10 +7691,38 @@ tr.type-sub:hover td {
         }
       });
 
-      computedFinalScore = ppCount > 0 ? (allPpSum / ppCount) : maxBobot;
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      var crit = 'E';
+      var critLabel = '100%';
+      var scoreVal = 0.375;
+
+      if (totalRows === 0) {
+        crit = 'A'; critLabel = '<= 25%'; scoreVal = 0.075;
+      } else if (pct >= 100) {
+        crit = 'E'; critLabel = '100%'; scoreVal = 0.375;
+      } else if (pct > 75) {
+        crit = 'D'; critLabel = '> 75% s/d <= 99%'; scoreVal = 0.300;
+      } else if (pct > 50) {
+        crit = 'C'; critLabel = '> 50% s/d <= 75%'; scoreVal = 0.225;
+      } else if (pct > 25) {
+        crit = 'B'; critLabel = '> 25% s/d <= 50%'; scoreVal = 0.150;
+      } else {
+        crit = 'A'; critLabel = '<= 25%'; scoreVal = 0.075;
+      }
+
+      computedFinalScore = scoreVal;
       var elGrand = document.getElementById("ws1a2bgGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+
+      updateStandardCriteriaHighlight('ws1a2bg', crit, scoreVal, {
+        'ws1a2bgPctMatched': pct.toFixed(2) + "% (" + Math.round(sumScore) + "/" + totalRows + " Selaras)",
+        'ws1a2bgCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan: " + pct.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      }
     }
 
     // 6. Sheet 1.a.3.a & 1.a.3.b (TPT & TK)
@@ -3953,7 +7758,22 @@ tr.type-sub:hover td {
         var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
         var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(computedFinalScore);
 
-        if (excelFxContent) excelFxContent.textContent = "";
+        var crit = 'A';
+        var critLabel = '< 25%';
+        if (rowAvg >= 100) { crit = 'E'; critLabel = '100% (Selaras Penuh)'; }
+        else if (rowAvg >= 75) { crit = 'D'; critLabel = '>= 75% s.d < 100%'; }
+        else if (rowAvg >= 50) { crit = 'C'; critLabel = '>= 50% s.d < 75%'; }
+        else if (rowAvg >= 25) { crit = 'B'; critLabel = '>= 25% s.d < 50%'; }
+        else { crit = 'A'; critLabel = '< 25%'; }
+
+        updateStandardCriteriaHighlight('ws1a3', crit, computedFinalScore, {
+          'ws1a3AvgScore': rowAvg.toFixed(2) + "%",
+          'ws1a3CritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+        }, ['A', 'B', 'C', 'D', 'E']);
+
+        if (excelFxContent) {
+          excelFxContent.textContent = "Rata-rata Keselarasan: " + rowAvg.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+        }
       }
     }
 
@@ -3975,59 +7795,154 @@ tr.type-sub:hover td {
         allKpuSum += avg;
         kpuCount++;
 
-        var avgCell = document.querySelector('#wsTable_1_a_4 .kpu-avg[data-kpu-idx="' + kpuIdx + '"]');
-        if (avgCell){
-          avgCell.textContent = avg.toFixed(2);
+        var terbCell = document.querySelector('#wsTable_1_a_4 .kpu-terbobot[data-kpu-idx="' + kpuIdx + '"]');
+        if (terbCell){
+          terbCell.textContent = avg.toFixed(2);
         }
       });
 
-      var grandAvg = kpuCount > 0 ? (allKpuSum / kpuCount) : 0;
-      computedFinalScore = grandAvg * maxBobot;
+      var grandAvg = kpuCount > 0 ? (allKpuSum / kpuCount) : 0.50;
 
-      var elGrand = document.getElementById("ws1a4GrandTerbobot");
-      if (elGrand) elGrand.textContent = grandAvg.toFixed(2);
+      // Update display cell Rata-rata Keselarasan Terbobot
+      var elGrandCell = document.querySelector("#wsTable_1_a_4 .kpu-grand-avg");
+      if (elGrandCell) elGrandCell.textContent = grandAvg.toFixed(2);
+
+      var elGrandFooter = document.getElementById("ws1a4GrandTerbobotFooter");
+      if (elGrandFooter) elGrandFooter.textContent = grandAvg.toFixed(2);
+
+      // Kriteria 2 Tingkat:
+      // A. Tidak -> A = 0,5 (nilai keselarasan dibawah 0,50)
+      // B. Ya    -> B = 1   (nilai keselarasan diatas atau sama dengan 0,50)
+      var crit = (grandAvg >= 0.50) ? 'B' : 'A';
+      var critScore = (grandAvg >= 0.50) ? 1.0 : 0.5;
+      var critLabel = (grandAvg >= 0.50) ? 'Ya (Nilai keselarasan >= 0,50)' : 'Tidak (Nilai keselarasan < 0,50)';
+      computedFinalScore = critScore * maxBobot;
+
+      updateStandardCriteriaHighlight('ws1a4', crit, computedFinalScore, {
+        'ws1a4CountMatched': kpuCount + " KPU RPJMN",
+        'ws1a4AvgPct': grandAvg.toFixed(2),
+        'ws1a4CritText': '<span style="color:' + (crit === 'B' ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + (crit === 'B' ? 'B = 1' : 'A = 0, 5') + ')</span>'
+      }, ['A', 'B']);
 
       modalBobotInput.value = computedFinalScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
       modalCalcDisplay.textContent = numFmt(modalBobotInput.value);
       syncExcelScoreUI(modalBobotInput.value, maxBobot);
-      if (excelFxContent) excelFxContent.textContent = "Rata-rata Keselarasan Terbobot KPU = " + grandAvg.toFixed(2) + " x Bobot Maksimal (" + maxBobot + ") = " + numFmt(computedFinalScore);
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan Terbobot KPU = " + grandAvg.toFixed(2) + " -> Kriteria " + crit + " (" + (crit === 'B' ? 'Ya (B = 1)' : 'Tidak (A = 0, 5)') + ") = " + numFmt(computedFinalScore);
+      }
     }
 
-    // 8. Sheet 1.a.5 & 1.a.6 (SPM)
-    else if (code === '1.a.5' || code === '1.a.6'){
+    // 8. Sheet 1.a.5 (Komponen SPM RPJMD) Sesuai Rumus Rata-rata Terbobot Bidang SPM
+    else if (code === '1.a.5'){
       var bidGroups = {};
-      document.querySelectorAll("#wsTable_SPM .ws-spm-row").forEach(function(row){
+      document.querySelectorAll("#wsTable_1_a_5 .ws-1a5-row").forEach(function(row){
         var bidIdx = row.getAttribute("data-bid-idx");
         if (!bidGroups[bidIdx]) bidGroups[bidIdx] = [];
         var scoreSel = row.querySelector(".ind-score-sel");
-        bidGroups[bidIdx].push(scoreSel ? parseFloat(scoreSel.value) : 1.0);
+        bidGroups[bidIdx].push(scoreSel ? parseFloat(scoreSel.value) : 0.50);
       });
 
       var allBidSum = 0;
       var bidCount = 0;
       Object.keys(bidGroups).forEach(function(bidIdx){
         var scores = bidGroups[bidIdx];
-        var avg = scores.reduce(function(a,b){return a+b;},0) / scores.length;
+        var avg = scores.length > 0 ? (scores.reduce(function(a,b){return a+b;},0) / scores.length) : 0.50;
         allBidSum += avg;
         bidCount++;
 
-        var firstRow = document.querySelector('#wsTable_SPM .ws-spm-row[data-bid-idx="' + bidIdx + '"]');
-        if (firstRow){
-          var avgCell = firstRow.querySelector(".bid-avg");
-          if (avgCell) avgCell.textContent = (avg * 100).toFixed(0) + "%";
+        var terbCell = document.querySelector('#wsTable_1_a_5 .spm-bid-terbobot[data-bid-idx="' + bidIdx + '"]');
+        if (terbCell){
+          terbCell.textContent = avg.toFixed(2);
         }
       });
 
-      var grandAvg = bidCount > 0 ? (allBidSum / bidCount) : 0;
-      computedFinalScore = grandAvg * maxBobot;
-      var elGrand = document.getElementById("wsSpmGrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+      var grandAvg = bidCount > 0 ? (allBidSum / bidCount) : 0.50;
+
+      // Update display cell Rata-rata Keselarasan Terbobot
+      var elGrandCell = document.querySelector("#wsTable_1_a_5 .spm-grand-avg");
+      if (elGrandCell) elGrandCell.textContent = grandAvg.toFixed(2);
+
+      var elGrandFooter = document.getElementById("ws1a5GrandTerbobotFooter");
+      if (elGrandFooter) elGrandFooter.textContent = grandAvg.toFixed(2);
+
+      // Kriteria 2 Tingkat:
+      // A. Tidak -> A = 0,5 (nilai keselarasan dibawah 0,50)
+      // B. Ya    -> B = 1   (nilai keselarasan diatas atau sama dengan 0,50)
+      var crit = (grandAvg >= 0.50) ? 'B' : 'A';
+      var critScore = (grandAvg >= 0.50) ? 1.0 : 0.5;
+      computedFinalScore = critScore * maxBobot;
+
+      updateStandardCriteriaHighlight('ws1a5', crit, computedFinalScore, {
+        'ws1a5CountMatched': bidCount + " Bidang SPM",
+        'ws1a5AvgPct': grandAvg.toFixed(2),
+        'ws1a5CritText': '<span style="color:' + (crit === 'B' ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + (crit === 'B' ? 'B = 1' : 'A = 0, 5') + ')</span>'
+      }, ['A', 'B']);
+
+      modalBobotInput.value = computedFinalScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      modalCalcDisplay.textContent = numFmt(modalBobotInput.value);
+      syncExcelScoreUI(modalBobotInput.value, maxBobot);
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan Terbobot SPM = " + grandAvg.toFixed(2) + " -> Kriteria " + crit + " (" + (crit === 'B' ? 'Ya (B = 1)' : 'Tidak (A = 0, 5)') + ") = " + numFmt(computedFinalScore);
+      }
     }
 
-    // 9. Sheet 1.b.10.a & 1.b.10.b (TPT & Kemiskinan RKP vs RKPD Makro)
-    else if (code === '1.b.10.a' || code === '1.b.10.b'){
-      var tblId = code === '1.b.10.a' ? 'wsTable_1_b_10_a' : 'wsTable_1_b_10_b';
+    // 8.b Sheet 1.a.6 (Target SPM) Sesuai Rumus Rata-rata Terbobot Bidang SPM
+    else if (code === '1.a.6'){
+      var bidGroups = {};
+      document.querySelectorAll("#wsTable_1_a_6 .ws-1a6-row").forEach(function(row){
+        var bidIdx = row.getAttribute("data-bid-idx");
+        if (!bidGroups[bidIdx]) bidGroups[bidIdx] = [];
+        var scoreSel = row.querySelector(".ind-score-sel");
+        bidGroups[bidIdx].push(scoreSel ? parseFloat(scoreSel.value) : 0.50);
+      });
+
+      var allBidSum = 0;
+      var bidCount = 0;
+      Object.keys(bidGroups).forEach(function(bidIdx){
+        var scores = bidGroups[bidIdx];
+        var avg = scores.length > 0 ? (scores.reduce(function(a,b){return a+b;},0) / scores.length) : 0.50;
+        allBidSum += avg;
+        bidCount++;
+
+        var terbCell = document.querySelector('#wsTable_1_a_6 .spm-bid-terbobot[data-bid-idx="' + bidIdx + '"]');
+        if (terbCell){
+          terbCell.textContent = avg.toFixed(2);
+        }
+      });
+
+      var grandAvg = bidCount > 0 ? (allBidSum / bidCount) : 0.50;
+
+      // Update display cell Rata-rata Keselarasan Terbobot
+      var elGrandCell = document.querySelector("#wsTable_1_a_6 .spm-grand-avg");
+      if (elGrandCell) elGrandCell.textContent = grandAvg.toFixed(2);
+
+      var elGrandFooter = document.getElementById("ws1a6GrandTerbobotFooter");
+      if (elGrandFooter) elGrandFooter.textContent = grandAvg.toFixed(2);
+
+      // Kriteria 2 Tingkat:
+      // A. Tidak -> A = 0,5 (nilai keselarasan dibawah 0,50)
+      // B. Ya    -> B = 1   (nilai keselarasan diatas atau sama dengan 0,50)
+      var crit = (grandAvg >= 0.50) ? 'B' : 'A';
+      var critScore = (grandAvg >= 0.50) ? 1.0 : 0.5;
+      computedFinalScore = critScore * maxBobot;
+
+      updateStandardCriteriaHighlight('ws1a6', crit, computedFinalScore, {
+        'ws1a6CountMatched': bidCount + " Bidang SPM",
+        'ws1a6AvgPct': grandAvg.toFixed(2),
+        'ws1a6CritText': '<span style="color:' + (crit === 'B' ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + (crit === 'B' ? 'B = 1' : 'A = 0, 5') + ')</span>'
+      }, ['A', 'B']);
+
+      modalBobotInput.value = computedFinalScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+      modalCalcDisplay.textContent = numFmt(modalBobotInput.value);
+      syncExcelScoreUI(modalBobotInput.value, maxBobot);
+      if (excelFxContent) {
+        excelFxContent.textContent = "Rata-rata Keselarasan Terbobot SPM = " + grandAvg.toFixed(2) + " -> Kriteria " + crit + " (" + (crit === 'B' ? 'Ya (B = 1)' : 'Tidak (A = 0, 5)') + ") = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // 9.a Sheet 1.b.10.a (TPT RKP vs RKPD Makro)
+    else if (code === '1.b.10.a'){
+      var tblId = 'wsTable_1_b_10_a';
       var row = document.querySelector("#" + tblId + " tbody tr");
       if (row){
         var rkRealVal = row.querySelector(".rkp-real") ? row.querySelector(".rkp-real").value.trim() : "";
@@ -4069,16 +7984,180 @@ tr.type-sub:hover td {
 
         var elAvg = row.querySelector(".avg-score-val"); if (elAvg) elAvg.textContent = avgScore.toFixed(2) + "%";
 
-        computedFinalScore = (avgScore / 100) * maxBobot;
+        var crit = 'A';
+        var critLabel = 'Tidak Selaras';
+        if (avgScore >= 50.0) {
+          crit = 'B';
+          critLabel = 'Selaras';
+          computedFinalScore = 0.75;
+        } else {
+          crit = 'A';
+          critLabel = 'Tidak Selaras';
+          computedFinalScore = 0.375;
+        }
+
         modalBobotInput.value = numFmt(computedFinalScore);
         modalCalcDisplay.textContent = numFmt(computedFinalScore);
         syncExcelScoreUI(modalBobotInput.value, maxBobot);
-        if (excelFxContent) excelFxContent.textContent = "Nilai Keselarasan Rata-rata: " + avgScore.toFixed(2) + "% x Bobot (" + maxBobot + ") = " + numFmt(computedFinalScore);
+
+        var elTerb = row.querySelector(".terb-val");
+        if (elTerb) elTerb.textContent = numFmt(computedFinalScore);
+
+        var elRefDok = row.querySelector(".ref-dok-inp");
+        if (elRefDok && modalRefDokumen && modalRefDokumen.value !== elRefDok.value) modalRefDokumen.value = elRefDok.value;
+        var elRefHal = row.querySelector(".ref-hal-inp");
+        if (elRefHal && modalRefHalaman && modalRefHalaman.value !== elRefHal.value) modalRefHalaman.value = elRefHal.value;
+        var elRefTbl = row.querySelector(".ref-tbl-inp");
+        if (elRefTbl && modalRefTabel && modalRefTabel.value !== elRefTbl.value) modalRefTabel.value = elRefTbl.value;
+        var elCatatan = row.querySelector(".catatan-inp");
+        if (elCatatan && modalCatatan && modalCatatan.value !== elCatatan.value) modalCatatan.value = elCatatan.value;
+
+        var safeId = 'ws1b10a';
+        var infoMap = {};
+        infoMap[safeId + 'AvgPct'] = avgScore.toFixed(2) + "%";
+        infoMap[safeId + 'CritText'] = '<span style="color:' + (crit === 'B' ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>';
+
+        updateStandardCriteriaHighlight(safeId, crit, computedFinalScore, infoMap, ['A', 'B']);
+
+        if (excelFxContent) {
+          excelFxContent.textContent = "Nilai Keselarasan: " + avgScore.toFixed(2) + "% -> Kriteria " + crit + " (" + critLabel + ") = " + numFmt(computedFinalScore);
+        }
       }
     }
 
-    // 9. Sheet 1.b.8.a & 1.b.8.b (RKP vs RKPD Makro)
-    else if (code === '1.b.8.a' || code === '1.b.8.b'){
+    // 9.b Sheet 1.b.10.b (Kemiskinan RKP vs RKPD Makro)
+    else if (code === '1.b.10.b'){
+      var tblId = 'wsTable_1_b_10_b';
+      var row = document.querySelector("#" + tblId + " tbody tr");
+      if (row){
+        var rkRealVal = row.querySelector(".rkp-real") ? row.querySelector(".rkp-real").value.trim() : "";
+        var rkTgtVal  = row.querySelector(".rkp-tgt") ? row.querySelector(".rkp-tgt").value.trim() : "";
+        var rdRealVal = row.querySelector(".rkpd-real") ? row.querySelector(".rkpd-real").value.trim() : "";
+        var rdTgtVal  = row.querySelector(".rkpd-tgt") ? row.querySelector(".rkpd-tgt").value.trim() : "";
+
+        var hasAnyVal = (rkRealVal !== "" || rkTgtVal !== "" || rdRealVal !== "" || rdTgtVal !== "");
+        var rReal = parseFloat(rkRealVal) || 0;
+        var rTgt  = parseFloat(rkTgtVal) || 0;
+        var dReal = parseFloat(rdRealVal) || 0;
+        var dTgt  = parseFloat(rdTgtVal) || 0;
+
+        var rGap = rTgt - rReal;
+        var dGap = dTgt - dReal;
+        var elRGap = row.querySelector(".rkp-gap"); if (elRGap) elRGap.textContent = hasAnyVal ? rGap.toFixed(2) : "-";
+        var elDGap = row.querySelector(".rkpd-gap"); if (elDGap) elDGap.textContent = hasAnyVal ? dGap.toFixed(2) : "-";
+
+        var marginReal = (rReal !== 0) ? ((Math.abs(dReal - rReal)/Math.abs(rReal))*100) : 0;
+        var marginTgt  = (rTgt !== 0) ? ((Math.abs(dTgt - rTgt)/Math.abs(rTgt))*100) : 0;
+        var marginGap  = (rGap !== 0) ? (((Math.abs(dGap) - Math.abs(rGap))/Math.abs(rGap))*100) : 0;
+
+        var scoreReal = hasAnyVal ? calcMarginScore(marginReal) : 0;
+        var scoreTgt  = hasAnyVal ? calcMarginScore(marginTgt) : 0;
+        var scoreGap  = hasAnyVal ? calcMarginScore(marginGap) : 0;
+        var avgScore  = hasAnyVal ? ((scoreReal + scoreTgt + scoreGap) / 3) : 0;
+
+        var elMarginReal = row.querySelector(".margin-real-calc"); if (elMarginReal) elMarginReal.textContent = marginReal.toFixed(2) + "%";
+        var elMarginRealKet = row.querySelector(".margin-real-ket"); if (elMarginRealKet) elMarginRealKet.textContent = marginReal.toFixed(2) + "%";
+        var elScoreReal = row.querySelector(".score-real-val"); if (elScoreReal) elScoreReal.textContent = scoreReal.toFixed(2) + "%";
+
+        var elMarginTgt = row.querySelector(".margin-tgt-calc"); if (elMarginTgt) elMarginTgt.textContent = marginTgt.toFixed(2) + "%";
+        var elMarginTgtKet = row.querySelector(".margin-tgt-ket"); if (elMarginTgtKet) elMarginTgtKet.textContent = marginTgt.toFixed(2) + "%";
+        var elScoreTgt = row.querySelector(".score-tgt-val"); if (elScoreTgt) elScoreTgt.textContent = scoreTgt.toFixed(2) + "%";
+
+        var elMarginGap = row.querySelector(".margin-gap-calc"); if (elMarginGap) elMarginGap.textContent = marginGap.toFixed(2) + "%";
+        var elMarginGapKet = row.querySelector(".margin-gap-ket"); if (elMarginGapKet) elMarginGapKet.textContent = Math.abs(marginGap).toFixed(2) + "%";
+        var elScoreGap = row.querySelector(".score-gap-val"); if (elScoreGap) elScoreGap.textContent = scoreGap.toFixed(2) + "%";
+
+        var elAvg = row.querySelector(".avg-score-val"); if (elAvg) elAvg.textContent = avgScore.toFixed(2) + "%";
+
+        var crit = 'A';
+        var critLabel = 'Tidak Selaras';
+        if (avgScore >= 50.0) {
+          crit = 'B';
+          critLabel = 'Selaras';
+          computedFinalScore = 0.75;
+        } else {
+          crit = 'A';
+          critLabel = 'Tidak Selaras';
+          computedFinalScore = 0.375;
+        }
+
+        modalBobotInput.value = numFmt(computedFinalScore);
+        modalCalcDisplay.textContent = numFmt(computedFinalScore);
+        syncExcelScoreUI(modalBobotInput.value, maxBobot);
+
+        var elTerb = row.querySelector(".terb-val");
+        if (elTerb) elTerb.textContent = numFmt(computedFinalScore);
+
+        var elRefDok = row.querySelector(".ref-dok-inp");
+        if (elRefDok && modalRefDokumen && modalRefDokumen.value !== elRefDok.value) modalRefDokumen.value = elRefDok.value;
+        var elRefHal = row.querySelector(".ref-hal-inp");
+        if (elRefHal && modalRefHalaman && modalRefHalaman.value !== elRefHal.value) modalRefHalaman.value = elRefHal.value;
+        var elRefTbl = row.querySelector(".ref-tbl-inp");
+        if (elRefTbl && modalRefTabel && modalRefTabel.value !== elRefTbl.value) modalRefTabel.value = elRefTbl.value;
+        var elCatatan = row.querySelector(".catatan-inp");
+        if (elCatatan && modalCatatan && modalCatatan.value !== elCatatan.value) modalCatatan.value = elCatatan.value;
+
+        var safeId = 'ws1b10b';
+        var infoMap = {};
+        infoMap[safeId + 'AvgPct'] = avgScore.toFixed(2) + "%";
+        infoMap[safeId + 'CritText'] = '<span style="color:' + (crit === 'B' ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>';
+
+        updateStandardCriteriaHighlight(safeId, crit, computedFinalScore, infoMap, ['A', 'B']);
+
+        if (excelFxContent) {
+          excelFxContent.textContent = "Nilai Keselarasan: " + avgScore.toFixed(2) + "% -> Kriteria " + crit + " (" + critLabel + ") = " + numFmt(computedFinalScore);
+        }
+      }
+    }
+
+    // 9. Persandingan Keterkaitan Program/Kegiatan Prioritas RKP dengan Program Daerah (1.b.1.b, 1.b.1.d s.d 1.b.9.b)
+    else if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b') {
+      var safeCode = code.replace(/\./g, '');
+      var sel = document.getElementById("wsSelectPersandingan" + safeCode);
+      var isAda = sel ? (sel.value === 'Ada') : false;
+      var maxBobot = parseFloat(modalBobotMaks.value) || 0.625;
+      computedFinalScore = isAda ? maxBobot : 0.0;
+      var crit = isAda ? 'B' : 'A';
+      var critLabel = isAda ? 'Ada' : 'Tidak ada';
+
+      modalBobotInput.value = numFmt(computedFinalScore);
+      modalCalcDisplay.textContent = numFmt(computedFinalScore);
+      syncExcelScoreUI(modalBobotInput.value, maxBobot);
+
+      var tableId = "#wsTable_" + code.replace(/\./g, '_');
+      var elTerb = document.querySelector(tableId + " .terb-val");
+      if (elTerb) {
+        elTerb.textContent = numFmt(computedFinalScore);
+      }
+      if (sel) {
+        sel.style.color = isAda ? '#16a34a' : '#dc2626';
+        sel.style.background = isAda ? '#f0fdf4' : '#fef2f2';
+        sel.style.borderColor = isAda ? '#86efac' : '#fca5a5';
+      }
+
+      var elRefDok = document.querySelector(tableId + " .ref-dok-inp");
+      if (elRefDok && modalRefDokumen && modalRefDokumen.value !== elRefDok.value) modalRefDokumen.value = elRefDok.value;
+      var elRefHal = document.querySelector(tableId + " .ref-hal-inp");
+      if (elRefHal && modalRefHalaman && modalRefHalaman.value !== elRefHal.value) modalRefHalaman.value = elRefHal.value;
+      var elRefTbl = document.querySelector(tableId + " .ref-tbl-inp");
+      if (elRefTbl && modalRefTabel && modalRefTabel.value !== elRefTbl.value) modalRefTabel.value = elRefTbl.value;
+      var elCatatan = document.querySelector(tableId + " .catatan-inp");
+      if (elCatatan && modalCatatan && modalCatatan.value !== elCatatan.value) modalCatatan.value = elCatatan.value;
+
+      var safeId = 'ws' + safeCode;
+      var infoMap = {};
+      infoMap[safeId + 'StatusText'] = isAda ? 'Ada (Tersedia)' : 'Tidak Ada';
+      infoMap[safeId + 'CritText'] = '<span style="color:' + (isAda ? '#16a34a' : '#dc2626') + '; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ') = ' + numFmt(computedFinalScore) + '</span>';
+
+      updateStandardCriteriaHighlight(safeId, crit, computedFinalScore, infoMap, ['A', 'B']);
+
+      if (excelFxContent) {
+        excelFxContent.textContent = "Ketersediaan: " + (isAda ? "Ada" : "Tidak Ada") + " -> Kriteria " + crit + " (" + critLabel + ") = " + numFmt(computedFinalScore);
+      }
+    }
+
+    // 9. Sheet 1.b.8.a (RKP vs RKPD Makro)
+    else if (code === '1.b.8.a'){
       var row = document.querySelector("#wsTable_1_b_8 .ws-1b8-row");
       if (row){
         var rReal = parseFloat(row.querySelector(".rkp-real").value) || 0;
@@ -4110,11 +8189,26 @@ tr.type-sub:hover td {
         var elRowAvg = row.querySelector(".row-avg"); if (elRowAvg) elRowAvg.textContent = rowAvg.toFixed(1) + "%";
         var elRowTerb = row.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(computedFinalScore);
 
-        if (excelFxContent) excelFxContent.textContent = "";
+        var crit = 'A';
+        var critLabel = '< 25%';
+        if (rowAvg >= 100) { crit = 'E'; critLabel = '100% (Selaras Penuh)'; }
+        else if (rowAvg >= 75) { crit = 'D'; critLabel = '>= 75% s.d < 100%'; }
+        else if (rowAvg >= 50) { crit = 'C'; critLabel = '>= 50% s.d < 75%'; }
+        else if (rowAvg >= 25) { crit = 'B'; critLabel = '>= 25% s.d < 50%'; }
+        else { crit = 'A'; critLabel = '< 25%'; }
+
+        updateStandardCriteriaHighlight('ws1b8', crit, computedFinalScore, {
+          'ws1b8AvgScore': rowAvg.toFixed(2) + "%",
+          'ws1b8CritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+        }, ['A', 'B', 'C', 'D', 'E']);
+
+        if (excelFxContent) {
+          excelFxContent.textContent = "Rata-rata Keselarasan: " + rowAvg.toFixed(2) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+        }
       }
     }
 
-        // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project)
+    // 10. Sheet 1.c.1 (Alokasi APBD untuk Prioritas Nasional / Major Project)
     else if (code === '1.c.1'){
       var subRows = document.querySelectorAll("#wsTable_1_c_1 .ws-1c1-sub-row");
       var sumScore = 0;
@@ -4125,9 +8219,25 @@ tr.type-sub:hover td {
         count++;
       });
       var avgRatio = count > 0 ? (sumScore / count) : 0;
+      var pct = avgRatio * 100;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("ws1c1GrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
+
+      var crit = 'A';
+      var critLabel = '<= 25%';
+      if (pct >= 100) { crit = 'E'; critLabel = '100% (Selaras Penuh)'; }
+      else if (pct > 75) { crit = 'D'; critLabel = '> 75% s/d <= 99%'; }
+      else if (pct > 50) { crit = 'C'; critLabel = '> 50% s/d <= 75%'; }
+      else if (pct > 25) { crit = 'B'; critLabel = '> 25% s/d <= 50%'; }
+      else { crit = 'A'; critLabel = '<= 25%'; }
+
+      updateStandardCriteriaHighlight('ws1c1', crit, computedFinalScore, {
+        'ws1c1CountMatched': count + " Sub Kegiatan",
+        'ws1c1AvgPct': pct.toFixed(1) + "%",
+        'ws1c1CritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
       if (excelFxContent) excelFxContent.textContent = "Bobot: " + numFmt(maxBobot) + " | Keselarasan Terbobot: " + numFmt(computedFinalScore);
     }
 
@@ -4144,16 +8254,32 @@ tr.type-sub:hover td {
         sumScore += rowScoreRatio;
       });
       var avgRatio = rows.length > 0 ? (sumScore / rows.length) : 1.0;
+      var pct = avgRatio * 100;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("ws3a1aGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+
+      var crit = 'A';
+      var critLabel = '<= 25%';
+      if (pct >= 100) { crit = 'E'; critLabel = '100% (Seluruh Program Ada OPD)'; }
+      else if (pct > 75) { crit = 'D'; critLabel = '> 75% s/d <= 99%'; }
+      else if (pct > 50) { crit = 'C'; critLabel = '> 50% s/d <= 75%'; }
+      else if (pct > 25) { crit = 'B'; critLabel = '> 25% s/d <= 50%'; }
+      else { crit = 'A'; critLabel = '<= 25%'; }
+
+      updateStandardCriteriaHighlight('ws3a1a', crit, computedFinalScore, {
+        'ws3a1aPctMatched': pct.toFixed(1) + "% (" + Math.round(sumScore) + "/" + rows.length + " OPD Ditetapkan)",
+        'ws3a1aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) excelFxContent.textContent = "Penetapan OPD: " + pct.toFixed(1) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
     }
 
     // 12. Sheet 3.a.1.b (Target Daerah vs IKU OPD)
     else if (code === '3.a.1.b'){
       var rows = document.querySelectorAll("#wsTable_3_a_1_b .ws-3a1b-row");
       var sumTerb = 0;
+      var sumScorePct = 0;
       rows.forEach(function(r){
         var tD = parseFloat(r.querySelector(".tgt-daerah").value) || 0;
         var tO = parseFloat(r.querySelector(".tgt-opd").value) || 0;
@@ -4175,12 +8301,28 @@ tr.type-sub:hover td {
         var elScore = r.querySelector(".score-cell"); if (elScore) elScore.textContent = scorePct + "%";
         var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowTerb);
         sumTerb += rowTerb;
+        sumScorePct += scorePct;
       });
 
+      var avgScorePct = rows.length > 0 ? (sumScorePct / rows.length) : 100;
       computedFinalScore = rows.length > 0 ? (sumTerb / rows.length) : maxBobot;
       var elGrand = document.getElementById("ws3a1bGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+
+      var crit = 'A';
+      var critLabel = '< 25%';
+      if (avgScorePct >= 100) { crit = 'E'; critLabel = '100% (Selaras Penuh)'; }
+      else if (avgScorePct >= 75) { crit = 'D'; critLabel = '>= 75% s.d < 100%'; }
+      else if (avgScorePct >= 50) { crit = 'C'; critLabel = '>= 50% s.d < 75%'; }
+      else if (avgScorePct >= 25) { crit = 'B'; critLabel = '>= 25% s.d < 50%'; }
+      else { crit = 'A'; critLabel = '< 25%'; }
+
+      updateStandardCriteriaHighlight('ws3a1b', crit, computedFinalScore, {
+        'ws3a1bPctMatched': avgScorePct.toFixed(1) + "% (" + rows.length + " IKU Terukur)",
+        'ws3a1bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) excelFxContent.textContent = "Rata-rata Keselarasan IKU OPD: " + avgScorePct.toFixed(1) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
     }
 
     // 13. General / Pilar 2 Kualitas Perencanaan
@@ -4194,10 +8336,25 @@ tr.type-sub:hover td {
         sumRatio += ratio;
       });
       var avgRatio = rows.length > 0 ? (sumRatio / rows.length) : 1.0;
+      var pct = avgRatio * 100;
       computedFinalScore = avgRatio * maxBobot;
       var elGrand = document.getElementById("wsGenGrandTerbobot");
       if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
-      if (excelFxContent) excelFxContent.textContent = "";
+
+      var crit = 'A';
+      var critLabel = '<= 25%';
+      if (pct >= 100) { crit = 'E'; critLabel = '100% (Memenuhi Sepenuhnya)'; }
+      else if (pct > 75) { crit = 'D'; critLabel = '> 75% s/d <= 99%'; }
+      else if (pct > 50) { crit = 'C'; critLabel = '> 50% s/d <= 75%'; }
+      else if (pct > 25) { crit = 'B'; critLabel = '> 25% s/d <= 50%'; }
+      else { crit = 'A'; critLabel = '<= 25%'; }
+
+      updateStandardCriteriaHighlight('wsGen', crit, computedFinalScore, {
+        'wsGenPctMatched': pct.toFixed(1) + "% (" + rows.length + " Parameter)",
+        'wsGenCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
+      }, ['A', 'B', 'C', 'D', 'E']);
+
+      if (excelFxContent) excelFxContent.textContent = "Pemenuhan Kriteria: " + pct.toFixed(1) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
     }
 
     // Sync computed score to Capaian input and pill display
@@ -4218,18 +8375,50 @@ tr.type-sub:hover td {
 
     // 1. Sheet 1.a.1.a
     if (code === '1.a.1.a'){
+      var matchedCount = 0;
+      var totalRows = 0;
       document.querySelectorAll("#wsTable_1_a_1_a .ws-1a1a-row").forEach(function(row){
         var rId = row.getAttribute("data-row-id");
-        json[rId + "_mn_base"] = row.querySelector(".mn-base").value.trim();
-        json[rId + "_mn_end"]  = row.querySelector(".mn-end").value.trim();
-        json[rId + "_md_base"] = row.querySelector(".md-base").value.trim();
-        json[rId + "_md_end"]  = row.querySelector(".md-end").value.trim();
+        var mnB = row.querySelector(".mn-base").value.trim();
+        var mnE = row.querySelector(".mn-end").value.trim();
+        var mdB = row.querySelector(".md-base").value.trim();
+        var mdE = row.querySelector(".md-end").value.trim();
+        json[rId + "_mn_base"] = mnB;
+        json[rId + "_mn_end"]  = mnE;
+        json[rId + "_md_base"] = mdB;
+        json[rId + "_md_end"]  = mdE;
+        totalRows++;
+        if ((mdB !== "" && !isNaN(parseFloat(mdB))) || (mdE !== "" && !isNaN(parseFloat(mdE)))) {
+          matchedCount++;
+        }
       });
+      var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 0;
+      json.matched_count = matchedCount;
+      json.total_rows = totalRows;
+      json.pct_matched = pctMatched;
+      json.kriteria = matchedCount === 0 ? 'A' : (pctMatched < 50 ? 'B' : 'C');
     }
-    // 2. Persandingan
-    else if (code === '1.a.1.b' || code === '1.a.1.d'){
+    // 2. Persandingan 1.a.1.b
+    else if (code === '1.a.1.b'){
       var sel = document.getElementById("wsSelectPersandingan");
-      json.status_tabel = sel ? sel.value : 'Ada';
+      var isAda = sel ? (sel.value === 'Ada') : true;
+      var catInp = document.getElementById("ws1a1bCatatan");
+
+      json.status_tabel = isAda ? 'Ada' : 'Tidak Ada';
+      json.catatan = catInp ? catInp.value.trim() : '';
+      json.kriteria = isAda ? 'B' : 'A';
+      json.score = isAda ? 0.5 : 0.0;
+    }
+    // 2b. Persandingan 1.a.1.d
+    else if (code === '1.a.1.d'){
+      var sel = document.getElementById("wsSelectPersandingan1d") || document.getElementById("wsSelectPersandingan");
+      var isAda = sel ? (sel.value === 'Ada') : true;
+      var catInp = document.getElementById("ws1a1dCatatan");
+
+      json.status_tabel = isAda ? 'Ada' : 'Tidak Ada';
+      json.catatan = catInp ? catInp.value.trim() : '';
+      json.kriteria = isAda ? 'B' : 'A';
+      json.score = isAda ? 0.5 : 0.0;
     }
     // 3. Sheet 1.a.1.c Matrix
     else if (code === '1.a.1.c'){
@@ -4243,11 +8432,14 @@ tr.type-sub:hover td {
         var pdInp = row.querySelector(".pd-title-inp");
         var scoreSel = row.querySelector(".pd-score-sel");
         var ketInp = row.querySelector(".pd-ket-inp");
+        var catInp = row.querySelector(".pn-catatan-inp");
 
         if (pnIdx !== lastPnIdx){
           if (curPn) pnList.push(curPn);
           curPn = {
+            pn_id: parseInt(pnIdx) + 1,
             pn_title: pnInp ? pnInp.value.trim() : '',
+            catatan: catInp ? catInp.value.trim() : '',
             pds: []
           };
           lastPnIdx = pnIdx;
@@ -4256,25 +8448,47 @@ tr.type-sub:hover td {
         if (curPn && pdInp){
           curPn.pds.push({
             title: pdInp.value.trim(),
-            score: scoreSel ? parseFloat(scoreSel.value) : 1.0,
+            score: scoreSel ? parseFloat(scoreSel.value) : 0,
             ket: ketInp ? ketInp.value.trim() : ''
           });
         }
       });
       if (curPn) pnList.push(curPn);
       json.pn_list = pnList;
+
+      var totalPns = pnList.length || 8;
+      var matchedPns = 0;
+      pnList.forEach(function(pn){
+        var hasMatch = (pn.pds || []).some(function(pd){
+          return pd.score > 0 || (pd.title && pd.title.trim() !== '' && !pd.title.toLowerCase().includes('tidak ada') && !pd.title.toLowerCase().includes('belum'));
+        });
+        if (hasMatch) matchedPns++;
+      });
+      var pct = totalPns > 0 ? (matchedPns / totalPns) * 100 : 0;
+      json.matched_count = matchedPns;
+      json.total_pns = totalPns;
+      json.pct_matched = pct;
+      json.kriteria = matchedPns === 0 ? 'A' : (pct < 50 ? 'B' : 'C');
+      json.score = matchedPns === 0 ? 0.0 : (pct < 50 ? 0.3 : 0.5);
     }
     // 4. Sheet 1.a.2.a
     else if (code === '1.a.2.a'){
       var ppList = [];
       var curPp = null;
       var lastPpIdx = null;
+      var totalRows = 0;
+      var sumScore = 0;
 
       document.querySelectorAll("#wsTable_1_a_2_a .ws-pp-row").forEach(function(row){
         var ppIdx = row.getAttribute("data-pp-idx");
         var ppInp = row.querySelector(".pp-title-inp");
         var pdInp = row.querySelector(".pd-title-inp");
         var scoreSel = row.querySelector(".pd-score-sel");
+        var ketInp = row.querySelector(".pd-ket-inp");
+
+        var sVal = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        totalRows++;
+        sumScore += sVal;
 
         if (ppIdx !== lastPpIdx){
           if (curPp) ppList.push(curPp);
@@ -4288,14 +8502,351 @@ tr.type-sub:hover td {
         if (curPp && pdInp){
           curPp.pds.push({
             title: pdInp.value.trim(),
-            score: scoreSel ? parseFloat(scoreSel.value) : 1.0
+            score: sVal,
+            ket: ketInp ? ketInp.value.trim() : ''
           });
         }
       });
       if (curPp) ppList.push(curPp);
       json.pp_list = ppList;
+
+      var pnWrap = document.querySelector("#wsTable_1_a_2_a .cell-pn-wrap-2a");
+      var pnTitle = pnWrap ? pnWrap.textContent.trim() : 'PN 1 : Memperkokoh Ideologi Pancasila, Demokrasi, dan Hak Asasi Manusia';
+      json.pn_list = [{
+        pn_title: pnTitle,
+        pps: ppList
+      }];
+
+      var catatanInp = document.getElementById("ws1a2aCatatan");
+      json.catatan = catatanInp ? catatanInp.value.trim() : '';
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      json.total_rows = totalRows;
+      json.sum_score = sumScore;
+      json.pct_matched = pct;
+
+      if (totalRows === 0) {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      } else if (pct >= 100) {
+        json.kriteria = 'E';
+        json.score = 0.375;
+      } else if (pct > 75) {
+        json.kriteria = 'D';
+        json.score = 0.300;
+      } else if (pct > 50) {
+        json.kriteria = 'C';
+        json.score = 0.225;
+      } else if (pct > 25) {
+        json.kriteria = 'B';
+        json.score = 0.150;
+      } else {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      }
     }
-    // 5. Sheets 1.a.2.b s.d 1.a.2.g
+    // Sheet 1.a.2.b
+    else if (code === '1.a.2.b'){
+      var ppList = [];
+      var curPp = null;
+      var lastPpIdx = null;
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_b .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        var ppInp = row.querySelector(".pp-title-inp");
+        var pdInp = row.querySelector(".pd-title-inp");
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var ketInp = row.querySelector(".pp-ket-inp");
+
+        var sVal = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        totalRows++;
+        sumScore += sVal;
+
+        if (ppIdx !== lastPpIdx){
+          if (curPp) ppList.push(curPp);
+          curPp = {
+            pp_title: ppInp ? ppInp.value.trim() : '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            pds: []
+          };
+          lastPpIdx = ppIdx;
+        }
+
+        if (curPp && pdInp){
+          curPp.pds.push({
+            title: pdInp.value.trim(),
+            score: sVal
+          });
+        }
+      });
+      if (curPp) ppList.push(curPp);
+      json.pp_list = ppList;
+
+      var pnWrap = document.querySelector("#wsTable_1_a_2_b .cell-pn-wrap-2b");
+      var pnTitle = pnWrap ? pnWrap.textContent.trim() : 'PN 2 : Memantapkan Sistem Pertahanan Keamanan Negara dan Mendorong Kemandirian Bangsa melalui Swasembada Pangan, Energi, Air, Ekonomi Syariah, Ekonomi Digital, Ekonomi Hijau, dan Ekonomi Biru';
+      json.pn_list = [{
+        pn_title: pnTitle,
+        pps: ppList
+      }];
+
+      var catatanInp = document.getElementById("ws1a2bCatatan");
+      json.catatan = catatanInp ? catatanInp.value.trim() : '';
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      json.total_rows = totalRows;
+      json.sum_score = sumScore;
+      json.pct_matched = pct;
+
+      if (totalRows === 0) {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      } else if (pct >= 100) {
+        json.kriteria = 'E';
+        json.score = 0.375;
+      } else if (pct > 75) {
+        json.kriteria = 'D';
+        json.score = 0.300;
+      } else if (pct > 50) {
+        json.kriteria = 'C';
+        json.score = 0.225;
+      } else if (pct > 25) {
+        json.kriteria = 'B';
+        json.score = 0.150;
+      } else {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      }
+    }
+    // Sheet 1.a.2.c
+    else if (code === '1.a.2.c'){
+      var ppList = [];
+      var curPp = null;
+      var lastPpIdx = null;
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_c .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        var ppInp = row.querySelector(".pp-title-inp");
+        var pdInp = row.querySelector(".pd-title-inp");
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var ketInp = row.querySelector(".pp-ket-inp");
+
+        var sVal = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        totalRows++;
+        sumScore += sVal;
+
+        if (ppIdx !== lastPpIdx){
+          if (curPp) ppList.push(curPp);
+          curPp = {
+            pp_title: ppInp ? ppInp.value.trim() : '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            pds: []
+          };
+          lastPpIdx = ppIdx;
+        }
+
+        if (curPp && pdInp){
+          curPp.pds.push({
+            title: pdInp.value.trim(),
+            score: sVal
+          });
+        }
+      });
+      if (curPp) ppList.push(curPp);
+      json.pp_list = ppList;
+
+      var pnWrap = document.querySelector("#wsTable_1_a_2_c .cell-pn-wrap-2c");
+      var pnTitle = pnWrap ? pnWrap.textContent.trim() : 'PN 3 : Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif serta mengembangkan agroindustri maritim industri di sentra produksi melalui peran aktif koperasi,';
+      json.pn_list = [{
+        pn_title: pnTitle,
+        pps: ppList
+      }];
+
+      var catatanInp = document.getElementById("ws1a2cCatatan");
+      json.catatan = catatanInp ? catatanInp.value.trim() : '';
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      json.total_rows = totalRows;
+      json.sum_score = sumScore;
+      json.pct_matched = pct;
+
+      if (totalRows === 0) {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      } else if (pct >= 100) {
+        json.kriteria = 'E';
+        json.score = 0.375;
+      } else if (pct > 75) {
+        json.kriteria = 'D';
+        json.score = 0.300;
+      } else if (pct > 50) {
+        json.kriteria = 'C';
+        json.score = 0.225;
+      } else if (pct > 25) {
+        json.kriteria = 'B';
+        json.score = 0.150;
+      } else {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      }
+    }
+    // Sheet 1.a.2.d
+    else if (code === '1.a.2.d'){
+      var ppList = [];
+      var curPp = null;
+      var lastPpIdx = null;
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_d .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        var ppInp = row.querySelector(".pp-title-inp");
+        var pdInp = row.querySelector(".pd-title-inp");
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var ketInp = row.querySelector(".pp-ket-inp");
+
+        var sVal = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        totalRows++;
+        sumScore += sVal;
+
+        if (ppIdx !== lastPpIdx){
+          if (curPp) ppList.push(curPp);
+          curPp = {
+            pp_title: ppInp ? ppInp.value.trim() : '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            pds: []
+          };
+          lastPpIdx = ppIdx;
+        }
+
+        if (curPp && pdInp){
+          curPp.pds.push({
+            title: pdInp.value.trim(),
+            score: sVal
+          });
+        }
+      });
+      if (curPp) ppList.push(curPp);
+      json.pp_list = ppList;
+
+      var pnWrap = document.querySelector("#wsTable_1_a_2_d .cell-pn-wrap-2b");
+      var pnTitle = pnWrap ? pnWrap.textContent.trim() : 'PN 4 : Memperkuat Pembangunan Sumber Daya Manusia (SDM), Sains, Teknologi, Pendidikan, Kesehatan, Prestasi Olahraga, Kesetaraan Gender, serta Penguatan Peran Perempuan, Pemuda (Generasi Milenial dan Generasi Z), dan Penyandang Disabilitas';
+      json.pn_list = [{
+        pn_title: pnTitle,
+        pps: ppList
+      }];
+
+      var catatanInp = document.getElementById("ws1a2dCatatan");
+      json.catatan = catatanInp ? catatanInp.value.trim() : '';
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      json.total_rows = totalRows;
+      json.sum_score = sumScore;
+      json.pct_matched = pct;
+
+      if (totalRows === 0) {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      } else if (pct >= 100) {
+        json.kriteria = 'E';
+        json.score = 0.375;
+      } else if (pct > 75) {
+        json.kriteria = 'D';
+        json.score = 0.300;
+      } else if (pct > 50) {
+        json.kriteria = 'C';
+        json.score = 0.225;
+      } else if (pct > 25) {
+        json.kriteria = 'B';
+        json.score = 0.150;
+      } else {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      }
+    }
+    // Sheet 1.a.2.e
+    else if (code === '1.a.2.e'){
+      var ppList = [];
+      var curPp = null;
+      var lastPpIdx = null;
+      var totalRows = 0;
+      var sumScore = 0;
+
+      document.querySelectorAll("#wsTable_1_a_2_e .ws-pp-row").forEach(function(row){
+        var ppIdx = row.getAttribute("data-pp-idx");
+        var ppInp = row.querySelector(".pp-title-inp");
+        var pdInp = row.querySelector(".pd-title-inp");
+        var scoreSel = row.querySelector(".pd-score-sel");
+        var ketInp = row.querySelector(".pp-ket-inp");
+
+        var sVal = scoreSel ? parseFloat(scoreSel.value) : 1.0;
+        totalRows++;
+        sumScore += sVal;
+
+        if (ppIdx !== lastPpIdx){
+          if (curPp) ppList.push(curPp);
+          curPp = {
+            pp_title: ppInp ? ppInp.value.trim() : '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            pds: []
+          };
+          lastPpIdx = ppIdx;
+        }
+
+        if (curPp && pdInp){
+          curPp.pds.push({
+            title: pdInp.value.trim(),
+            score: sVal
+          });
+        }
+      });
+      if (curPp) ppList.push(curPp);
+      json.pp_list = ppList;
+
+      var pnWrap = document.querySelector("#wsTable_1_a_2_e .cell-pn-wrap-2b");
+      var pnTitle = pnWrap ? pnWrap.textContent.trim() : 'PN 5 : Melanjutkan Hilirisasi dan Mengembangkan Industri Berbasis Sumber Daya Alam untuk Meningkatkan Nilai Tambah di Dalam Negeri';
+      json.pn_list = [{
+        pn_title: pnTitle,
+        pps: ppList
+      }];
+
+      var catatanInp = document.getElementById("ws1a2eCatatan");
+      json.catatan = catatanInp ? catatanInp.value.trim() : '';
+
+      var avgRatio = totalRows > 0 ? (sumScore / totalRows) : 1.0;
+      var pct = avgRatio * 100;
+      json.total_rows = totalRows;
+      json.sum_score = sumScore;
+      json.pct_matched = pct;
+
+      if (totalRows === 0) {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      } else if (pct >= 100) {
+        json.kriteria = 'E';
+        json.score = 0.375;
+      } else if (pct > 75) {
+        json.kriteria = 'D';
+        json.score = 0.300;
+      } else if (pct > 50) {
+        json.kriteria = 'C';
+        json.score = 0.225;
+      } else if (pct > 25) {
+        json.kriteria = 'B';
+        json.score = 0.150;
+      } else {
+        json.kriteria = 'A';
+        json.score = 0.075;
+      }
+    }
+    // 5. Sheets 1.a.2.f s.d 1.a.2.h
     else if (code.indexOf('1.a.2.') === 0){
       var ppList = [];
       var curPp = null;
@@ -4356,12 +8907,14 @@ tr.type-sub:hover td {
 
         if (kpuIdx !== lastKpuIdx){
           if (curKpu) kpuList.push(curKpu);
+          var terbCell = document.querySelector('#wsTable_1_a_4 .kpu-terbobot[data-kpu-idx="' + kpuIdx + '"]');
           curKpu = {
             kpu_title: row.getAttribute("data-kpu-title") || '',
             keterangan: ketInp ? ketInp.value.trim() : '',
-            dokumen: dokInp ? dokInp.value.trim() : '',
-            halaman: halInp ? halInp.value.trim() : '',
-            tabel: tblInp ? tblInp.value.trim() : '',
+            keselarasan_terbobot: terbCell ? parseFloat(terbCell.textContent) : 0.50,
+            dokumen: dokInp ? (dokInp.value.trim() || 'RPJMN Tahun 2025-2029') : 'RPJMN Tahun 2025-2029',
+            halaman: halInp ? (halInp.value.trim() || '270') : '270',
+            tabel: tblInp ? (tblInp.value.trim() || 'Daftar Kegiatan Utama Pembangunan') : 'Daftar Kegiatan Utama Pembangunan',
             catatan: catInp ? catInp.value.trim() : '',
             pds: []
           };
@@ -4378,40 +8931,118 @@ tr.type-sub:hover td {
       });
       if (curKpu) kpuList.push(curKpu);
       json.kpu_list = kpuList;
+
+      var grandCell = document.querySelector("#wsTable_1_a_4 .kpu-grand-avg");
+      var grandVal = grandCell ? parseFloat(grandCell.textContent) : 0.50;
+      json.rata_rata_terbobot = grandVal;
+      json.kriteria = (grandVal >= 0.50) ? 'B' : 'A';
+      json.score = (grandVal >= 0.50) ? 1.0 : 0.5;
     }
-    // 8. Sheet SPM
-    else if (code === '1.a.5' || code === '1.a.6'){
+    // 8. Sheet 1.a.5 (Komponen SPM RPJMD)
+    else if (code === '1.a.5'){
       var spmList = [];
       var curBid = null;
       var lastBidIdx = null;
 
-      document.querySelectorAll("#wsTable_SPM .ws-spm-row").forEach(function(row){
+      document.querySelectorAll("#wsTable_1_a_5 .ws-1a5-row").forEach(function(row){
         var bidIdx = row.getAttribute("data-bid-idx");
-        var indInp = row.querySelector(".ind-name-inp");
-        var tgtInp = row.querySelector(".ind-target-inp");
-        var unitInp = row.querySelector(".ind-unit-inp");
+        var indNameSpan = row.querySelector(".spm-ind-name");
         var scoreSel = row.querySelector(".ind-score-sel");
+        var ketInp = row.querySelector(".spm-ket-inp");
+        var dokInp = row.querySelector(".spm-dok-inp");
+        var halInp = row.querySelector(".spm-hal-inp");
+        var tblInp = row.querySelector(".spm-tbl-inp");
+        var catInp = row.querySelector(".spm-catatan-inp");
 
         if (bidIdx !== lastBidIdx){
           if (curBid) spmList.push(curBid);
+          var terbCell = document.querySelector('#wsTable_1_a_5 .spm-bid-terbobot[data-bid-idx="' + bidIdx + '"]');
           curBid = {
-            bidang: 'Bidang ' + (parseInt(bidIdx) + 1),
+            no_bidang: parseInt(bidIdx) + 1,
+            bidang_nasional: row.getAttribute("data-bid-nasional") || '',
+            bidang_daerah: row.getAttribute("data-bid-title") || '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            keselarasan_terbobot: terbCell ? parseFloat(terbCell.textContent) : 0.50,
+            dokumen: dokInp ? (dokInp.value.trim() || 'RPJMD Kab Banyuwangi 2025-2029') : 'RPJMD Kab Banyuwangi 2025-2029',
+            halaman: halInp ? halInp.value.trim() : '',
+            tabel: tblInp ? tblInp.value.trim() : '',
+            catatan: catInp ? catInp.value.trim() : '',
             ind_list: []
           };
           lastBidIdx = bidIdx;
         }
 
-        if (curBid && indInp){
+        var indName = indNameSpan ? indNameSpan.textContent.trim() : '-';
+        if (curBid){
           curBid.ind_list.push({
-            name: indInp.value.trim(),
-            target: tgtInp ? tgtInp.value.trim() : '100%',
-            unit: unitInp ? unitInp.value.trim() : 'Persen',
-            score: scoreSel ? parseFloat(scoreSel.value) : 1.0
+            name: indName,
+            score: scoreSel ? parseFloat(scoreSel.value) : 0.50
           });
         }
       });
       if (curBid) spmList.push(curBid);
       json.spm_list = spmList;
+
+      var grandCell = document.querySelector("#wsTable_1_a_5 .spm-grand-avg");
+      var grandVal = grandCell ? parseFloat(grandCell.textContent) : 0.50;
+      json.rata_rata_terbobot = grandVal;
+      json.kriteria = (grandVal >= 0.50) ? 'B' : 'A';
+      json.score = (grandVal >= 0.50) ? 1.0 : 0.5;
+    }
+    // 8.b Sheet 1.a.6 (Target SPM)
+    else if (code === '1.a.6'){
+      var spmList = [];
+      var curBid = null;
+      var lastBidIdx = null;
+
+      document.querySelectorAll("#wsTable_1_a_6 .ws-1a6-row").forEach(function(row){
+        var bidIdx = row.getAttribute("data-bid-idx");
+        var indNameSpan = row.querySelector(".spm-ind-name");
+        var tgtInp = row.querySelector(".ind-target-inp");
+        var unitInp = row.querySelector(".ind-unit-inp");
+        var scoreSel = row.querySelector(".ind-score-sel");
+        var ketInp = row.querySelector(".spm-ket-inp");
+        var dokInp = row.querySelector(".spm-dok-inp");
+        var halInp = row.querySelector(".spm-hal-inp");
+        var tblInp = row.querySelector(".spm-tbl-inp");
+        var catInp = row.querySelector(".spm-catatan-inp");
+
+        if (bidIdx !== lastBidIdx){
+          if (curBid) spmList.push(curBid);
+          var terbCell = document.querySelector('#wsTable_1_a_6 .spm-bid-terbobot[data-bid-idx="' + bidIdx + '"]');
+          curBid = {
+            no_bidang: parseInt(bidIdx) + 1,
+            bidang_nasional: row.getAttribute("data-bid-nasional") || '',
+            bidang_daerah: row.getAttribute("data-bid-title") || '',
+            keterangan: ketInp ? ketInp.value.trim() : '',
+            keselarasan_terbobot: terbCell ? parseFloat(terbCell.textContent) : 0.50,
+            dokumen: dokInp ? (dokInp.value.trim() || 'RPJMD Kab Banyuwangi 2025-2029') : 'RPJMD Kab Banyuwangi 2025-2029',
+            halaman: halInp ? halInp.value.trim() : '',
+            tabel: tblInp ? tblInp.value.trim() : '',
+            catatan: catInp ? catInp.value.trim() : '',
+            ind_list: []
+          };
+          lastBidIdx = bidIdx;
+        }
+
+        var indName = indNameSpan ? indNameSpan.textContent.trim() : '-';
+        if (curBid){
+          curBid.ind_list.push({
+            name: indName,
+            target: tgtInp ? tgtInp.value.trim() : '-',
+            satuan: unitInp ? unitInp.value.trim() : 'persen',
+            score: scoreSel ? parseFloat(scoreSel.value) : 0.50
+          });
+        }
+      });
+      if (curBid) spmList.push(curBid);
+      json.spm_list = spmList;
+
+      var grandCell = document.querySelector("#wsTable_1_a_6 .spm-grand-avg");
+      var grandVal = grandCell ? parseFloat(grandCell.textContent) : 0.50;
+      json.rata_rata_terbobot = grandVal;
+      json.kriteria = (grandVal >= 0.50) ? 'B' : 'A';
+      json.score = (grandVal >= 0.50) ? 1.0 : 0.5;
     }
     // 9. Sheet 1.b.8
                 // 9.a Sheet 1.b.10.a (TPT RKP vs RKPD)
@@ -4436,6 +9067,9 @@ tr.type-sub:hover td {
         json.halaman = row.querySelector(".ref-hal-inp") ? row.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
         json.tabel = row.querySelector(".ref-tbl-inp") ? row.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
         json.catatan = row.querySelector(".catatan-inp") ? row.querySelector(".catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+        var avgVal = parseFloat(json.avg_score) || 0;
+        json.kriteria = avgVal >= 50.0 ? 'B' : 'A';
+        json.score = avgVal >= 50.0 ? 0.75 : 0.375;
       }
     }
         // 9.b Sheet 1.b.10.b (Kemiskinan RKP vs RKPD)
@@ -4460,9 +9094,28 @@ tr.type-sub:hover td {
         json.halaman = row.querySelector(".ref-hal-inp") ? row.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
         json.tabel = row.querySelector(".ref-tbl-inp") ? row.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
         json.catatan = row.querySelector(".catatan-inp") ? row.querySelector(".catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+        var avgVal = parseFloat(json.avg_score) || 0;
+        json.kriteria = avgVal >= 50.0 ? 'B' : 'A';
+        json.score = avgVal >= 50.0 ? 0.75 : 0.375;
       }
     }
-    else if (code === '1.b.8.a' || code === '1.b.8.b'){
+    else if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b'){
+      var tableId = "#wsTable_" + code.replace(/\./g, '_');
+      var row = document.querySelector(tableId + " .ws-persandingan-row");
+      if (row){
+        var sel = row.querySelector(".status-tabel-select");
+        var isAda = sel ? (sel.value === 'Ada') : false;
+        json.status_tabel = sel ? sel.value : 'Tidak Ada';
+        json.kriteria = isAda ? 'B' : 'A';
+        json.score = isAda ? 0.625 : 0.0;
+        json.score_terbobot = row.querySelector(".terb-val") ? row.querySelector(".terb-val").textContent.trim() : numFmt(json.score);
+        json.dokumen = row.querySelector(".ref-dok-inp") ? row.querySelector(".ref-dok-inp").value.trim() : (modalRefDokumen ? modalRefDokumen.value.trim() : '');
+        json.halaman = row.querySelector(".ref-hal-inp") ? row.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
+        json.tabel = row.querySelector(".ref-tbl-inp") ? row.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
+        json.catatan = row.querySelector(".catatan-inp") ? row.querySelector(".catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+      }
+    }
+    else if (code === '1.b.8.a'){
       var row = document.querySelector("#wsTable_1_b_8 .ws-1b8-row");
       if (row){
         json.rkp_real = row.querySelector(".rkp-real").value.trim();
@@ -4595,7 +9248,8 @@ tr.type-sub:hover td {
   }
 
   // Open Modal Detail
-  function openDetailModal(code){
+  function openDetailModal(code, isVerifMode){
+    if (isVerifMode === undefined) isVerifMode = IS_VERIFIKATOR;
     var item = itemMap[code];
     if (!item) return;
 
@@ -4617,7 +9271,7 @@ tr.type-sub:hover td {
     var typeLabel = item.type === 'sub' ? 'Sub-Indikator ' + item.letter + ')' : 'Indikator ' + (item.no || '');
     excelFxContent.textContent = typeLabel + " : " + item.title;
 
-    var currentVal = (saved.bobot_capaian !== null && saved.bobot_capaian !== undefined) ? saved.bobot_capaian : item.bobot;
+    var currentVal = (saved.bobot_verifikator !== null && saved.bobot_verifikator !== undefined && saved.bobot_verifikator !== "") ? saved.bobot_verifikator : ((saved.bobot_capaian !== null && saved.bobot_capaian !== undefined) ? saved.bobot_capaian : item.bobot);
     modalBobotInput.value = currentVal;
     modalBobotInput.max = item.bobot;
     modalCalcDisplay.textContent = numFmt(currentVal);
@@ -4627,13 +9281,342 @@ tr.type-sub:hover td {
     modalRefTabel.value = detailObj.ref_tabel || "";
     modalCatatan.value = saved.catatan || "";
     modalBuktiDukung.value = saved.bukti_dukung || "";
+
+    if (code === '1.a.1.b') {
+      var auto1b = getAutoScore_1_a_1_b(detailObj);
+      if (!modalCatatan.value && auto1b.catatan) {
+        modalCatatan.value = auto1b.catatan;
+      }
+    }
+    if (code === '1.a.1.c') {
+      var auto1c = getAutoScore_1_a_1_c(detailObj);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Otomatis dihitung dari keselarasan Prioritas Pembangunan Daerah terhadap PN RPJMN (" + auto1c.matched + "/" + auto1c.total + " PN selaras, " + auto1c.pct.toFixed(2) + "%)";
+      }
+    }
+    if (code === '1.a.1.d') {
+      var auto1d = getAutoScore_1_a_1_d(detailObj);
+      if (!modalCatatan.value && auto1d.catatan) {
+        modalCatatan.value = auto1d.catatan;
+      }
+    }
+    if (code === '1.a.2.a') {
+      var auto1a2a = getAutoScore_1_a_2_a(detailObj, item.bobot);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.a.2.b') {
+      var auto1a2b = getAutoScore_1_a_2_b(detailObj, item.bobot);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.a.2.c') {
+      var auto1a2c = getAutoScore_1_a_2_c(detailObj, item.bobot);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.a.2.d') {
+      var auto1a2d = getAutoScore_1_a_2_d(detailObj, item.bobot);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.a.2.e') {
+      var auto1a2e = getAutoScore_1_a_2_e(detailObj, item.bobot);
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.a.4') {
+      var auto1a4 = getAutoScore_1_a_4(detailObj);
+      if (!saved.bobot_capaian || (parseFloat(saved.bobot_capaian) !== 0.5 && parseFloat(saved.bobot_capaian) !== 1.0)) {
+        saved.bobot_capaian = auto1a4.score;
+        saved.opsi_aksi = auto1a4.aksi;
+      }
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || 'RPJMN Tahun 2025-2029';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || '270';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || 'Daftar Kegiatan Utama Pembangunan';
+      if (!modalCatatan.value) {
+        modalCatatan.value = detailObj.catatan || "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Kegiatan Prioritas Utama terkait";
+      }
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+      currentVal = saved.bobot_capaian;
+      modalBobotInput.value = currentVal;
+      modalCalcDisplay.textContent = numFmt(currentVal);
+    }
+    if (code === '1.a.5') {
+      var auto1a5 = getAutoScore_1_a_5(detailObj);
+      if (!saved.bobot_capaian || (parseFloat(saved.bobot_capaian) !== 0.5 && parseFloat(saved.bobot_capaian) !== 1.0)) {
+        saved.bobot_capaian = auto1a5.score;
+        saved.opsi_aksi = auto1a5.aksi;
+      }
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Indikator SPM Daerah yang selaras dengan Bidang SPM Nasional dan Daerah terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+      currentVal = saved.bobot_capaian;
+      modalBobotInput.value = currentVal;
+      modalCalcDisplay.textContent = numFmt(currentVal);
+    }
+    if (code === '1.a.6') {
+      var auto1a6 = getAutoScore_1_a_6(detailObj);
+      if (!saved.bobot_capaian || (parseFloat(saved.bobot_capaian) !== 0.5 && parseFloat(saved.bobot_capaian) !== 1.0)) {
+        saved.bobot_capaian = auto1a6.score;
+        saved.opsi_aksi = auto1a6.aksi;
+      }
+      if (!modalCatatan.value) {
+        modalCatatan.value = "Terdapat Target SPM Daerah yang selaras dengan Target SPM Nasional terkait";
+      }
+      detailObj.catatan = modalCatatan.value;
+      currentVal = saved.bobot_capaian;
+      modalBobotInput.value = currentVal;
+      modalCalcDisplay.textContent = numFmt(currentVal);
+    }
+    if (code === '1.b.10.a') {
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || (typeof AUTO_DATA_1_B_10_A !== 'undefined' ? (AUTO_DATA_1_B_10_A.dokumen || '') : '') || 'RKPD Kab Banyuwangi 2026';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || (typeof AUTO_DATA_1_B_10_A !== 'undefined' ? (AUTO_DATA_1_B_10_A.halaman || '') : '') || 'IV-7';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || (typeof AUTO_DATA_1_B_10_A !== 'undefined' ? (AUTO_DATA_1_B_10_A.tabel || '') : '') || 'Tabel 4.1';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || (typeof AUTO_DATA_1_B_10_A !== 'undefined' ? (AUTO_DATA_1_B_10_A.catatan || '') : '') || 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.b.10.b') {
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.dokumen || '') : '') || 'RKPD Kab Banyuwangi 2026';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.halaman || '') : '') || 'IV-8';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.tabel || '') : '') || 'Tabel 4.1';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.catatan || '') : '') || 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+    var persandinganAutoMap = {
+      '1.b.1.b': typeof AUTO_DATA_1_B_1_B !== 'undefined' ? AUTO_DATA_1_B_1_B : {},
+      '1.b.1.d': typeof AUTO_DATA_1_B_1_D !== 'undefined' ? AUTO_DATA_1_B_1_D : {},
+      '1.b.2.b': typeof AUTO_DATA_1_B_2_B !== 'undefined' ? AUTO_DATA_1_B_2_B : {},
+      '1.b.3.b': typeof AUTO_DATA_1_B_3_B !== 'undefined' ? AUTO_DATA_1_B_3_B : {},
+      '1.b.4.b': typeof AUTO_DATA_1_B_4_B !== 'undefined' ? AUTO_DATA_1_B_4_B : {},
+      '1.b.5.b': typeof AUTO_DATA_1_B_5_B !== 'undefined' ? AUTO_DATA_1_B_5_B : {},
+      '1.b.6.b': typeof AUTO_DATA_1_B_6_B !== 'undefined' ? AUTO_DATA_1_B_6_B : {},
+      '1.b.7.b': typeof AUTO_DATA_1_B_7_B !== 'undefined' ? AUTO_DATA_1_B_7_B : {},
+      '1.b.8.b': typeof AUTO_DATA_1_B_8_B !== 'undefined' ? AUTO_DATA_1_B_8_B : {},
+      '1.b.9.b': typeof AUTO_DATA_1_B_9_B !== 'undefined' ? AUTO_DATA_1_B_9_B : {}
+    };
+    if (persandinganAutoMap[code]) {
+      var autoItem = persandinganAutoMap[code];
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || autoItem.dokumen || '';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || autoItem.halaman || '';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || autoItem.tabel || '';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || autoItem.catatan || '';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+
     showPreviewIfImageOrPdf(modalBuktiDukung.value, 'previewBuktiContainer', 'modalBuktiDukung');
 
     // Render Dynamic Worksheet
     modalDynamicWorksheet.innerHTML = renderDynamicWorksheet(code, item.bobot, detailObj);
     
-    // Initial Calculation Trigger
+    // Initial Calculation Trigger (Nilai otomatis generate seperti modal di detail)
     updateModalWorksheetScore();
+
+    // Verifikator Decision Panel & Status Setup
+    var statusVerif = saved.status_verifikasi || (saved.bobot_verifikator !== null && saved.bobot_verifikator !== undefined && saved.bobot_verifikator !== "" ? 'Terverifikasi' : 'Draft');
+    var alasanRevisi = saved.alasan_revisi || saved.catatan_verifikator || '';
+
+    if (isVerifMode) {
+      if (verifDecisionPanel) verifDecisionPanel.style.display = 'block';
+      if (modalExcelTitleWrap) {
+        modalExcelTitleWrap.innerHTML = ' <i class="fa fa-shield" style="color:#00c292;"></i> Lembar Verifikasi IPPD [<span id="excelPointBadge">POIN ' + code + '</span>]';
+      }
+      if (modalBobotLabel) {
+        modalBobotLabel.textContent = 'Bobot Verifikasi:';
+      }
+
+      // Hide banners for verifikator
+      if (bannerStatusRevisi) bannerStatusRevisi.style.display = 'none';
+      if (bannerStatusVerified) bannerStatusVerified.style.display = 'none';
+
+      // Setup state for verifikator decision panel
+      if (statusVerif === 'Terverifikasi' || statusVerif === 'Sudah Sesuai') {
+        if (badgeVerifModalStatus) {
+          badgeVerifModalStatus.className = 'verif-badge-pill status-verified';
+          badgeVerifModalStatus.innerHTML = '<i class="fa fa-check-circle"></i> Terverifikasi';
+        }
+        if (btnChoiceVerify) btnChoiceVerify.classList.add('active');
+        if (btnChoiceRevision) btnChoiceRevision.classList.remove('active');
+        if (boxAlasanRevisi) boxAlasanRevisi.style.display = 'none';
+        if (modalAlasanRevisi) modalAlasanRevisi.value = '';
+      } else if (statusVerif === 'Perlu Perbaikan' || statusVerif === 'Revisi') {
+        if (badgeVerifModalStatus) {
+          badgeVerifModalStatus.className = 'verif-badge-pill status-revision';
+          badgeVerifModalStatus.innerHTML = '<i class="fa fa-pencil-square-o"></i> Perlu Perbaikan';
+        }
+        if (btnChoiceRevision) btnChoiceRevision.classList.add('active');
+        if (btnChoiceVerify) btnChoiceVerify.classList.remove('active');
+        if (boxAlasanRevisi) boxAlasanRevisi.style.display = 'block';
+        if (modalAlasanRevisi) modalAlasanRevisi.value = alasanRevisi;
+      } else {
+        if (badgeVerifModalStatus) {
+          badgeVerifModalStatus.className = 'verif-badge-pill status-draft';
+          badgeVerifModalStatus.innerHTML = '<i class="fa fa-clock-o"></i> Belum Diverifikasi';
+        }
+        if (btnChoiceVerify) btnChoiceVerify.classList.remove('active');
+        if (btnChoiceRevision) btnChoiceRevision.classList.remove('active');
+        if (boxAlasanRevisi) boxAlasanRevisi.style.display = 'none';
+        if (modalAlasanRevisi) modalAlasanRevisi.value = '';
+      }
+    } else {
+      if (verifDecisionPanel) verifDecisionPanel.style.display = 'none';
+      if (modalExcelTitleWrap) {
+        modalExcelTitleWrap.innerHTML = ' IPPD Daerah - Lembar Kerja Evaluasi [<span id="excelPointBadge">POIN ' + code + '</span>]';
+      }
+      if (modalBobotLabel) {
+        modalBobotLabel.textContent = 'Capaian:';
+      }
+
+      // Show alert banners for regular/Daerah user if verifikator gave feedback
+      if (statusVerif === 'Perlu Perbaikan' || statusVerif === 'Revisi') {
+        if (bannerStatusRevisi) {
+          bannerStatusRevisi.style.display = 'flex';
+          if (bannerRevisiText) {
+            bannerRevisiText.textContent = alasanRevisi || 'Terdapat beberapa data atau bukti dukung yang belum sesuai. Silakan lakukan perbaikan data.';
+          }
+        }
+        if (bannerStatusVerified) bannerStatusVerified.style.display = 'none';
+      } else if (statusVerif === 'Terverifikasi') {
+        if (bannerStatusVerified) bannerStatusVerified.style.display = 'flex';
+        if (bannerStatusRevisi) bannerStatusRevisi.style.display = 'none';
+      } else {
+        if (bannerStatusRevisi) bannerStatusRevisi.style.display = 'none';
+        if (bannerStatusVerified) bannerStatusVerified.style.display = 'none';
+      }
+    }
+
+    // Render Data Informasi Dokumen & Bukti Pendukung
+    var boxInputDaerah = document.getElementById("boxInputReferensiDaerah");
+    var boxDataInfo = document.getElementById("boxDataInformasi");
+    var contentDataInfo = document.getElementById("contentDataInformasi");
+    var badgeDataInfo = document.getElementById("badgeDataInformasi");
+
+    if (isVerifMode || IS_VERIFIKATOR) {
+      if (boxInputDaerah) boxInputDaerah.style.display = 'none';
+      if (boxDataInfo && contentDataInfo) {
+        boxDataInfo.style.display = 'block';
+
+        var docName = (modalRefDokumen ? modalRefDokumen.value : (detailObj.ref_dokumen || "")).trim();
+        var docHal = (modalRefHalaman ? modalRefHalaman.value : (detailObj.ref_halaman || "")).trim();
+        var docTab = (modalRefTabel ? modalRefTabel.value : (detailObj.ref_tabel || "")).trim();
+        var docCat = (modalCatatan ? modalCatatan.value : (saved.catatan || "")).trim();
+        var docBukti = (modalBuktiDukung ? modalBuktiDukung.value : (saved.bukti_dukung || "")).trim();
+
+        var hasAnyInfo = docName || docHal || docTab || docCat || docBukti;
+
+        if (hasAnyInfo) {
+          if (badgeDataInfo) {
+            badgeDataInfo.innerHTML = '<i class="fa fa-check-circle"></i> Data Terlampir';
+            badgeDataInfo.className = 'excel-info-badge badge-success';
+          }
+          var infoHtml = '';
+
+          // Pills for docName, docHal, docTab
+          if (docName || docHal || docTab) {
+            infoHtml += '<div class="excel-info-pills">';
+            if (docName) {
+              infoHtml += '<span class="excel-info-pill"><i class="fa fa-book" style="color:#0f766e;"></i> <strong>Dokumen Sumber:</strong> ' + escapeHtml(docName) + '</span>';
+            }
+            if (docHal) {
+              infoHtml += '<span class="excel-info-pill"><i class="fa fa-bookmark-o" style="color:#0f766e;"></i> <strong>Halaman:</strong> ' + escapeHtml(docHal) + '</span>';
+            }
+            if (docTab) {
+              infoHtml += '<span class="excel-info-pill"><i class="fa fa-table" style="color:#0f766e;"></i> <strong>Tabel/Matriks:</strong> ' + escapeHtml(docTab) + '</span>';
+            }
+            infoHtml += '</div>';
+          }
+
+          // Catatan Evaluasi Daerah
+          if (docCat) {
+            infoHtml += '<div class="excel-info-catatan"><i class="fa fa-commenting-o" style="color:#2563eb; margin-right:4px;"></i> <strong>Catatan Evaluasi Daerah:</strong> ' + escapeHtml(docCat) + '</div>';
+          }
+
+          // Bukti Dukung (Images / PDFs / Links) - Read-Only View (No delete, no upload)
+          if (docBukti) {
+            infoHtml += '<div class="excel-info-bukti-wrap" style="margin-top:6px;">';
+            infoHtml += '<div style="font-size:11px; font-weight:700; color:#475569; text-transform:uppercase; margin-bottom:6px;"><i class="fa fa-paperclip" style="color:#0f766e;"></i> Bukti Dukung / Lampiran Daerah:</div>';
+
+            var urls = docBukti.split(',').map(function(s){ return s.trim(); }).filter(function(s){ return s !== ''; });
+            if (urls.length > 0) {
+              infoHtml += '<div style="display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start;">';
+              urls.forEach(function(url){
+                var ext = url.split('.').pop().toLowerCase();
+                var isImage = ['jpg', 'jpeg', 'png', 'gif'].includes(ext) || (ext.length > 4 && url.match(/\.(jpeg|jpg|gif|png)$/i));
+                var isPdf = (ext === 'pdf');
+
+                if (isImage) {
+                  infoHtml += 
+                    '<div style="border:1px solid #cbd5e1; border-radius:6px; padding:6px; background:#fff; text-align:center; max-width:140px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">' +
+                      '<img src="' + escapeHtml(url) + '" style="max-width:100%; height:60px; object-fit:contain; border-radius:4px; margin-bottom:5px; cursor:pointer;" onclick="openPreviewModal(\'' + escapeHtml(url) + '\')">' +
+                      '<button type="button" class="btn-ui btn-ui-secondary" style="font-size:11px; padding:3px 8px; width:100%; justify-content:center;" onclick="openPreviewModal(\'' + escapeHtml(url) + '\')"><i class="fa fa-eye"></i> Lihat Foto</button>' +
+                    '</div>';
+                } else if (isPdf) {
+                  infoHtml += 
+                    '<div style="border:1px solid #cbd5e1; border-radius:6px; padding:8px 10px; background:#fff; text-align:center; max-width:140px; box-shadow:0 1px 2px rgba(0,0,0,0.05);">' +
+                      '<div style="font-size:32px; color:#ef4444; margin-bottom:4px;"><i class="fa fa-file-pdf-o"></i></div>' +
+                      '<div style="font-size:10px; color:#475569; margin-bottom:6px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="' + escapeHtml(url) + '">Dokumen PDF</div>' +
+                      '<button type="button" class="btn-ui btn-ui-secondary" style="font-size:11px; padding:3px 8px; width:100%; justify-content:center;" onclick="openPreviewModal(\'' + escapeHtml(url) + '\')"><i class="fa fa-eye"></i> Buka PDF</button>' +
+                    '</div>';
+                } else {
+                  var isHttp = url.match(/^https?:\/\//i);
+                  infoHtml += 
+                    '<div style="border:1px solid #cbd5e1; border-radius:6px; padding:8px 12px; background:#fff; display:inline-flex; align-items:center; gap:8px;">' +
+                      '<i class="fa fa-link" style="color:#2563eb;"></i>' +
+                      (isHttp ? 
+                        '<a href="' + escapeHtml(url) + '" target="_blank" class="btn-info-bukti-link"><i class="fa fa-external-link"></i> Buka Tautan Dokumen ↗</a>' :
+                        '<span style="color:#334155; font-size:12px;">' + escapeHtml(url) + '</span>'
+                      ) +
+                    '</div>';
+                }
+              });
+              infoHtml += '</div>';
+            } else {
+              infoHtml += '<div style="font-size:12px; color:#64748b; font-style:italic;">' + escapeHtml(docBukti) + '</div>';
+            }
+            infoHtml += '</div>';
+          }
+
+          contentDataInfo.innerHTML = infoHtml;
+        } else {
+          if (badgeDataInfo) {
+            badgeDataInfo.innerHTML = '<i class="fa fa-clock-o"></i> Belum Diisi';
+            badgeDataInfo.className = 'excel-info-badge badge-empty';
+          }
+          contentDataInfo.innerHTML = 
+            '<div style="padding:10px 14px; background:#ffffff; border:1px dashed #cbd5e1; border-radius:6px; color:#64748b; font-size:12.5px; font-style:italic;">' +
+              '<i class="fa fa-info-circle" style="color:#94a3b8; margin-right:4px;"></i> Daerah belum menginputkan referensi dokumen sumber atau bukti dukung untuk indikator ini.' +
+            '</div>';
+        }
+      }
+    } else {
+      // Regular / Akun Daerah Mode
+      if (boxInputDaerah) boxInputDaerah.style.display = 'block';
+      if (boxDataInfo) boxDataInfo.style.display = 'none';
+      showPreviewIfImageOrPdf(modalBuktiDukung ? modalBuktiDukung.value : '', 'previewBuktiContainer', 'modalBuktiDukung');
+    }
 
     syncExcelScoreUI(modalBobotInput.value, item.bobot);
     updateExcelLinkPreview(saved.bukti_dukung || "");
@@ -4669,8 +9652,8 @@ tr.type-sub:hover td {
       instansi_id: selectInstansi.value,
       item_code: code,
       bobot_capaian: bobotNum,
-      opsi_aksi: bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : '',
-      catatan: modalCatatan.value.trim(),
+      opsi_aksi: ((code === '1.a.4' || code === '1.a.5') && detailData && detailData.kriteria) ? (detailData.kriteria === 'B' ? 'Ya' : 'Tidak') : (bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : ''),
+      catatan: ((code === '1.a.2.a' || code === '1.a.2.b' || code === '1.a.2.c' || code === '1.a.4' || code === '1.a.5') && detailData && detailData.catatan !== undefined) ? detailData.catatan : ((detailData && detailData.catatan && !modalCatatan.value.trim()) ? detailData.catatan : modalCatatan.value.trim()),
       bukti_dukung: modalBuktiDukung.value.trim(),
       detail_json: JSON.stringify(detailData)
     };
@@ -4794,15 +9777,31 @@ tr.type-sub:hover td {
           MASTER_DATA = resp.master || MASTER_DATA;
           SCORES_MAP = resp.scores || {};
           
+          if (resp.AutoData_1_a_1_a) AUTO_DATA_1_A_1_A = resp.AutoData_1_a_1_a;
+          if (resp.AutoData_1_a_1_b) AUTO_DATA_1_A_1_B = resp.AutoData_1_a_1_b;
           if (resp.AutoData_1_a_1_c) AUTO_DATA_1_A_1_C = resp.AutoData_1_a_1_c;
           if (resp.AutoData_1_a_2_a) AUTO_DATA_1_A_2_A = resp.AutoData_1_a_2_a;
+          if (resp.AutoData_1_a_2_b) AUTO_DATA_1_A_2_B = resp.AutoData_1_a_2_b;
+          if (resp.AutoData_1_a_2_c) AUTO_DATA_1_A_2_C = resp.AutoData_1_a_2_c;
+          if (resp.AutoData_1_a_2_d) AUTO_DATA_1_A_2_D = resp.AutoData_1_a_2_d;
+          if (resp.AutoData_1_a_2_e) AUTO_DATA_1_A_2_E = resp.AutoData_1_a_2_e;
           if (resp.AutoData_1_a_2_ALL) AUTO_DATA_1_A_2_ALL = resp.AutoData_1_a_2_ALL;
           if (resp.AutoData_1_a_4) AUTO_DATA_1_A_4 = resp.AutoData_1_a_4;
           if (resp.AutoData_1_a_5) AUTO_DATA_1_A_5 = resp.AutoData_1_a_5;
           if (resp.AutoData_1_a_6) AUTO_DATA_1_A_6 = resp.AutoData_1_a_6;
+          if (resp.AutoData_1_b_1_b) AUTO_DATA_1_B_1_B = resp.AutoData_1_b_1_b;
+          if (resp.AutoData_1_b_1_d) AUTO_DATA_1_B_1_D = resp.AutoData_1_b_1_d;
+          if (resp.AutoData_1_b_2_b) AUTO_DATA_1_B_2_B = resp.AutoData_1_b_2_b;
+          if (resp.AutoData_1_b_3_b) AUTO_DATA_1_B_3_B = resp.AutoData_1_b_3_b;
+          if (resp.AutoData_1_b_4_b) AUTO_DATA_1_B_4_B = resp.AutoData_1_b_4_b;
+          if (resp.AutoData_1_b_5_b) AUTO_DATA_1_B_5_B = resp.AutoData_1_b_5_b;
+          if (resp.AutoData_1_b_6_b) AUTO_DATA_1_B_6_B = resp.AutoData_1_b_6_b;
+          if (resp.AutoData_1_b_7_b) AUTO_DATA_1_B_7_B = resp.AutoData_1_b_7_b;
+          if (resp.AutoData_1_b_8_b) AUTO_DATA_1_B_8_B = resp.AutoData_1_b_8_b;
+          if (resp.AutoData_1_b_9_b) AUTO_DATA_1_B_9_B = resp.AutoData_1_b_9_b;
           if (resp.AutoData_1_b_10_a) AUTO_DATA_1_B_10_A = resp.AutoData_1_b_10_a;
           if (resp.AutoData_1_b_10_b) AUTO_DATA_1_B_10_B = resp.AutoData_1_b_10_b;
-        if (resp.AutoData_1_c_1) AUTO_DATA_1_C_1 = resp.AutoData_1_c_1;
+          if (resp.AutoData_1_c_1) AUTO_DATA_1_C_1 = resp.AutoData_1_c_1;
 
           buildItemMap();
           renderTable();
@@ -4812,6 +9811,17 @@ tr.type-sub:hover td {
   }
 
   // Event Listeners for Toolbar and Tree
+  if (selectTahun) {
+    selectTahun.addEventListener("change", function(){
+      var url = new URL(window.location.href);
+      url.searchParams.set("tahun", this.value);
+      if (selectInstansi && selectInstansi.value) {
+        url.searchParams.set("instansi_id", selectInstansi.value);
+      }
+      window.location.href = url.toString();
+    });
+  }
+
   document.getElementById("btnExpandAll").addEventListener("click", function(){
     collapsedKeys.clear();
     renderTable();
@@ -4835,7 +9845,10 @@ tr.type-sub:hover td {
     renderTable();
   });
 
-  document.getElementById("btnSaveAll").addEventListener("click", saveAllScores);
+  var btnSaveAll = document.getElementById("btnSaveAll");
+  if (btnSaveAll) {
+    btnSaveAll.addEventListener("click", saveAllScores);
+  }
 
   tbody.addEventListener("click", function(e){
     // Toggle Tree Chevron
@@ -4848,19 +9861,19 @@ tr.type-sub:hover td {
       return;
     }
 
-    // Open Modal Detail
+    // Open Modal Detail (in verification mode if user is verifikator)
     var detailBtn = e.target.closest(".btn-action-detail");
     if (detailBtn){
       var itemCode = detailBtn.getAttribute("data-code");
-      openDetailModal(itemCode);
+      openDetailModal(itemCode, IS_VERIFIKATOR);
       return;
     }
 
-    // Open Verifikator Modal
+    // Open Verifikator Modal (opens authentic Excel detail modal in verification mode)
     var verifBtn = e.target.closest(".btn-action-verifikator");
     if (verifBtn){
       var itemCode = verifBtn.getAttribute("data-code");
-      openVerifikatorModal(itemCode);
+      openDetailModal(itemCode, true);
       return;
     }
   });
@@ -4938,22 +9951,26 @@ tr.type-sub:hover td {
   // Excel quick doc chips
   document.querySelectorAll(".chip-doc").forEach(function(chip){
     chip.addEventListener("click", function(){
-      modalRefDokumen.value = this.getAttribute("data-text");
-      modalRefDokumen.focus();
+      if (modalRefDokumen) {
+        modalRefDokumen.value = this.getAttribute("data-text");
+        if (modalRefDokumen.type !== 'hidden') modalRefDokumen.focus();
+      }
     });
   });
 
   // Excel catatan quick chips
   document.querySelectorAll(".excel-catatan-chip").forEach(function(chip){
     chip.addEventListener("click", function(){
-      var textToAdd = this.getAttribute("data-text");
-      var cur = modalCatatan.value.trim();
-      if (!cur) {
-        modalCatatan.value = textToAdd;
-      } else if (cur.indexOf(textToAdd) === -1) {
-        modalCatatan.value = cur + (cur.endsWith(".") ? " " : ", ") + textToAdd;
+      if (modalCatatan) {
+        var textToAdd = this.getAttribute("data-text");
+        var cur = modalCatatan.value.trim();
+        if (!cur) {
+          modalCatatan.value = textToAdd;
+        } else if (cur.indexOf(textToAdd) === -1) {
+          modalCatatan.value = cur + (cur.endsWith(".") ? " " : ", ") + textToAdd;
+        }
+        if (modalCatatan.type !== 'hidden') modalCatatan.focus();
       }
-      modalCatatan.focus();
     });
   });
 
@@ -4976,13 +9993,26 @@ tr.type-sub:hover td {
 
   // Reactive Calculation on input and change events inside modal worksheet
   modalDynamicWorksheet.addEventListener("input", function(e){
+    if ((e.target.id === 'ws1a2aCatatan' || e.target.id === 'ws1a2bCatatan' || e.target.id === 'ws1a2cCatatan') && modalCatatan) {
+      modalCatatan.value = e.target.value;
+    }
     if (e.target.classList.contains("calc-inp") || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT'){
       updateModalWorksheetScore();
     }
   });
 
+  if (modalCatatan) {
+    modalCatatan.addEventListener("input", function(){
+      var cInp = document.getElementById("ws1a2aCatatan") || document.getElementById("ws1a2bCatatan") || document.getElementById("ws1a2cCatatan");
+      if (cInp) cInp.value = this.value;
+    });
+  }
+
   modalDynamicWorksheet.addEventListener("change", function(e){
-    if (e.target.classList.contains("calc-inp") || e.target.tagName === 'SELECT' || e.target.id === 'wsSelectPersandingan'){
+    if ((e.target.id === 'ws1a2aCatatan' || e.target.id === 'ws1a2bCatatan' || e.target.id === 'ws1a2cCatatan') && modalCatatan) {
+      modalCatatan.value = e.target.value;
+    }
+    if (e.target.classList.contains("calc-inp") || e.target.tagName === 'SELECT' || e.target.id === 'wsSelectPersandingan' || e.target.id === 'wsSelectPersandingan1d'){
       updateModalWorksheetScore();
     }
   });
@@ -5758,10 +10788,185 @@ tr.type-sub:hover td {
     });
   }
 
-  document.getElementById("btnModalClose").addEventListener("click", closeDetailModal);
-  document.getElementById("btnModalCancel").addEventListener("click", closeDetailModal);
+  var btnClose = document.getElementById("btnModalClose");
+  if (btnClose) btnClose.addEventListener("click", closeDetailModal);
+
+  var btnCancel = document.getElementById("btnModalCancel");
+  if (btnCancel) btnCancel.addEventListener("click", closeDetailModal);
   
-  document.getElementById("btnModalSave").addEventListener("click", saveModalDetail);
+  var btnModalSave = document.getElementById("btnModalSave");
+  if (btnModalSave) {
+    btnModalSave.addEventListener("click", saveModalDetail);
+  }
+
+  // Verifikator Action Button Listeners inside Modal
+  if (btnModalActionVerifikasi) {
+    btnModalActionVerifikasi.addEventListener("click", function(){
+      submitVerifikasi("verifikasi");
+    });
+  }
+  if (btnModalActionPerbaiki) {
+    btnModalActionPerbaiki.addEventListener("click", function(){
+      submitVerifikasi("perbaiki");
+    });
+  }
+
+  // Verifikator Decision Choices
+  if (btnChoiceVerify) {
+    btnChoiceVerify.addEventListener("click", function(){
+      btnChoiceVerify.classList.add("active");
+      if (btnChoiceRevision) btnChoiceRevision.classList.remove("active");
+      if (boxAlasanRevisi) boxAlasanRevisi.style.display = "none";
+      if (badgeVerifModalStatus) {
+        badgeVerifModalStatus.className = "verif-badge-pill status-verified";
+        badgeVerifModalStatus.innerHTML = '<i class="fa fa-check-circle"></i> Verifikasi (Sesuai)';
+      }
+    });
+  }
+
+  if (btnChoiceRevision) {
+    btnChoiceRevision.addEventListener("click", function(){
+      btnChoiceRevision.classList.add("active");
+      if (btnChoiceVerify) btnChoiceVerify.classList.remove("active");
+      if (boxAlasanRevisi) {
+        boxAlasanRevisi.style.display = "block";
+        if (modalAlasanRevisi) {
+          modalAlasanRevisi.focus();
+        }
+      }
+      if (badgeVerifModalStatus) {
+        badgeVerifModalStatus.className = "verif-badge-pill status-revision";
+        badgeVerifModalStatus.innerHTML = '<i class="fa fa-pencil-square-o"></i> Perlu Perbaikan';
+      }
+    });
+  }
+
+  // Template Quick Chips for Alasan Revisi
+  document.querySelectorAll(".chip-item-revisi").forEach(function(chip){
+    chip.addEventListener("click", function(){
+      var text = this.getAttribute("data-text");
+      if (!modalAlasanRevisi) return;
+      if (modalAlasanRevisi.value.trim() === "") {
+        modalAlasanRevisi.value = text;
+      } else {
+        modalAlasanRevisi.value += " " + text;
+      }
+      modalAlasanRevisi.focus();
+    });
+  });
+
+  // Submit Verifikasi or Perbaiki
+  function submitVerifikasi(action){
+    if (!IS_ROLE_4 && !IS_VERIFIKATOR){
+      showToast("Akses ditolak: Hanya akun verifikator yang dapat memverifikasi.", true);
+      return;
+    }
+
+    var code = modalItemCode ? modalItemCode.value : "";
+    if (!code) return;
+
+    var item = itemMap[code];
+    var maxVal = item ? item.bobot : 100;
+    var currentScore = parseFloat(modalBobotInput ? modalBobotInput.value : 0);
+    if (isNaN(currentScore)) currentScore = 0;
+
+    var alasan = modalAlasanRevisi ? modalAlasanRevisi.value.trim() : "";
+    var statusVerif = (action === 'perbaiki') ? 'Perlu Perbaikan' : 'Terverifikasi';
+
+    if (action === 'perbaiki'){
+      if (!alasan){
+        if (boxAlasanRevisi) boxAlasanRevisi.style.display = 'block';
+        if (btnChoiceRevision) btnChoiceRevision.classList.add('active');
+        if (btnChoiceVerify) btnChoiceVerify.classList.remove('active');
+        if (modalAlasanRevisi) modalAlasanRevisi.focus();
+
+        Swal.fire({
+          icon: 'warning',
+          title: 'Alasan Revisi Wajib Diisi',
+          text: 'Mohon tuliskan catatan perbaikan atau alasan mengapa indikator / bukti dukung ini belum sesuai agar daerah dapat memperbaikinya.',
+          confirmButtonColor: '#d97706',
+          confirmButtonText: 'Baik, Saya Isi Sekarang'
+        });
+        return;
+      }
+    }
+
+    var detailData = collectDetailJson(code);
+
+    var payload = {
+      tahun: selectTahun ? selectTahun.value : 2026,
+      instansi_id: selectInstansi ? selectInstansi.value : 1,
+      item_code: code,
+      bobot_verifikator: currentScore,
+      opsi_aksi_verifikator: (action === 'perbaiki') ? 'Perlu Perbaikan' : 'Terverifikasi',
+      status_verifikasi: statusVerif,
+      alasan_revisi: (action === 'perbaiki') ? alasan : '',
+      catatan_verifikator: (action === 'perbaiki') ? alasan : (modalCatatan ? modalCatatan.value.trim() : ''),
+      bukti_dukung_verifikator: modalBuktiDukung ? modalBuktiDukung.value.trim() : '',
+      detail_json: JSON.stringify(detailData)
+    };
+
+    var btnSubmit = (action === 'perbaiki') ? btnModalActionPerbaiki : btnModalActionVerifikasi;
+    var origHtml = btnSubmit ? btnSubmit.innerHTML : '';
+    if (btnSubmit){
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Memproses...';
+    }
+
+    $.ajax({
+      url: BASE_URL + "Instansi/SaveIPPDVerifikator",
+      type: "POST",
+      data: payload,
+      dataType: "json",
+      success: function(resp){
+        if (btnSubmit){
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = origHtml;
+        }
+
+        if (resp && resp.status === 'success'){
+          if (!SCORES_MAP[code]) SCORES_MAP[code] = {};
+          SCORES_MAP[code].bobot_verifikator = currentScore;
+          SCORES_MAP[code].status_verifikasi = statusVerif;
+          SCORES_MAP[code].opsi_aksi_verifikator = (action === 'perbaiki') ? 'Perlu Perbaikan' : 'Terverifikasi';
+          SCORES_MAP[code].alasan_revisi = (action === 'perbaiki') ? alasan : null;
+          SCORES_MAP[code].catatan_verifikator = (action === 'perbaiki') ? alasan : (modalCatatan ? modalCatatan.value.trim() : '');
+          if (statusVerif === 'Terverifikasi'){
+            SCORES_MAP[code].bobot_capaian = currentScore;
+          }
+
+          closeDetailModal();
+          renderTable();
+
+          Swal.fire({
+            icon: action === 'perbaiki' ? 'info' : 'success',
+            title: action === 'perbaiki' ? 'Catatan Perbaikan Terkirim' : 'Berhasil Diverifikasi',
+            text: resp.message || (action === 'perbaiki' ? 'Catatan perbaikan telah dikirim ke akun daerah.' : 'Nilai capaian berhasil diverifikasi dan disetujui.'),
+            timer: 2000,
+            showConfirmButton: false,
+            confirmButtonColor: '#00c292'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menyimpan',
+            text: (resp && resp.message) ? resp.message : 'Terjadi kesalahan sistem saat menyimpan verifikasi.'
+          });
+        }
+      },
+      error: function(xhr, status, error){
+        if (btnSubmit){
+          btnSubmit.disabled = false;
+          btnSubmit.innerHTML = origHtml;
+        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Kesalahan Jaringan',
+          text: 'Gagal menghubungi server: ' + (error || 'Koneksi terputus')
+        });
+      }
+    });
+  }
 
   modalDetail.addEventListener("click", function(e){
     if (e.target === modalDetail) closeDetailModal();
@@ -5828,73 +11033,7 @@ tr.type-sub:hover td {
   }
 
   function openVerifikatorModal(code){
-    var item = itemMap[code];
-    if (!item) return;
-
-    var saved = SCORES_MAP[code] || {};
-
-    verifItemCode.value = code;
-    verifBobotMaks.value = item.bobot;
-    verifMaxBadge.textContent = numFmt(item.bobot);
-
-    var typeLabel = item.type === 'sub' ? 'Sub-Indikator (' + item.letter + ')' : 'Indikator (' + (item.no || code) + ')';
-    verifModalTitle.textContent = "Penilaian " + typeLabel;
-    verifUraian.value = item.title;
-
-    // Hitung otomatis total keselarasan bobot dari lembar kerja / formula
-    var keselarasanScore = getItemKeselarasanBobot(code, item.bobot);
-    if (verifKeselarasanBadge) {
-      verifKeselarasanBadge.textContent = numFmt(keselarasanScore);
-    }
-
-    // BOBOT CAPAIAN: otomatis terisi dari total keselarasan bobot jika belum pernah diverifikasi
-    var hasSavedVerif = (saved.bobot_verifikator !== null && saved.bobot_verifikator !== undefined && saved.bobot_verifikator !== "");
-    var targetScore = hasSavedVerif ? Number(saved.bobot_verifikator) : keselarasanScore;
-    var targetStr = targetScore.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
-    verifBobotInput.value = targetStr === "" ? "0" : targetStr;
-    verifBobotInput.max = item.bobot;
-
-    // OPSI AKSI / KRITERIA: jangan terisi otomatis (hanya dimuat jika sudah tersimpan sebelumnya)
-    verifOpsiAksi.value = saved.opsi_aksi_verifikator || "";
-
-    verifCatatan.value = saved.catatan_verifikator || "";
-    verifBuktiDukung.value = saved.bukti_dukung_verifikator || "";
-    showPreviewIfImageOrPdf(verifBuktiDukung.value, 'verifPreviewBuktiContainer', 'verifBuktiDukung');
-
-    if (!IS_ROLE_4) {
-      verifBobotInput.readOnly = true;
-      verifOpsiAksi.disabled = true;
-      verifCatatan.readOnly = true;
-      verifBuktiDukung.readOnly = true;
-      if (btnSyncKeselarasan) btnSyncKeselarasan.disabled = true;
-      document.querySelectorAll(".verif-preset-btn").forEach(function(b){ b.disabled = true; });
-      if (btnVerifCancel) btnVerifCancel.style.display = "none";
-      if (btnVerifSave) btnVerifSave.style.display = "none";
-      if (btnVerifCloseBottom) btnVerifCloseBottom.style.display = "";
-    } else {
-      verifBobotInput.readOnly = false;
-      verifOpsiAksi.disabled = false;
-      verifCatatan.readOnly = false;
-      verifBuktiDukung.readOnly = false;
-      if (btnSyncKeselarasan) btnSyncKeselarasan.disabled = false;
-      document.querySelectorAll(".verif-preset-btn").forEach(function(b){ b.disabled = false; });
-      if (btnVerifCancel) btnVerifCancel.style.display = "";
-      if (btnVerifCloseBottom) btnVerifCloseBottom.style.display = "none";
-      if (btnVerifSave) {
-        btnVerifSave.style.display = "";
-        btnVerifSave.disabled = false;
-        btnVerifSave.style.opacity = "1";
-        btnVerifSave.style.cursor = "pointer";
-        btnVerifSave.innerHTML = '<i class="fa fa-save"></i> Simpan Penilaian';
-        btnVerifSave.title = "Simpan Penilaian Verifikator";
-      }
-    }
-
-    syncVerifScoreUI(targetStr, item.bobot);
-    updateVerifLinkPreview(saved.bukti_dukung_verifikator || "");
-
-    modalVerif.classList.add("open");
-    document.body.style.overflow = "hidden";
+    openDetailModal(code, true);
   }
 
   function closeVerifikatorModal(){

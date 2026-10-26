@@ -4309,18 +4309,66 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 ->result_array();
 
             // 3. List Dukungan Kegiatan Prioritas Utama yang sudah diinput
-            $this->db->select('d.*, p.Kode as KodePrioritas, p.PrioritasPembangunan, k.Kode as KodeKegiatan, k.KegiatanPrioritas');
+            $this->db->select('d.*, p.Kode as KodePrioritas, p.PrioritasPembangunan, k.Kode as KodeKegiatan, k.KegiatanPrioritas, 
+                               COALESCE(pp.ProgramPrioritas, pp_kp.ProgramPrioritas) as ProgramPrioritas,
+                               kp.KegiatanPrioritas as KpNama,
+                               COALESCE(pp.Id, pp_kp.Id) as PPId');
             $this->db->from('dukungan_kpu_rpjmd d');
             $this->db->join('rpjmn_kpu_prioritas p', 'd.PrioritasId = p.Id', 'left');
             $this->db->join('rpjmn_kpu_kegiatan k', 'd.KegiatanId = k.Id', 'left');
+            $this->db->join('ps_program_prioritas pp', 'd.KegiatanId = pp.Id', 'left');
+            $this->db->join('ps_kegiatan_prioritas kp', 'd.KegiatanId = kp.Id', 'left');
+            $this->db->join('ps_program_prioritas pp_kp', 'kp._IdPP = pp_kp.Id', 'left');
             $this->db->where('d.deleted_at IS NULL');
             if (!empty($KodeWilayah)) {
                 $this->db->where('d.KodeWilayah', $KodeWilayah);
             }
             $this->db->order_by('p.Id', 'ASC');
-            $this->db->order_by('k.Id', 'ASC');
             $this->db->order_by('d.Id', 'ASC');
-            $Data['DukunganList'] = $this->db->get()->result_array();
+            $rawList = $this->db->get()->result_array();
+
+            // Kamus urutan PP per PN
+            $ppOrderMap = [];
+            if ($this->db->table_exists('ps_program_prioritas')) {
+                $allPps = $this->db->query("SELECT Id, _IdPN, ProgramPrioritas FROM ps_program_prioritas WHERE deleted_at IS NULL ORDER BY _IdPN ASC, Id ASC")->result_array();
+                foreach ($allPps as $pRow) {
+                    $pnId = (int)$pRow['_IdPN'];
+                    if (!isset($ppOrderMap[$pnId])) $ppOrderMap[$pnId] = [];
+                    $ppOrderMap[$pnId][$pRow['Id']] = [
+                        'order' => count($ppOrderMap[$pnId]) + 1,
+                        'name' => $pRow['ProgramPrioritas']
+                    ];
+                }
+            }
+
+            // Kamus master KP per PP
+            $kpByPp = [];
+            if ($this->db->table_exists('ps_kegiatan_prioritas')) {
+                $allKps = $this->db->query("SELECT Id, _IdPP, KegiatanPrioritas FROM ps_kegiatan_prioritas WHERE deleted_at IS NULL ORDER BY Id ASC")->result_array();
+                foreach ($allKps as $kp) {
+                    $ppId = (int)$kp['_IdPP'];
+                    if (!isset($kpByPp[$ppId])) $kpByPp[$ppId] = [];
+                    $kpByPp[$ppId][] = $kp['KegiatanPrioritas'];
+                }
+            }
+
+            foreach ($rawList as &$row) {
+                $pnId = (int)$row['PrioritasId'];
+                $kId  = (int)$row['KegiatanId'];
+                $ppId = !empty($row['PPId']) ? (int)$row['PPId'] : $kId;
+
+                $order = isset($ppOrderMap[$pnId][$ppId]) ? $ppOrderMap[$pnId][$ppId]['order'] : ($pnId === 1 && $kId === 2 ? 2 : 1);
+                $ppName = !empty($row['ProgramPrioritas']) ? $row['ProgramPrioritas'] : (isset($ppOrderMap[$pnId][$kId]) ? $ppOrderMap[$pnId][$kId]['name'] : $row['KegiatanPrioritas']);
+
+                if (!empty($ppName)) {
+                    $cleanPpName = preg_replace('/^PP\s*\d+\s*:\s*/i', '', $ppName);
+                    $row['KodeKegiatan'] = 'PP ' . $order;
+                    $row['KegiatanPrioritas'] = 'PP ' . $order . ' : ' . $cleanPpName;
+                }
+            }
+            unset($row);
+
+            $Data['DukunganList'] = $rawList;
             $Data['IsDaerah'] = (isset($_SESSION['Level']) && $_SESSION['Level'] == 3);
 
             $this->load->view('Daerah/header', $Header);
@@ -4328,7 +4376,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         /**
-         * AJAX: Ambil Kegiatan Prioritas Utama berdasarkan Prioritas Nasional yang dipilih
+         * AJAX: Ambil Program Prioritas berdasarkan Prioritas Nasional yang dipilih
          */
         public function GetKegiatanKpuByPrioritas()
         {
@@ -4338,14 +4386,37 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
 
-            $kegiatan = $this->db
-                ->select('Id, Kode, KegiatanPrioritas')
-                ->from('rpjmn_kpu_kegiatan')
-                ->where('_Id', $prioritasId)
+            // Ambil data Program Prioritas dari ps_program_prioritas berdasarkan _IdPN
+            $ppRows = $this->db
+                ->select('Id, ProgramPrioritas')
+                ->from('ps_program_prioritas')
+                ->where('_IdPN', $prioritasId)
                 ->where('deleted_at IS NULL')
                 ->order_by('Id', 'ASC')
                 ->get()
                 ->result_array();
+
+            $kegiatan = [];
+            if (!empty($ppRows)) {
+                $idx = 1;
+                foreach ($ppRows as $p) {
+                    $kegiatan[] = [
+                        'Id' => $p['Id'],
+                        'Kode' => 'PP ' . $idx,
+                        'KegiatanPrioritas' => 'PP ' . $idx . ' : ' . $p['ProgramPrioritas']
+                    ];
+                    $idx++;
+                }
+            } else {
+                $kegiatan = $this->db
+                    ->select('Id, Kode, KegiatanPrioritas')
+                    ->from('rpjmn_kpu_kegiatan')
+                    ->where('_Id', $prioritasId)
+                    ->where('deleted_at IS NULL')
+                    ->order_by('Id', 'ASC')
+                    ->get()
+                    ->result_array();
+            }
 
             echo json_encode($kegiatan);
         }

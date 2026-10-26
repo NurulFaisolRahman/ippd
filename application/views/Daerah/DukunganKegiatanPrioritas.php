@@ -268,7 +268,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                                     <tr>
                                         <th style="width: 5%;" class="text-center">No</th>
                                         <th style="width: 25%;">Prioritas Nasional</th>
-                                        <th style="width: 32%;">Kegiatan Prioritas Utama</th>
+                                        <th style="width: 32%;">Program Prioritas (PP)</th>
                                         <th style="width: <?= $isDaerah ? '28%' : '38%' ?>;">Dukungan Program pada RPJMD</th>
                                         <?php if ($isDaerah) { ?>
                                             <th style="width: 10%;" class="text-center">Aksi</th>
@@ -311,9 +311,21 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                                                 <?php if (!empty($row['KodeKegiatan'])) { ?>
                                                     <span class="badge-kegiatan"><?= html_escape($row['KodeKegiatan']) ?></span>
                                                 <?php } ?>
-                                                <span style="color: #334155;">
+                                                <span style="color: #1e293b; font-weight: 600;">
                                                     <?= html_escape($row['KegiatanPrioritas'] ?: '-') ?>
                                                 </span>
+                                                <?php if (!empty($row['KpTerkait'])) { ?>
+                                                    <div style="margin-top: 6px; padding: 6px 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #20c997; border-radius: 4px; font-size: 11.5px; color: #475569;">
+                                                        <div style="font-weight: 700; color: #0d9488; margin-bottom: 2px;">
+                                                            <i class="fa fa-crosshairs"></i> Kegiatan Prioritas (KP) Terkait:
+                                                        </div>
+                                                        <ul style="margin: 0; padding-left: 16px;">
+                                                            <?php foreach ($row['KpTerkait'] as $kpItem) { ?>
+                                                                <li><?= html_escape($kpItem) ?></li>
+                                                            <?php } ?>
+                                                        </ul>
+                                                    </div>
+                                                <?php } ?>
                                             </td>
                                             <td style="vertical-align: middle;">
                                                 <?php
@@ -427,15 +439,15 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                             <div class="field-desc">Data diambil dari Kegiatan Prioritas Utama pada Prioritas Pembangunan (RPJMN).</div>
                         </div>
 
-                        <!-- 2. Kegiatan Prioritas Utama -->
+                        <!-- 2. Program Prioritas Pembangunan Nasional -->
                         <div class="form-group-kpu">
                             <label for="Input_KegiatanId">
-                                2. Kegiatan Prioritas Utama <span class="text-danger">*</span>
+                                2. Program Prioritas Pembangunan Nasional &amp; Kegiatan Terkait <span class="text-danger">*</span>
                             </label>
                             <select id="Input_KegiatanId" class="form-control select2-modal" style="width: 100%;" disabled>
                                 <option value="">-- Pilih Prioritas Nasional Terlebih Dahulu --</option>
                             </select>
-                            <div class="field-desc">Pilihan kegiatan akan muncul otomatis berdasarkan Prioritas Nasional yang dipilih.</div>
+                            <div class="field-desc">Pilihan Program Prioritas akan muncul otomatis (khusus PN 1 hanya dimunculkan PP 2 beserta data Kegiatan Prioritas terkait).</div>
                         </div>
 
                         <!-- 3. Dukungan Program pada RPJMD -->
@@ -497,13 +509,13 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                             </select>
                         </div>
 
-                        <!-- 2. Kegiatan Prioritas Utama -->
+                        <!-- 2. Program Prioritas Pembangunan Nasional -->
                         <div class="form-group-kpu">
                             <label for="Edit_KegiatanId">
-                                2. Kegiatan Prioritas Utama <span class="text-danger">*</span>
+                                2. Program Prioritas Pembangunan Nasional &amp; Kegiatan Terkait <span class="text-danger">*</span>
                             </label>
                             <select id="Edit_KegiatanId" class="form-control select2-modal-edit" style="width: 100%;">
-                                <option value="">-- Pilih Kegiatan Prioritas Utama --</option>
+                                <option value="">-- Pilih Program Prioritas --</option>
                             </select>
                         </div>
 
@@ -686,7 +698,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
             var prioritasId = $(this).val();
             var $kegiatanSelect = $('#Input_KegiatanId');
 
-            $kegiatanSelect.empty().append('<option value="">-- Memuat Kegiatan... --</option>').prop('disabled', true);
+            $kegiatanSelect.empty().append('<option value="">-- Memuat Program Prioritas... --</option>').prop('disabled', true);
 
             if (!prioritasId) {
                 $kegiatanSelect.empty().append('<option value="">-- Pilih Prioritas Nasional Terlebih Dahulu --</option>').prop('disabled', true);
@@ -703,7 +715,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                 },
                 dataType: 'json',
                 success: function(response) {
-                    $kegiatanSelect.empty().append('<option value="">-- Pilih Kegiatan Prioritas Utama --</option>');
+                    $kegiatanSelect.empty().append('<option value="">-- Pilih Program Prioritas --</option>');
                     if (response && response.length > 0) {
                         $.each(response, function(index, item) {
                             var kodeText = item.Kode ? '[' + item.Kode + '] ' : '';
@@ -711,12 +723,12 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                         });
                         $kegiatanSelect.prop('disabled', false);
                     } else {
-                        $kegiatanSelect.append('<option value="" disabled>Tidak ada kegiatan pada prioritas ini</option>');
+                        $kegiatanSelect.append('<option value="" disabled>Tidak ada program prioritas pada PN ini</option>');
                     }
                     $kegiatanSelect.trigger('change');
                 },
                 error: function() {
-                    $kegiatanSelect.empty().append('<option value="">Gagal memuat kegiatan</option>');
+                    $kegiatanSelect.empty().append('<option value="">Gagal memuat program prioritas</option>');
                     $kegiatanSelect.trigger('change');
                 }
             });
@@ -729,7 +741,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
             var prioritasId = $(this).val();
             var $kegiatanSelect = $('#Edit_KegiatanId');
 
-            $kegiatanSelect.empty().append('<option value="">-- Memuat Kegiatan... --</option>').prop('disabled', true);
+            $kegiatanSelect.empty().append('<option value="">-- Memuat Program Prioritas... --</option>').prop('disabled', true);
 
             if (!prioritasId) {
                 $kegiatanSelect.empty().append('<option value="">-- Pilih Prioritas Terlebih Dahulu --</option>');
@@ -746,7 +758,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                 },
                 dataType: 'json',
                 success: function(response) {
-                    $kegiatanSelect.empty().append('<option value="">-- Pilih Kegiatan Prioritas Utama --</option>');
+                    $kegiatanSelect.empty().append('<option value="">-- Pilih Program Prioritas --</option>');
                     if (response && response.length > 0) {
                         $.each(response, function(index, item) {
                             var kodeText = item.Kode ? '[' + item.Kode + '] ' : '';
@@ -755,12 +767,12 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                         });
                         $kegiatanSelect.prop('disabled', false);
                     } else {
-                        $kegiatanSelect.append('<option value="" disabled>Tidak ada kegiatan pada prioritas ini</option>');
+                        $kegiatanSelect.append('<option value="" disabled>Tidak ada program prioritas pada PN ini</option>');
                     }
                     $kegiatanSelect.trigger('change');
                 },
                 error: function() {
-                    $kegiatanSelect.empty().append('<option value="">Gagal memuat kegiatan</option>');
+                    $kegiatanSelect.empty().append('<option value="">Gagal memuat program prioritas</option>');
                     $kegiatanSelect.trigger('change');
                 }
             });
@@ -782,7 +794,7 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Level']) && $_SESSI
                 return;
             }
             if (!kegiatanId) {
-                $alertBox.text('Silakan pilih Kegiatan Prioritas Utama!').slideDown();
+                $alertBox.text('Silakan pilih Program Prioritas Pembangunan Nasional!').slideDown();
                 $('#Input_KegiatanId').select2('open');
                 return;
             }
