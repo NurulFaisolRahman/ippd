@@ -2732,6 +2732,12 @@ tr.type-sub:hover td {
     return s.replace(".", ",");
   }
 
+  function roundNumber(num, dec){
+    if (num === null || num === undefined || isNaN(num)) return 0;
+    var factor = Math.pow(10, dec !== undefined ? dec : 2);
+    return Math.round(Number(num) * factor) / factor;
+  }
+
   function parseNum(val){
     if (val === null || val === undefined) return 0;
     if (typeof val === 'number') return isNaN(val) ? 0 : val;
@@ -10152,8 +10158,8 @@ tr.type-sub:hover td {
       instansi_id: selectInstansi.value,
       item_code: code,
       bobot_capaian: bobotNum,
-      opsi_aksi: ((code === '1.a.4' || code === '1.a.5') && detailData && detailData.kriteria) ? (detailData.kriteria === 'B' ? 'Ya' : 'Tidak') : (bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : ''),
-      catatan: ((code === '1.a.2.a' || code === '1.a.2.b' || code === '1.a.2.c' || code === '1.a.4' || code === '1.a.5') && detailData && detailData.catatan !== undefined) ? detailData.catatan : ((detailData && detailData.catatan && !modalCatatan.value.trim()) ? detailData.catatan : modalCatatan.value.trim()),
+      opsi_aksi: (code === '1.b.1.c' && detailData && detailData.kriteria) ? (detailData.kriteria === 'C' ? 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : (detailData.kriteria === 'B' ? 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : 'Tidak ada keterkaitan')) : (((code === '1.a.4' || code === '1.a.5') && detailData && detailData.kriteria) ? (detailData.kriteria === 'B' ? 'Ya' : 'Tidak') : (bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : '')),
+      catatan: (code === '1.b.1.c' && detailData && detailData.kriteria) ? ('Otomatis dihitung dari keselarasan Prioritas Pembangunan Daerah terhadap Sasaran PN RKP (' + (detailData.matched_count || 0) + '/' + (detailData.total_pn || 8) + ' PN selaras, ' + (detailData.pct_matched || 0) + '%, Kriteria ' + (detailData.kriteria || 'C') + ' = ' + numFmt(bobotNum) + ')') : (((code === '1.a.2.a' || code === '1.a.2.b' || code === '1.a.2.c' || code === '1.a.4' || code === '1.a.5') && detailData && detailData.catatan !== undefined) ? detailData.catatan : ((detailData && detailData.catatan && !modalCatatan.value.trim()) ? detailData.catatan : modalCatatan.value.trim())),
       bukti_dukung: modalBuktiDukung.value.trim(),
       detail_json: JSON.stringify(detailData)
     };
