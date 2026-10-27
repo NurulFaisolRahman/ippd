@@ -6538,6 +6538,9 @@ tr.type-sub:hover td {
       ]
     });
 
+    return html;
+  }
+
   // --- 1.b.1.c Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RKPD dengan PN RKP ---
   function getAutoScore_1_b_1_c(d){
     var source = (d && d.pn_list && d.pn_list.length > 0) ? d : (AUTO_DATA_1_B_1_C || {});
