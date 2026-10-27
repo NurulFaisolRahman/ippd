@@ -32966,6 +32966,275 @@ public function updateStatusPerjanjianKinerja() {
             'catatan' => 'Otomatis dihitung dari keselarasan Prioritas Pembangunan Daerah terhadap PN RKP (' . $matched_pn_cnt . '/' . $total_pns_cnt . ' PN selaras, ' . $pct_matched_1b1c . '%, Kriteria ' . $crit_1b1c . ' = ' . number_format($score_1b1c, 3) . ')'
         ];
 
+        // --- AutoData 1.b.2.a s.d 1.b.9.a: Tingkat dukungan program daerah terhadap kegiatan prioritas pada PN 1 s.d PN 8 RKP sesuai dengan kewenangan daerah (/Daerah/DukunganPrioritasPembangunan) ---
+        $pnDukunganConfigs = [
+            '1.b.2.a' => [
+                'pn_id' => 1,
+                'pn_keyword' => 'Memperkokoh',
+                'pn_title' => 'PN 1 : Memperkokoh Ideologi Pancasila, Demokrasi, dan Hak Asasi Manusia',
+                'halaman' => 'IV-18',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => "Penguatan Pers dan Media Massa yang Bertanggung Jawab, Edukatif, Jujur, Objektif, dan Sehat Industri (BEJO'S)", 'program_daerah' => 'PROGRAM PENGELOLAAN INFORMASI DAN KOMUNIKASI PUBLIK', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.3.a' => [
+                'pn_id' => 2,
+                'pn_keyword' => 'Pertahanan',
+                'pn_title' => 'PN 2 : Memantapkan Sistem Pertahanan Keamanan Negara dan Mendorong Kemandirian Bangsa melalui Swasembada Pangan, Energi, Air, Ekonomi Syariah, Ekonomi Digital, Ekonomi Hijau, dan Ekonomi Biru',
+                'halaman' => 'IV-19',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Pengembangan Pangan Akuatik (Blue Food)', 'program_daerah' => 'PROGRAM PENGELOLAAN PERIKANAN TANGKAP', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Akuatik (Blue Food)', 'program_daerah' => 'PROGRAM PENGELOLAANPERIKANAN BUDIDAYA', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Akuatik (Blue Food)', 'program_daerah' => 'PROGRAM PENGOLAHAN DANPEMASARAN HASIL PERIKANAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Hewani', 'program_daerah' => 'PROGRAM PENYEDIAAN DAN PENGEMBANGAN SARANA PERTANIAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Hewani', 'program_daerah' => 'PROGRAM PENGENDALIAN KESEHATAN HEWAN DAN KESEHATAN MASYARAKAT VETERINER', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Lokal dan Nabati', 'program_daerah' => 'PROGRAM PENYEDIAAN DAN PENGEMBANGAN SARANA PERTANIAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Lokal dan Nabati', 'program_daerah' => 'PROGRAM PENYEDIAAN DAN PENGEMBANGAN PRASARANAPERTANIAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Lokal dan Nabati', 'program_daerah' => 'PROGRAM PENINGKATAN DIVERSIFIKASI DAN KETAHANAN PANGAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Pangan Lokal dan Nabati', 'program_daerah' => 'PROGRAM PENYULUHANPERTANIAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Konservasi Sumber Daya Air', 'program_daerah' => 'PROGRAM PENGELOLAAN SUMBERDAYA AIR (SDA)', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Penyediaan dan Pengawasan Sanitasi Aman, Berkelanjutan, dan Berketahanan Iklim Berbasis CWIS', 'program_daerah' => 'PROGRAM PENGELOLAANPERSAMPAHAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Penyediaan dan Pengawasan Sanitasi Aman, Berkelanjutan, dan Berketahanan Iklim Berbasis CWIS', 'program_daerah' => 'PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM AIR LIMBAH', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengelolaan Susut dan Sisa Pangan', 'program_daerah' => 'PROGRAM PENINGKATAN DIVERSIFIKASI DAN KETAHANAN PANGAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Peningkatan Pengelolaan Kualitas Air Sungai dan Danau', 'program_daerah' => 'PROGRAM PENGENDALIAN PENCEMARAN DAN/ATAU KERUSAKAN LINGKUNGAN HIDUP', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Perubahan Perilaku dan Penguatan Tata Kelola Persampahan', 'program_daerah' => 'PROGRAM PENGELOLAANPERSAMPAHAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Perubahan Perilaku dan Penguatan Tata Kelola Persampahan', 'program_daerah' => 'PROGRAM PENINGKATAN PENDIDIKAN, PELATIHAN DAN PENYULUHAN LINGKUNGAN HIDUP UNTUK MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Peningkatan Pengumpulan dan Pengolahan Sampah serta Pemrosesan Residu di TPA/LUR', 'program_daerah' => 'PROGRAM PENGELOLAANPERSAMPAHAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Industri Garam dan Produk Olahan Hasil Laut', 'program_daerah' => 'PROGRAM PENGOLAHAN DANPEMASARAN HASIL PERIKANAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Industri Garam dan Produk Olahan Hasil Laut', 'program_daerah' => 'PROGRAM PENGELOLAAN PERIKANAN TANGKAP', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pengembangan Industri Garam dan Produk Olahan Hasil Laut', 'program_daerah' => 'PROGRAM PENGEMBANGAN EKSPOR', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.4.a' => [
+                'pn_id' => 3,
+                'pn_keyword' => 'infrastruktur',
+                'pn_title' => 'PN 3 : Melanjutkan pengembangan infrastruktur dan meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif serta mengembangkan agromaritim industri di sentra produksi melalui peran aktif koperasi',
+                'halaman' => 'IV-20',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Pengembangan Koperasi Sektor Produksi', 'program_daerah' => 'PROGRAM PEMBERDAYAAN DANPERLINDUNGAN KOPERASI', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.5.a' => [
+                'pn_id' => 4,
+                'pn_keyword' => 'Sumber Daya Manusia',
+                'pn_title' => 'PN 4: Memperkuat Pembangunan Sumber Daya Manusia (SDM), Sains, Teknologi, Pendidikan, Kesehatan, Prestasi Olahraga, Kesetaraan Gender, serta Penguatan Peran Perempuan, Pemuda (Generasi Milenial dan Generasi Z), dan Penyandang Disabilitas',
+                'halaman' => 'IV-21',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Perluasan Layanan Pendidikan Anak Usia Dini', 'program_daerah' => 'PROGRAM PENGELOLAANPENDIDIKAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Perluasan Layanan Pendidikan Anak Usia Dini', 'program_daerah' => 'PROGRAM PENGENDALIANPERIZINAN PENDIDIKAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Revitalisasi Sarana dan Prasarana Sekolah dan Madrasah yang Berkualitas (PHTC)', 'program_daerah' => 'PROGRAM PENGELOLAANPENDIDIKAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pencegahan dan Penanganan Anak Tidak Sekolah', 'program_daerah' => 'PROGRAM PENGELOLAANPENDIDIKAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Peningkatan Relevansi dan Perluasan Akses Pendidikan Tinggi', 'program_daerah' => 'PROGRAM PENGELOLAANPENDIDIKAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Peningkatan Fungsi Intermediasi dan Layanan Pemanfaatan Iptek dan Inovasi', 'program_daerah' => 'PROGRAM PENELITIAN DAN PENGEMBANGAN DAERAH', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pencegahan dan Penurunan Stunting', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pencegahan dan Penurunan Stunting', 'program_daerah' => 'PROGRAM PEMBERDAYAANMASYARAKAT BIDANG KESEHATAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Penyelenggaraan Pemeriksaan Kesehatan Gratis', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Penyakit Kusta & Eliminasi Schistosomiasis', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Investasi Pelayanan Kesehatan Primer', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pembangunan RS lengkap berkualitas di Kab/Kota dan Pengembangan Pelayanan Kesehatan Bergerak dan Daerah Sulit Akses', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Produksi dan Pendayagunaan SDM Kesehatan', 'program_daerah' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.6.a' => [
+                'pn_id' => 5,
+                'pn_keyword' => 'Hilirisasi',
+                'pn_title' => 'PN 5: Melanjutkan Hilirisasi dan Mengembangkan Industri Berbasis Sumber Daya Alam untuk Meningkatkan Nilai Tambah di Dalam Negeri',
+                'halaman' => 'IV-22',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Pengembangan Hilirisasi Rumput Laut', 'program_daerah' => 'PROGRAM PENGOLAHAN DANPEMASARAN HASIL PERIKANAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.7.a' => [
+                'pn_id' => 6,
+                'pn_keyword' => 'Membangun dari Desa',
+                'pn_title' => 'PN 6 : Membangun dari Desa dan dari Bawah untuk Pertumbuhan Ekonomi, Pemerataan Ekonomi, dan Pemberantasan Kemiskinan',
+                'halaman' => 'IV-23',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Pemenuhan Layanan Dasar dan Infrastruktur Desa', 'program_daerah' => 'PROGRAM PEMBERDAYAAN LEMBAGA KEMASYARAKATAN, LEMBAGA ADAT DAN MASYARAKAT HUKUM ADAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Transformasi Ekonomi Lokal, Ketahanan Sosial dan Pelestarian Lingkungan Desa', 'program_daerah' => 'PROGRAM PENINGKATAN DIVERSIFIKASI DAN KETAHANAN PANGAN MASYARAKAT', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.8.a' => [
+                'pn_id' => 7,
+                'pn_keyword' => 'Reformasi Politik',
+                'pn_title' => 'PN 7 : Memperkuat Reformasi Politik, Hukum, dan Birokrasi, serta Memperkuat Pencegahan dan Pemberantasan Korupsi, Narkoba, Judi, dan Penyelundupan',
+                'halaman' => 'IV-24',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Penguatan Sistem Manajemen Talenta ASN', 'program_daerah' => 'PROGRAM KEPEGAWAIAN, PENDIDIKAN DAN PELATIHAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Tata Kelola Pelayanan Publik', 'program_daerah' => 'PROGRAM PENYELENGGARAAN PEMERINTAHAN DAN PELAYANAN PUBLIK', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ],
+            '1.b.9.a' => [
+                'pn_id' => 8,
+                'pn_keyword' => 'Harmonis',
+                'pn_title' => 'PN 8 : Memperkuat Penyelarasan Kehidupan yang Harmonis dengan Lingkungan, Alam, dan Budaya, serta Peningkatan Toleransi Antarumat Beragama untuk Mencapai Masyarakat yang Adil dan Makmur',
+                'halaman' => 'IV-25',
+                'tabel' => 'Tabel 4.4',
+                'fallbacks' => [
+                    ['kp_title' => 'Penguatan Moderasi Beragama dan Kualitas Layanan Bimbingan Keagamaan', 'program_daerah' => 'PROGRAM PEMBINAAN KESATUAN BANGSA DAN POLITIK DALAM NEGERI', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625],
+                    ['kp_title' => 'Pelindungan dan Pelestarian Warisan Budaya', 'program_daerah' => 'PROGRAM PENGEMBANGAN KEBUDAYAAN', 'score' => 100.0, 'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait', 'keselarasan_terbobot' => 0.625]
+                ]
+            ]
+        ];
+
+        $autoDataDukunganPN = [];
+        foreach ($pnDukunganConfigs as $codeKey => $cfg) {
+            $pnNum = $cfg['pn_id'];
+            $pnKw = $cfg['pn_keyword'];
+            $rows_pna = [];
+            $rdpRows = [];
+            if (!empty($KodeWilayah)) {
+                $rdpRows = $this->db->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', $tahun)
+                    ->where('deleted_at IS NULL')
+                    ->where("(id_pn = $pnNum OR kode_pn = '$pnNum' OR kode_pn LIKE '%PN $pnNum%' OR nama_pn LIKE '%$pnKw%')")
+                    ->order_by('id', 'ASC')
+                    ->get('rkpd_dukungan_prioritas')
+                    ->result_array();
+            }
+
+            if (!empty($rdpRows)) {
+                foreach ($rdpRows as $rRow) {
+                    $kegiatanList = [];
+                    if (!empty($rRow['kegiatan_nasional_json'])) {
+                        $decodedKeg = json_decode($rRow['kegiatan_nasional_json'], true);
+                        if (is_array($decodedKeg)) {
+                            foreach ($decodedKeg as $itemKeg) {
+                                $kTitle = is_array($itemKeg) ? ($itemKeg['kegiatan_nasional'] ?? ($itemKeg['nama'] ?? '')) : (string)$itemKeg;
+                                if (!empty(trim($kTitle))) $kegiatanList[] = trim($kTitle);
+                            }
+                        }
+                    }
+                    if (empty($kegiatanList) && !empty($rRow['program_nasional'])) {
+                        $kegiatanList[] = trim($rRow['program_nasional']);
+                    }
+
+                    $dukunganList = [];
+                    if (!empty($rRow['dukungan_program_json'])) {
+                        $decodedDuk = json_decode($rRow['dukungan_program_json'], true);
+                        if (is_array($decodedDuk)) {
+                            foreach ($decodedDuk as $itemDuk) {
+                                $dTitle = is_array($itemDuk) ? ($itemDuk['dukungan_program'] ?? ($itemDuk['nama'] ?? '')) : (string)$itemDuk;
+                                if (!empty(trim($dTitle))) $dukunganList[] = trim($dTitle);
+                            }
+                        }
+                    }
+                    if (empty($dukunganList) && !empty($rRow['program_prioritas_daerah'])) {
+                        $dukunganList[] = trim($rRow['program_prioritas_daerah']);
+                    }
+
+                    if (count($kegiatanList) === 1 && count($dukunganList) >= 1) {
+                        $kpTitle = $kegiatanList[0];
+                        foreach ($dukunganList as $pdTitle) {
+                            $hasSupport = (!empty($pdTitle) && $pdTitle !== '-');
+                            $rows_pna[] = [
+                                'kp_title' => $kpTitle,
+                                'program_daerah' => $pdTitle,
+                                'score' => $hasSupport ? 100.0 : 0.0,
+                                'keterangan' => $hasSupport ? 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait' : 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait',
+                                'keselarasan_terbobot' => $hasSupport ? 0.625 : 0.0
+                            ];
+                        }
+                    } elseif (count($dukunganList) === 1 && count($kegiatanList) >= 1) {
+                        $pdTitle = $dukunganList[0];
+                        $hasSupport = (!empty($pdTitle) && $pdTitle !== '-');
+                        foreach ($kegiatanList as $kpTitle) {
+                            $rows_pna[] = [
+                                'kp_title' => $kpTitle,
+                                'program_daerah' => $pdTitle,
+                                'score' => $hasSupport ? 100.0 : 0.0,
+                                'keterangan' => $hasSupport ? 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait' : 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait',
+                                'keselarasan_terbobot' => $hasSupport ? 0.625 : 0.0
+                            ];
+                        }
+                    } else {
+                        $maxCnt = max(count($kegiatanList), count($dukunganList), 1);
+                        for ($kIdx = 0; $kIdx < $maxCnt; $kIdx++) {
+                            $kpTitle = $kegiatanList[$kIdx] ?? ($kegiatanList[0] ?? ($cfg['fallbacks'][0]['kp_title'] ?? ''));
+                            $pdTitle = $dukunganList[$kIdx] ?? ($dukunganList[0] ?? ($cfg['fallbacks'][0]['program_daerah'] ?? '-'));
+                            $hasSupport = (!empty($pdTitle) && $pdTitle !== '-');
+                            $rows_pna[] = [
+                                'kp_title' => $kpTitle,
+                                'program_daerah' => $pdTitle,
+                                'score' => $hasSupport ? 100.0 : 0.0,
+                                'keterangan' => $hasSupport ? 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait' : 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Prioritas Nasional terkait',
+                                'keselarasan_terbobot' => $hasSupport ? 0.625 : 0.0
+                            ];
+                        }
+                    }
+                }
+            }
+
+            if (empty($rows_pna)) {
+                $rows_pna = $cfg['fallbacks'];
+            }
+
+            $totalKp = count($rows_pna);
+            $sumScore = 0;
+            $matchedKp = 0;
+            foreach ($rows_pna as $rItem) {
+                $sc = (float)($rItem['score'] ?? 0);
+                $sumScore += $sc;
+                if ($sc > 0) $matchedKp++;
+            }
+
+            $avgScore = $totalKp > 0 ? round($sumScore / $totalKp, 2) : 0.0;
+            $avgTerb = $totalKp > 0 ? round(($avgScore / 100.0) * 0.625, 2) : 0.0;
+
+            if ($avgScore <= 25.0) {
+                $crit = 'A';
+                $score = 0.15625;
+                $aksi = '=< 25%';
+            } elseif ($avgScore <= 50.0) {
+                $crit = 'B';
+                $score = 0.3125;
+                $aksi = '25% - 50%';
+            } elseif ($avgScore <= 75.0) {
+                $crit = 'C';
+                $score = 0.46875;
+                $aksi = '50% - 75%';
+            } else {
+                $crit = 'D';
+                $score = 0.625;
+                $aksi = '=> 75%';
+            }
+
+            $autoKey = 'AutoData_' . str_replace('.', '_', $codeKey);
+            $autoDataDukunganPN[$autoKey] = [
+                'item_code' => $codeKey,
+                'pn_id' => $pnNum,
+                'pn_title' => $cfg['pn_title'],
+                'rows' => $rows_pna,
+                'matched_count' => $matchedKp,
+                'total_kp' => $totalKp,
+                'avg_score' => $avgScore,
+                'avg_terbobot' => $avgTerb,
+                'kriteria' => $crit,
+                'score' => $score,
+                'opsi_aksi' => $aksi,
+                'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+                'halaman' => $cfg['halaman'],
+                'tabel' => $cfg['tabel'],
+                'catatan' => 'Otomatis dihitung dari keselarasan Dukungan Program Daerah terhadap Kegiatan Prioritas pada PN ' . $pnNum . ' RKP (/Daerah/DukunganPrioritasPembangunan)'
+            ];
+        }
+
+        $autoData_1_b_2_a = $autoDataDukunganPN['AutoData_1_b_2_a'];
+        $autoData_1_b_3_a = $autoDataDukunganPN['AutoData_1_b_3_a'];
+        $autoData_1_b_4_a = $autoDataDukunganPN['AutoData_1_b_4_a'];
+        $autoData_1_b_5_a = $autoDataDukunganPN['AutoData_1_b_5_a'];
+        $autoData_1_b_6_a = $autoDataDukunganPN['AutoData_1_b_6_a'];
+        $autoData_1_b_7_a = $autoDataDukunganPN['AutoData_1_b_7_a'];
+        $autoData_1_b_8_a = $autoDataDukunganPN['AutoData_1_b_8_a'];
+        $autoData_1_b_9_a = $autoDataDukunganPN['AutoData_1_b_9_a'];
+
         return [
             'AutoData_1_a_1_a' => $autoData_1_a_1_a,
             'AutoData_1_a_1_b' => $autoData_1_a_1_b,
@@ -32989,6 +33258,14 @@ public function updateStatusPerjanjianKinerja() {
             'AutoData_1_b_1_b' => $autoData_1_b_1_b,
             'AutoData_1_b_1_c' => $autoData_1_b_1_c,
             'AutoData_1_b_1_d' => $autoData_1_b_1_d,
+            'AutoData_1_b_2_a' => $autoData_1_b_2_a,
+            'AutoData_1_b_3_a' => $autoData_1_b_3_a,
+            'AutoData_1_b_4_a' => $autoData_1_b_4_a,
+            'AutoData_1_b_5_a' => $autoData_1_b_5_a,
+            'AutoData_1_b_6_a' => $autoData_1_b_6_a,
+            'AutoData_1_b_7_a' => $autoData_1_b_7_a,
+            'AutoData_1_b_8_a' => $autoData_1_b_8_a,
+            'AutoData_1_b_9_a' => $autoData_1_b_9_a,
             'AutoData_1_b_2_b' => $autoData_1_b_2_b,
             'AutoData_1_b_3_b' => $autoData_1_b_3_b,
             'AutoData_1_b_4_b' => $autoData_1_b_4_b,
@@ -33977,6 +34254,30 @@ public function updateStatusPerjanjianKinerja() {
                 'status_verifikasi' => 'Draft',
                 'tgl_verifikasi' => null
             ];
+        }
+
+        // Auto-generate 1.b.2.a s.d 1.b.9.a score dari keselarasan Dukungan Program Daerah terhadap Kegiatan Prioritas pada PN 1 s.d PN 8 RKP (/Daerah/DukunganPrioritasPembangunan)
+        foreach (['1.b.2.a', '1.b.3.a', '1.b.4.a', '1.b.5.a', '1.b.6.a', '1.b.7.a', '1.b.8.a', '1.b.9.a'] as $pnaCode) {
+            $autoKey = 'AutoData_' . str_replace('.', '_', $pnaCode);
+            if ((!isset($scoresMap[$pnaCode]) || $scoresMap[$pnaCode]['bobot_capaian'] === null || empty($scoresMap[$pnaCode]['detail_json'])) && isset($autoData[$autoKey])) {
+                $da = $autoData[$autoKey];
+                $existing_id = isset($scoresMap[$pnaCode]) ? $scoresMap[$pnaCode]['id'] : null;
+                $existing_bukti = isset($scoresMap[$pnaCode]) ? $scoresMap[$pnaCode]['bukti_dukung'] : '';
+                $scoresMap[$pnaCode] = [
+                    'id' => $existing_id,
+                    'bobot_capaian' => (float)$da['score'],
+                    'opsi_aksi' => $da['opsi_aksi'],
+                    'catatan' => $da['catatan'],
+                    'bukti_dukung' => $existing_bukti,
+                    'detail_json' => json_encode($da),
+                    'bobot_verifikator' => null,
+                    'opsi_aksi_verifikator' => '',
+                    'catatan_verifikator' => '',
+                    'bukti_dukung_verifikator' => '',
+                    'status_verifikasi' => 'Draft',
+                    'tgl_verifikasi' => null
+                ];
+            }
         }
 
         // Auto-generate 1.b.10.a score dari keselarasan indikator makro RKP vs RKPD: Tingkat Pengangguran Terbuka (TPT)
@@ -35140,6 +35441,30 @@ public function updateStatusPerjanjianKinerja() {
                 'status_verifikasi' => 'Draft',
                 'tgl_verifikasi' => null
             ];
+        }
+
+        // Auto-generate 1.b.2.a s.d 1.b.9.a score jika ada data AutoData_1_b_..._a
+        foreach (['1.b.2.a', '1.b.3.a', '1.b.4.a', '1.b.5.a', '1.b.6.a', '1.b.7.a', '1.b.8.a', '1.b.9.a'] as $pnaCode) {
+            $autoKey = 'AutoData_' . str_replace('.', '_', $pnaCode);
+            if (isset($autoData[$autoKey])) {
+                $da = $autoData[$autoKey];
+                $existing_id = isset($scoresMap[$pnaCode]) ? $scoresMap[$pnaCode]['id'] : null;
+                $existing_bukti = isset($scoresMap[$pnaCode]) ? $scoresMap[$pnaCode]['bukti_dukung'] : '';
+                $scoresMap[$pnaCode] = [
+                    'id' => $existing_id,
+                    'bobot_capaian' => (float)$da['score'],
+                    'opsi_aksi' => $da['opsi_aksi'],
+                    'catatan' => $da['catatan'],
+                    'bukti_dukung' => $existing_bukti,
+                    'detail_json' => json_encode($da),
+                    'bobot_verifikator' => null,
+                    'opsi_aksi_verifikator' => '',
+                    'catatan_verifikator' => '',
+                    'bukti_dukung_verifikator' => '',
+                    'status_verifikasi' => 'Draft',
+                    'tgl_verifikasi' => null
+                ];
+            }
         }
 
         // Auto-generate 1.b.10.a score jika ada data AutoData_1_b_10_a
