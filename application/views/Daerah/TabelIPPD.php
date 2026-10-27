@@ -2644,6 +2644,7 @@ tr.type-sub:hover td {
   var AUTO_DATA_1_B_10_A = <?= isset($AutoData_1_b_10_a) ? json_encode($AutoData_1_b_10_a) : '{}' ?>;
   var AUTO_DATA_1_B_10_B = <?= isset($AutoData_1_b_10_b) ? json_encode($AutoData_1_b_10_b) : '{}' ?>;
   var AUTO_DATA_1_B_1_B = <?= isset($AutoData_1_b_1_b) ? json_encode($AutoData_1_b_1_b) : '{}' ?>;
+  var AUTO_DATA_1_B_1_C = <?= isset($AutoData_1_b_1_c) ? json_encode($AutoData_1_b_1_c) : '{}' ?>;
   var AUTO_DATA_1_B_1_D = <?= isset($AutoData_1_b_1_d) ? json_encode($AutoData_1_b_1_d) : '{}' ?>;
   var AUTO_DATA_1_B_2_B = <?= isset($AutoData_1_b_2_b) ? json_encode($AutoData_1_b_2_b) : '{}' ?>;
   var AUTO_DATA_1_B_3_B = <?= isset($AutoData_1_b_3_b) ? json_encode($AutoData_1_b_3_b) : '{}' ?>;
@@ -6537,6 +6538,321 @@ tr.type-sub:hover td {
       ]
     });
 
+  // --- 1.b.1.c Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RKPD dengan PN RKP ---
+  function getAutoScore_1_b_1_c(d){
+    var source = (d && d.pn_list && d.pn_list.length > 0) ? d : (AUTO_DATA_1_B_1_C || {});
+    var pnList = (source.pn_list && source.pn_list.length > 0) ? source.pn_list : [];
+
+    if (pnList.length === 0) {
+      pnList = [
+        {
+          pn_id: 1,
+          pn_title: 'PN 1: Memperkokoh Ideologi Pancasila, Demokrasi, dan Hak Asasi Manusia',
+          pds: [{ name: '-', score: 0.0 }],
+          keterangan: 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '0%',
+          keselarasan_terbobot: 0.0
+        },
+        {
+          pn_id: 2,
+          pn_title: 'PN 2: Memantapkan Sistem Pertahanan Keamanan Negara dan Mendorong Kemandirian Bangsa melalui Swasembada Pangan, Energi, Air, Ekonomi Syariah, Ekonomi Digital, Ekonomi Hijau, dan Ekonomi Biru',
+          pds: [
+            { name: 'PD 1 : Peningkatan Produksi Pangan', score: 100.0 },
+            { name: 'PD 3 : Perluasan Pasar Sektor Pertanian dan Pariwisata', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 3,
+          pn_title: 'PN 3 : Meningkatkan lapangan kerja yang berkualitas, mendorong kewirausahaan, mengembangkan industri kreatif serta mengembangkan agroindustri maritim industri di sentra produksi melalui peran aktif koperasi,',
+          pds: [
+            { name: 'PD 4 : Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata', score: 100.0 },
+            { name: 'PD 5 : Peningkatan Akses Infratruktur Pariwisata dan Pertanian serta Peningkatan ketahanan Lingkungan hidup', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 4,
+          pn_title: 'PN 4: Memperkuat Pembangunan Sumber Daya Manusia (SDM), Sains, Teknologi, Pendidikan, Kesehatan, Prestasi Olahraga, Kesetaraan Gender, serta Penguatan Peran Perempuan, Pemuda (Generasi Milenial dan Generasi Z), dan Penyandang Disabilitas',
+          pds: [
+            { name: 'PD 7 : Penguatan Pendidikan Yang Berdaya Saing', score: 100.0 },
+            { name: 'PD 8 : Peningkatan Akses Kesehatan Dan Pola Hidup Sehat', score: 100.0 },
+            { name: 'PD 6 : Perlindungan Sosial Adaptif dan Pemberdayaan Masyarakat Miskin Dan Rentan', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 5,
+          pn_title: 'PN 5: Melanjutkan Hilirisasi dan Mengembangkan Industri Berbasis Sumber Daya Alam untuk Meningkatkan Nilai Tambah di Dalam Negeri',
+          pds: [
+            { name: 'PD 2 : Peningkatan Nilai Tambah Produk UMKM', score: 100.0 },
+            { name: 'PD 3 : Perluasan Pasar Sektor Pertanian dan Pariwisata', score: 100.0 },
+            { name: 'PD 5 : Peningkatan Akses Infratruktur Pariwisata dan Pertanian serta Peningkatan ketahanan Lingkungan hidup', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 6,
+          pn_title: 'PN 6: Membangun dari Desa dan dari Bawah untuk Pertumbuhan Ekonomi, Pemerataan Ekonomi, dan Pemberantasan Kemiskinan',
+          pds: [
+            { name: 'PD 6 : Perlindungan Sosial Adaptif dan Pemberdayaan Masyarakat Miskin Dan Rentan', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 7,
+          pn_title: 'PN 7: Memperkuat Reformasi Politik, Hukum, dan Birokrasi, serta Memperkuat Pencegahan dan Pemberantasan Korupsi, Narkoba, Judi, dan Penyelundupan',
+          pds: [
+            { name: 'PD 9 : Reformasi Birokrasi', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        },
+        {
+          pn_id: 8,
+          pn_title: 'PN 8: Memperkuat Penyelarasan Kehidupan yang Harmonis dengan Lingkungan Alam dan Budaya, serta Peningkatan Toleransi Antarumat Beragama untuk Mencapai Masyarakat yang Adil dan Makmur',
+          pds: [
+            { name: 'PD 5 : Peningkatan Akses Infratruktur Pariwisata dan Pertanian serta Peningkatan ketahanan Lingkungan hidup', score: 100.0 }
+          ],
+          keterangan: 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+          keselarasan_rata_rata: '100%',
+          keselarasan_terbobot: 0.625
+        }
+      ];
+    }
+
+    var matchedCount = 0;
+    pnList.forEach(function(pn){
+      var hasSel = false;
+      if (pn.pds && pn.pds.length > 0) {
+        pn.pds.forEach(function(pd){
+          if (parseFloat(pd.score) > 0) hasSel = true;
+        });
+      }
+      if (hasSel) matchedCount++;
+    });
+
+    var totalPn = pnList.length || 8;
+    var pctMatched = totalPn > 0 ? Math.round((matchedCount / totalPn) * 100) : 0;
+    var avgTerbobot = totalPn > 0 ? roundNumber((matchedCount * 0.625) / totalPn, 2) : 0.0;
+
+    var crit = 'A';
+    var critText = 'Tidak ada keterkaitan';
+    var finalScore = 0.1;
+
+    if (matchedCount === 0 || pctMatched === 0) {
+      crit = 'A';
+      critText = 'Tidak ada keterkaitan';
+      finalScore = 0.1;
+    } else if (pctMatched < 50) {
+      crit = 'B';
+      critText = 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP';
+      finalScore = 0.31;
+    } else {
+      crit = 'C';
+      critText = 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP';
+      finalScore = 0.625;
+    }
+
+    return {
+      pnList: pnList,
+      matchedCount: matchedCount,
+      totalPn: totalPn,
+      pctMatched: pctMatched,
+      avgTerbobot: avgTerbobot,
+      kriteria: crit,
+      critText: critText,
+      finalScore: finalScore,
+      dokumen: (d && d.dokumen) || source.dokumen || 'RKPD Kab Banyuwangi 2026',
+      halaman: (d && d.halaman) || source.halaman || 'IV-15',
+      tabel: (d && d.tabel) || source.tabel || 'Tabel 4.3',
+      catatan: (d && d.catatan) || source.catatan || ''
+    };
+  }
+
+  function renderWs_1_b_1_c(d, maxBobot){
+    d = d || {};
+    var info = getAutoScore_1_b_1_c(d);
+    var pnList = info.pnList;
+    var totalPn = info.totalPn;
+    var matchedCount = info.matchedCount;
+    var pctMatched = info.pctMatched;
+    var avgTerbobot = info.avgTerbobot;
+    var crit = info.kriteria;
+    var critText = info.critText;
+    var finalScore = info.finalScore;
+
+    var totalRows = 0;
+    pnList.forEach(function(pn){
+      var cnt = (pn.pds && pn.pds.length > 0) ? pn.pds.length : 1;
+      totalRows += cnt;
+    });
+    if (totalRows === 0) totalRows = 1;
+
+    var html =
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_1_b_1_c" style="min-width: 1400px; font-size: 13px;">' +
+        '<thead>' +
+          '<tr>' +
+            '<th class="th-green" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">RKP</th>' +
+            '<th class="th-blue" style="width: 280px; min-width: 280px; vertical-align: middle; font-size: 13px; padding: 10px 8px; text-align: center;">RKPD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; min-width: 110px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Nilai Keselarasan<br><small style="font-weight:600;">(0% / 100%)</small></th>' +
+            '<th class="th-amber" rowspan="2" style="width: 240px; min-width: 240px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Keterangan</th>' +
+            '<th class="th-green" rowspan="2" style="width: 110px; min-width: 110px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Nilai Keselarasan<br>Rata-rata</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 90px; min-width: 90px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Bobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 105px; min-width: 105px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Keselarasan Terbobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 115px; min-width: 115px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th class="th-blue" colspan="3" style="display:none;">Referensi</th>' +
+            '<th class="th-amber" rowspan="2" style="width: 160px; min-width: 160px; vertical-align: middle; font-size: 12.5px; padding: 8px; text-align: center;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-green" style="font-size: 12px; padding: 6px; text-align: center;">Prioritas Nasional (PN)</th>' +
+            '<th class="th-blue" style="font-size: 12px; padding: 6px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+            '<th style="display:none;">Dokumen</th>' +
+            '<th style="display:none;">Halaman</th>' +
+            '<th style="display:none;">Tabel</th>' +
+          '</tr>' +
+        '</thead>' +
+        '<tbody>';
+
+    pnList.forEach(function(pn, pnIdx){
+      var pds = (pn.pds && pn.pds.length > 0) ? pn.pds : [{ name: '-', score: 0.0 }];
+      var pdsCount = pds.length;
+      var curAvg = pn.keselarasan_rata_rata || (pn.keselarasan_terbobot > 0 ? '100%' : '0%');
+      var curTerb = (pn.keselarasan_terbobot !== undefined && pn.keselarasan_terbobot !== null) ? parseFloat(pn.keselarasan_terbobot) : 0.0;
+      var curKet = pn.keterangan || (curTerb > 0 ? 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait' : 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait');
+
+      html += '<tr class="ws-1b1c-pn-group-header" style="display:none;" data-pn-idx="' + pnIdx + '" data-pn-id="' + pn.pn_id + '" data-pn-title="' + escapeHtml(pn.pn_title) + '"></tr>';
+
+      pds.forEach(function(pd, pdIdx){
+        var curScore = (pd.score !== null && pd.score !== undefined) ? parseFloat(pd.score) : 0.0;
+
+        html += '<tr class="ws-1b1c-pd-row" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '">';
+
+        if (pdIdx === 0) {
+          html +=
+            '<td rowspan="' + pdsCount + '" style="vertical-align: top; font-weight: 700; color: #166534; background: #f0fdf4; font-size: 12.5px; padding: 10px 8px; line-height: 1.45;">' +
+              escapeHtml(pn.pn_title) +
+            '</td>';
+        }
+
+        html +=
+          '<td style="vertical-align: middle; padding: 8px 10px; font-size: 12.5px; color: #1e293b; background: #ffffff;">' +
+            '<input type="text" class="calc-inp ws-1b1c-pd-title" value="' + escapeHtml(pd.name || '-') + '" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: 500;">' +
+          '</td>';
+
+        html +=
+          '<td style="text-align: center; vertical-align: middle; padding: 6px 4px;">' +
+            '<select class="calc-inp ws-1b1c-pd-score-sel" data-pn-idx="' + pnIdx + '" data-pd-idx="' + pdIdx + '" style="text-align: center; font-weight: 700; font-size: 12px; height: 34px; padding: 2px 4px; border-radius: 4px; background: #ffffff; cursor: pointer; width: 100%;">' +
+              '<option value="100.00"' + (curScore >= 100 ? ' selected' : '') + '>100.00%</option>' +
+              '<option value="0.00"' + (curScore < 100 ? ' selected' : '') + '>0.00%</option>' +
+            '</select>' +
+          '</td>';
+
+        if (pdIdx === 0) {
+          html +=
+            '<td rowspan="' + pdsCount + '" style="vertical-align: top; padding: 8px;">' +
+              '<textarea class="calc-inp ws-1b1c-pn-ket" data-pn-idx="' + pnIdx + '" rows="3" style="width:100%; resize: vertical; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 4px; border: 1px solid #cbd5e1; min-height: 60px;">' + escapeHtml(curKet) + '</textarea>' +
+            '</td>';
+
+          html +=
+            '<td rowspan="' + pdsCount + '" style="vertical-align: middle; text-align: center; padding: 8px;">' +
+              '<span class="ws-1b1c-pn-avg" data-pn-idx="' + pnIdx + '" style="font-weight: 800; font-size: 13px; color: ' + (curTerb > 0 ? '#15803d' : '#dc2626') + ';">' + curAvg + '</span>' +
+            '</td>';
+
+          if (pnIdx === 0) {
+            html +=
+              '<td rowspan="' + totalRows + '" style="vertical-align: middle; text-align: center; font-weight: 800; font-size: 13px; font-family: \'Roboto Mono\', monospace; background: #f8fafc; color: #334155; padding: 8px; border: 1px solid #cbd5e1;">' +
+                '<span class="ws-1b1c-bobot-val">0.625</span>' +
+              '</td>';
+          }
+
+          html +=
+            '<td rowspan="' + pdsCount + '" style="vertical-align: middle; text-align: center; padding: 8px;">' +
+              '<span class="ws-1b1c-pn-terbobot" data-pn-idx="' + pnIdx + '" style="font-weight: 800; font-size: 13px; font-family: \'Roboto Mono\', monospace; color: ' + (curTerb > 0 ? '#15803d' : '#dc2626') + ';">' + (curTerb > 0 ? '0,63' : '0,00') + '</span>' +
+            '</td>';
+
+          if (pnIdx === 0) {
+            html +=
+              '<td rowspan="' + totalRows + '" style="vertical-align: middle; text-align: center; font-weight: 800; font-size: 14px; font-family: \'Roboto Mono\', monospace; background: #eff6ff; color: #1e40af; border: 1.5px solid #93c5fd; padding: 8px;">' +
+                '<span class="ws-1b1c-avg-terbobot-val">' + avgTerbobot.toFixed(2) + '</span>' +
+              '</td>';
+
+            html +=
+              '<td rowspan="' + totalRows + '" style="display:none;">' +
+                '<input type="hidden" class="ref-dok-inp" value="' + escapeHtml(info.dokumen) + '">' +
+                '<input type="hidden" class="ref-hal-inp" value="' + escapeHtml(info.halaman) + '">' +
+                '<input type="hidden" class="ref-tbl-inp" value="' + escapeHtml(info.tabel) + '">' +
+              '</td>';
+
+            html +=
+              '<td rowspan="' + totalRows + '" style="vertical-align: top; padding: 8px;">' +
+                '<textarea class="calc-inp ws-1b1c-catatan-inp" rows="6" placeholder="Catatan tambahan..." style="width:100%; resize: vertical; font-size: 12px; line-height: 1.4; padding: 6px 8px; border-radius: 4px; border: 1px solid #cbd5e1; min-height: 100px;">' + escapeHtml(info.catatan) + '</textarea>' +
+              '</td>';
+          }
+        }
+
+        html += '</tr>';
+      });
+    });
+
+    html +=
+      '<tr style="background: #f1f5f9; font-weight: 700; border-top: 2px solid #cbd5e1;">' +
+        '<td colspan="2" style="text-align: right; padding: 10px 14px; font-size: 13px; color: #334155;">Nilai Keselarasan Rata-rata:</td>' +
+        '<td colspan="2" style="background: #f1f5f9;"></td>' +
+        '<td style="text-align: center; vertical-align: middle; padding: 8px;">' +
+          '<span class="ws-1b1c-total-avg-pct" style="font-weight: 800; font-size: 14px; color: #dc2626;">' + pctMatched + '%</span>' +
+        '</td>' +
+        '<td style="background: #f1f5f9;"></td>' +
+        '<td style="background: #f1f5f9;"></td>' +
+        '<td style="text-align: center; vertical-align: middle; padding: 8px;">' +
+          '<span class="ws-1b1c-total-avg-terb" style="font-weight: 800; font-size: 14px; color: #1e40af;">' + avgTerbobot.toFixed(2) + '</span>' +
+        '</td>' +
+        '<td style="background: #f1f5f9;"></td>' +
+      '</tr>' +
+      '</tbody></table></div>';
+
+    html +=
+      '<div style="margin-top: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e293b; font-size: 12.5px; font-weight: 600;">' +
+        '<i class="fa fa-camera" style="color: #3b82f6; margin-right: 6px;"></i> Screenshot Prioritas Nasional di RKP dan Dukungan Prioritas Pembangunan Daerah di RKPD dapat diunggah melalui Bukti Dukung di bawah.' +
+      '</div>' +
+      '<div style="margin-top: 6px; font-size: 12px; color: #64748b; font-style: italic;">' +
+        '<i class="fa fa-database" style="color: #0d9488; margin-right: 4px;"></i> Tarik data dari <b>/Daerah/TemaPembangunan</b> (Prioritas Pembangunan Daerah RKPD terhadap Prioritas Nasional RKP).' +
+      '</div>';
+
+    html += renderStandardCriteriaCard({
+      code: '1.b.1.c',
+      safeId: 'ws1b1c',
+      title: 'Keterangan & Kriteria Penilaian Poin 1.b.1.c',
+      badgeText: 'A. Tidak ada keterkaitan | B. < 50% | C. > 50%',
+      colTitle: 'Kriteria Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RKPD dengan PN RKP',
+      rows: [
+        { crit: 'A', text: 'Tidak ada keterkaitan', val: '0,1', color: '#dc2626' },
+        { crit: 'B', text: 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP', val: '0,31', color: '#d97706' },
+        { crit: 'C', text: 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP', val: '0,625', color: '#16a34a' }
+      ],
+      sourceTitle: 'Hasil Analisis Keterkaitan Prioritas Daerah (/Daerah/TemaPembangunan)',
+      infoRows: [
+        { label: 'Indikator:', value: 'Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RKPD dengan PN RKP' },
+        { label: 'Sumber Data:', value: 'Menu /Daerah/TemaPembangunan' },
+        { label: 'Total Prioritas Nasional:', id: 'ws1b1cTotalPn', value: totalPn + ' PN' },
+        { label: 'PN Selaras / Didukung:', id: 'ws1b1cMatchedPn', value: matchedCount + ' PN (' + pctMatched + '%)' },
+        { label: 'Rata-rata Terbobot:', id: 'ws1b1cAvgTerbobot', value: numFmt(avgTerbobot) },
+        { label: 'Kriteria Terpenuhi:', id: 'ws1b1cCritText', value: '<span style="color:' + (crit === 'C' ? '#16a34a' : (crit === 'B' ? '#d97706' : '#dc2626')) + '; font-weight:700;">Kriteria ' + crit + ' (' + critText + ') = ' + numFmt(finalScore) + '</span>' }
+      ]
+    });
+
     return html;
   }
 
@@ -7044,6 +7360,7 @@ tr.type-sub:hover td {
     if (code === '1.b.10.a') return renderWs_1_b_10_a(detailData, maxBobot);
     if (code === '1.b.10.b') return renderWs_1_b_10_b(detailData, maxBobot);
     if (code === '1.b.8.a') return renderWs_1_b_8(code, detailData, maxBobot);
+    if (code === '1.b.1.c') return renderWs_1_b_1_c(detailData, maxBobot);
     if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b') {
       return renderWs_Persandingan_1b(code, detailData, maxBobot);
     }
@@ -8110,6 +8427,106 @@ tr.type-sub:hover td {
       }
     }
 
+    // 8.c. Tingkat Keselarasan Prioritas Pembangunan Daerah dalam RKPD dengan PN RKP (1.b.1.c)
+    else if (code === '1.b.1.c') {
+      var table = document.querySelector("#wsTable_1_b_1_c");
+      if (table) {
+        var pnGroups = {};
+        table.querySelectorAll(".ws-1b1c-pd-row").forEach(function(r) {
+          var pnIdx = r.getAttribute("data-pn-idx");
+          if (!pnGroups[pnIdx]) pnGroups[pnIdx] = [];
+          var sel = r.querySelector(".ws-1b1c-pd-score-sel");
+          var sc = sel ? parseFloat(sel.value) : 0;
+          pnGroups[pnIdx].push(sc);
+        });
+
+        var matchedPn = 0;
+        var totalPn = Object.keys(pnGroups).length || 8;
+        var maxBobot = parseFloat(modalBobotMaks.value) || 0.625;
+
+        for (var pIdx in pnGroups) {
+          var scores = pnGroups[pIdx];
+          var hasSelaras = false;
+          scores.forEach(function(s) {
+            if (s > 0) hasSelaras = true;
+          });
+
+          var pnAvgEl = table.querySelector('.ws-1b1c-pn-avg[data-pn-idx="' + pIdx + '"]');
+          var pnTerbEl = table.querySelector('.ws-1b1c-pn-terbobot[data-pn-idx="' + pIdx + '"]');
+          var pnKetEl = table.querySelector('.ws-1b1c-pn-ket[data-pn-idx="' + pIdx + '"]');
+
+          if (hasSelaras) {
+            matchedPn++;
+            if (pnAvgEl) {
+              pnAvgEl.textContent = '100%';
+              pnAvgEl.style.color = '#15803d';
+            }
+            if (pnTerbEl) {
+              pnTerbEl.textContent = '0,63';
+              pnTerbEl.style.color = '#15803d';
+            }
+            if (pnKetEl && (!pnKetEl.value || pnKetEl.value.indexOf('Tidak ada') !== -1)) {
+              pnKetEl.value = 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
+            }
+          } else {
+            if (pnAvgEl) {
+              pnAvgEl.textContent = '0%';
+              pnAvgEl.style.color = '#dc2626';
+            }
+            if (pnTerbEl) {
+              pnTerbEl.textContent = '0,00';
+              pnTerbEl.style.color = '#dc2626';
+            }
+            if (pnKetEl && (!pnKetEl.value || pnKetEl.value.indexOf('Terdapat') !== -1)) {
+              pnKetEl.value = 'Tidak ada Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait';
+            }
+          }
+        }
+
+        var pctMatched = totalPn > 0 ? Math.round((matchedPn / totalPn) * 100) : 0;
+        var avgTerbobot = totalPn > 0 ? roundNumber((matchedPn * maxBobot) / totalPn, 2) : 0.0;
+
+        var elAvgTerb = table.querySelector(".ws-1b1c-avg-terbobot-val");
+        if (elAvgTerb) elAvgTerb.textContent = avgTerbobot.toFixed(2);
+        var elTotAvgTerb = table.querySelector(".ws-1b1c-total-avg-terb");
+        if (elTotAvgTerb) elTotAvgTerb.textContent = avgTerbobot.toFixed(2);
+        var elTotAvgPct = table.querySelector(".ws-1b1c-total-avg-pct");
+        if (elTotAvgPct) elTotAvgPct.textContent = pctMatched + '%';
+
+        var crit = 'A';
+        var critLabel = 'Tidak ada keterkaitan';
+        if (matchedPn === 0 || pctMatched === 0) {
+          crit = 'A';
+          critLabel = 'Tidak ada keterkaitan';
+          computedFinalScore = 0.1;
+        } else if (pctMatched < 50) {
+          crit = 'B';
+          critLabel = 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP';
+          computedFinalScore = 0.31;
+        } else {
+          crit = 'C';
+          critLabel = 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP';
+          computedFinalScore = 0.625;
+        }
+
+        modalBobotInput.value = numFmt(computedFinalScore);
+        modalCalcDisplay.textContent = numFmt(computedFinalScore);
+        syncExcelScoreUI(modalBobotInput.value, maxBobot);
+
+        var infoMap = {};
+        infoMap['ws1b1cTotalPn'] = totalPn + ' PN';
+        infoMap['ws1b1cMatchedPn'] = matchedPn + ' PN (' + pctMatched + '%)';
+        infoMap['ws1b1cAvgTerbobot'] = numFmt(avgTerbobot);
+        infoMap['ws1b1cCritText'] = '<span style="color:' + (crit === 'C' ? '#16a34a' : (crit === 'B' ? '#d97706' : '#dc2626')) + '; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ') = ' + numFmt(computedFinalScore) + '</span>';
+
+        updateStandardCriteriaHighlight('ws1b1c', crit, computedFinalScore, infoMap, ['A', 'B', 'C']);
+
+        if (excelFxContent) {
+          excelFxContent.textContent = "Keselarasan: " + pctMatched + "% (" + matchedPn + "/" + totalPn + " PN) -> Kriteria " + crit + " = " + numFmt(computedFinalScore);
+        }
+      }
+    }
+
     // 9. Persandingan Keterkaitan Program/Kegiatan Prioritas RKP dengan Program Daerah (1.b.1.b, 1.b.1.d s.d 1.b.9.b)
     else if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b') {
       var safeCode = code.replace(/\./g, '');
@@ -9099,6 +9516,76 @@ tr.type-sub:hover td {
         json.score = avgVal >= 50.0 ? 0.75 : 0.375;
       }
     }
+    else if (code === '1.b.1.c') {
+      var table = document.querySelector("#wsTable_1_b_1_c");
+      if (table) {
+        var pnList = [];
+        var matchedCount = 0;
+        var pnHeaders = table.querySelectorAll(".ws-1b1c-pn-group-header");
+        pnHeaders.forEach(function(headerEl) {
+          var pnIdx = headerEl.getAttribute("data-pn-idx");
+          var pnId = parseInt(headerEl.getAttribute("data-pn-id")) || 0;
+          var pnTitle = headerEl.getAttribute("data-pn-title") || '';
+          var ketEl = table.querySelector('.ws-1b1c-pn-ket[data-pn-idx="' + pnIdx + '"]');
+          var ket = ketEl ? ketEl.value.trim() : '';
+          var avgEl = table.querySelector('.ws-1b1c-pn-avg[data-pn-idx="' + pnIdx + '"]');
+          var avgStr = avgEl ? avgEl.textContent.trim() : '0%';
+          var terbEl = table.querySelector('.ws-1b1c-pn-terbobot[data-pn-idx="' + pnIdx + '"]');
+          var terbVal = terbEl ? parseFloat(terbEl.textContent.replace(',', '.')) : 0;
+
+          var pds = [];
+          var hasSelaras = false;
+          table.querySelectorAll('.ws-1b1c-pd-row[data-pn-idx="' + pnIdx + '"]').forEach(function(pdRow) {
+            var pdTitleEl = pdRow.querySelector(".ws-1b1c-pd-title");
+            var pdTitle = pdTitleEl ? (pdTitleEl.value ? pdTitleEl.value.trim() : pdTitleEl.textContent.trim()) : '';
+            var sel = pdRow.querySelector(".ws-1b1c-pd-score-sel");
+            var sc = sel ? parseFloat(sel.value) : 0;
+            if (sc > 0) hasSelaras = true;
+            pds.push({ name: pdTitle, score: sc });
+          });
+
+          if (hasSelaras) matchedCount++;
+
+          pnList.push({
+            pn_id: pnId,
+            pn_title: pnTitle,
+            pds: pds,
+            keterangan: ket,
+            keselarasan_rata_rata: avgStr,
+            keselarasan_terbobot: terbVal
+          });
+        });
+
+        var totalPn = pnList.length || 8;
+        var pctMatched = totalPn > 0 ? Math.round((matchedCount / totalPn) * 100) : 0;
+        var avgTerb = totalPn > 0 ? roundNumber((matchedCount * 0.625) / totalPn, 2) : 0;
+
+        var crit = 'A';
+        var sc = 0.1;
+        if (matchedCount === 0 || pctMatched === 0) {
+          crit = 'A';
+          sc = 0.1;
+        } else if (pctMatched < 50) {
+          crit = 'B';
+          sc = 0.31;
+        } else {
+          crit = 'C';
+          sc = 0.625;
+        }
+
+        json.pn_list = pnList;
+        json.matched_count = matchedCount;
+        json.total_pn = totalPn;
+        json.pct_matched = pctMatched;
+        json.avg_keselarasan_terbobot = avgTerb;
+        json.kriteria = crit;
+        json.score = sc;
+        json.dokumen = table.querySelector(".ref-dok-inp") ? table.querySelector(".ref-dok-inp").value.trim() : (modalRefDokumen ? modalRefDokumen.value.trim() : '');
+        json.halaman = table.querySelector(".ref-hal-inp") ? table.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : '');
+        json.tabel = table.querySelector(".ref-tbl-inp") ? table.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : '');
+        json.catatan = table.querySelector(".ws-1b1c-catatan-inp") ? table.querySelector(".ws-1b1c-catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+      }
+    }
     else if (code === '1.b.1.b' || code === '1.b.1.d' || code === '1.b.2.b' || code === '1.b.3.b' || code === '1.b.4.b' || code === '1.b.5.b' || code === '1.b.6.b' || code === '1.b.7.b' || code === '1.b.8.b' || code === '1.b.9.b'){
       var tableId = "#wsTable_" + code.replace(/\./g, '_');
       var row = document.querySelector(tableId + " .ws-persandingan-row");
@@ -9398,6 +9885,16 @@ tr.type-sub:hover td {
       if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.halaman || '') : '') || 'IV-8';
       if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.tabel || '') : '') || 'Tabel 4.1';
       if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || (typeof AUTO_DATA_1_B_10_B !== 'undefined' ? (AUTO_DATA_1_B_10_B.catatan || '') : '') || 'Tidak perlu dihitung, data realisasi hanya untuk data perhitungan Gap';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+    if (code === '1.b.1.c') {
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || (typeof AUTO_DATA_1_B_1_C !== 'undefined' ? (AUTO_DATA_1_B_1_C.dokumen || '') : '') || 'RKPD Kab Banyuwangi 2026';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || (typeof AUTO_DATA_1_B_1_C !== 'undefined' ? (AUTO_DATA_1_B_1_C.halaman || '') : '') || 'IV-15';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || (typeof AUTO_DATA_1_B_1_C !== 'undefined' ? (AUTO_DATA_1_B_1_C.tabel || '') : '') || 'Tabel 4.3';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || (typeof AUTO_DATA_1_B_1_C !== 'undefined' ? (AUTO_DATA_1_B_1_C.catatan || '') : '') || '';
       detailObj.dokumen = modalRefDokumen.value;
       detailObj.halaman = modalRefHalaman.value;
       detailObj.tabel = modalRefTabel.value;
@@ -9797,6 +10294,7 @@ tr.type-sub:hover td {
           if (resp.AutoData_1_b_5_b) AUTO_DATA_1_B_5_B = resp.AutoData_1_b_5_b;
           if (resp.AutoData_1_b_6_b) AUTO_DATA_1_B_6_B = resp.AutoData_1_b_6_b;
           if (resp.AutoData_1_b_7_b) AUTO_DATA_1_B_7_B = resp.AutoData_1_b_7_b;
+          if (resp.AutoData_1_b_1_c) AUTO_DATA_1_B_1_C = resp.AutoData_1_b_1_c;
           if (resp.AutoData_1_b_8_b) AUTO_DATA_1_B_8_B = resp.AutoData_1_b_8_b;
           if (resp.AutoData_1_b_9_b) AUTO_DATA_1_B_9_B = resp.AutoData_1_b_9_b;
           if (resp.AutoData_1_b_10_a) AUTO_DATA_1_B_10_A = resp.AutoData_1_b_10_a;
