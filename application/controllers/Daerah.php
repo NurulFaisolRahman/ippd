@@ -33298,13 +33298,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
         $KodeWilayah = $this->input->get('kodewilayah', TRUE);
-        if (empty($KodeWilayah)) {
-            $KodeWilayah = $this->_getKodeWilayah();
+        $HasFiltered = false;
+        if (isset($_SESSION['KodeWilayah'])) {
+            $KodeWilayah = $_SESSION['KodeWilayah'];
+            $HasFiltered = true;
+        } else {
+            if (!empty($KodeWilayah)) {
+                $HasFiltered = true;
+            } else {
+                $KodeWilayah = '';
+                $HasFiltered = false;
+            }
         }
-        if (empty($KodeWilayah)) {
-            $rowWil = $this->db->select('kode_wilayah')->where('deleted_at IS NULL')->limit(1)->get('belanja_sub_kegiatan_header')->row_array();
-            $KodeWilayah = !empty($rowWil['kode_wilayah']) ? $rowWil['kode_wilayah'] : '32.09';
-        }
+        $Data['HasFiltered'] = $HasFiltered;
 
         $tahun = $this->input->get('tahun', TRUE);
         if (empty($tahun)) {
@@ -33328,9 +33334,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         rsort($tahunList);
         $Data['TahunList'] = $tahunList;
 
-        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-        $Data['KodeWilayah'] = $KodeWilayah;
-        $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
+        if (!empty($KodeWilayah)) {
+            $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+            $Data['KodeWilayah'] = $KodeWilayah;
+            $Data['NamaWilayah'] = $wilayah['Nama'] ?? '';
+        } else {
+            $Data['KodeWilayah'] = '';
+            $Data['NamaWilayah'] = '';
+        }
 
         // 1. Master Rekening Dictionary untuk nama resmi akun
         $masterRek = $this->db->select('kode_rekening, nama_rekening')->order_by('kode_rekening', 'ASC')->get('master_rekening')->result_array();
@@ -33340,7 +33351,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // 2. Data PENDAPATAN DAERAH (Akun 4) dari anggaran_pendapatan (semua OPD)
-        $pendapatanRows = $this->db->query("
+        $pendapatanRows = !empty($KodeWilayah) ? $this->db->query("
             SELECT 
                 SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
                 uraian,
@@ -33348,7 +33359,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             FROM anggaran_pendapatan
             WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
             GROUP BY rek3
-        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array() : [];
 
         $pendapatanAgg = [];
         foreach ($pendapatanRows as $r) {
@@ -33361,7 +33372,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // 3. Data BELANJA DAERAH (Akun 5) dari Belanja Sub Kegiatan (semua OPD)
-        $belanjaRows = $this->db->query("
+        $belanjaRows = !empty($KodeWilayah) ? $this->db->query("
             SELECT 
                 SUBSTRING_INDEX(r.kode_rekening, '.', 3) as rek3,
                 r.uraian_rekening,
@@ -33377,7 +33388,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             WHERE h.kode_wilayah = ? AND h.tahun = ? 
               AND r.deleted_at IS NULL AND h.deleted_at IS NULL
             GROUP BY rek3
-        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array() : [];
 
         $belanjaAgg = [];
         foreach ($belanjaRows as $r) {
@@ -33391,7 +33402,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         }
 
         // 4. Data PEMBIAYAAN DAERAH (Akun 6) dari Penerimaan & Pengeluaran (semua OPD)
-        $terimaRows = $this->db->query("
+        $terimaRows = !empty($KodeWilayah) ? $this->db->query("
             SELECT 
                 SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
                 uraian,
@@ -33399,7 +33410,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             FROM anggaran_pembiayaan_penerimaan
             WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
             GROUP BY rek3
-        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array() : [];
 
         $terimaAgg = [];
         foreach ($terimaRows as $r) {
@@ -33411,7 +33422,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             ];
         }
 
-        $keluarRows = $this->db->query("
+        $keluarRows = !empty($KodeWilayah) ? $this->db->query("
             SELECT 
                 SUBSTRING_INDEX(kode_rekening, '.', 3) as rek3,
                 uraian,
@@ -33419,7 +33430,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             FROM anggaran_pembiayaan_pengeluaran
             WHERE kodewilayah = ? AND tahun = ? AND deleted_at IS NULL
             GROUP BY rek3
-        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array();
+        ", [$KodeWilayah, $Data['SelectedTahun']])->result_array() : [];
 
         $keluarAgg = [];
         foreach ($keluarRows as $r) {
@@ -33553,12 +33564,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         
         $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
         $KodeWilayah = $this->input->get('kodewilayah', TRUE);
-        if (empty($KodeWilayah)) {
-            $KodeWilayah = $this->_getKodeWilayah();
+        $HasFiltered = false;
+        if (isset($_SESSION['KodeWilayah'])) {
+            $KodeWilayah = $_SESSION['KodeWilayah'];
+            $HasFiltered = true;
+        } else {
+            if (!empty($KodeWilayah)) {
+                $HasFiltered = true;
+            } else {
+                $KodeWilayah = '';
+                $HasFiltered = false;
+            }
         }
-        if (empty($KodeWilayah)) {
-            $KodeWilayah = '32.09';
-        }
+        $Data['HasFiltered'] = $HasFiltered;
 
         $tahun = $this->input->get('tahun', TRUE);
         if (empty($tahun)) {

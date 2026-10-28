@@ -1622,6 +1622,52 @@ tr.type-sub:hover td {
     <p class="page-subtitle">Instrumen penilaian dan pemantauan kualitas perencanaan daerah berdasarkan 3 pilar: Sinergi (32%), Kualitas Perencanaan (58%), dan Keterhubungan Kinerja (10%).</p>
   </div>
 
+  <!-- FILTER WILAYAH SEBELUM LOGIN -->
+  <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    <div style="background: #ffffff; border: 1px solid var(--ui-border); border-radius: var(--radius-md); box-shadow: var(--shadow-card); padding: 18px 22px; margin-bottom: 20px;">
+      <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: flex-end;">
+        <div style="flex: 1 1 250px; min-width: 200px;">
+          <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ui-text-muted); display: block; margin-bottom: 6px;">Provinsi</label>
+          <select class="t-select" id="Provinsi" style="width: 100%; height: 38px;">
+            <option value="">Pilih Provinsi</option>
+            <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+              <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($HasFiltered) && !empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                <?= html_escape($prov['Nama']) ?>
+              </option>
+            <?php } } ?>
+          </select>
+        </div>
+
+        <div style="flex: 1 1 250px; min-width: 200px;">
+          <label style="font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; color: var(--ui-text-muted); display: block; margin-bottom: 6px;">Kab/Kota</label>
+          <select class="t-select" id="KabKota" style="width: 100%; height: 38px;">
+            <option value="">Pilih Kab/Kota</option>
+          </select>
+        </div>
+
+        <div style="flex: 0 0 auto;">
+          <button type="button" class="btn-ui btn-ui-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 800; border-radius: var(--radius-sm);">
+            <i class="fa fa-filter"></i> Filter
+          </button>
+        </div>
+      </div>
+
+      <?php if (!empty($KodeWilayah) && !empty($HasFiltered)) { ?>
+        <div style="margin-top: 14px; padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; font-size: 13px; color: #1e40af;">
+          <strong>Wilayah terpilih:</strong> <?= html_escape($NamaWilayah ?? '') ?>
+        </div>
+      <?php } ?>
+    </div>
+  <?php } ?>
+
+  <?php if (empty($KodeWilayah)) { ?>
+    <div class="alert alert-info text-center" style="padding: 30px 20px; margin: 20px 0; border-radius: 8px; background-color: #f0f9ff; border: 1px solid #bae6fd;">
+      <i class="fa fa-info-circle fa-2x" style="color: #0284c7; margin-bottom: 10px; display: block;"></i>
+      <h4 style="font-weight: 700; color: #0369a1; margin-bottom: 6px;">Wilayah Belum Dipilih</h4>
+      <p style="color: #475569; margin: 0; font-size: 13.5px;">Silakan pilih <b>Provinsi</b> dan <b>Kab/Kota</b> di atas, kemudian klik tombol <b>Filter</b> untuk menampilkan data.</p>
+    </div>
+  <?php } else { ?>
+
   <!-- Stats Grid -->
   <div class="stats-grid">
     <!-- Total Score -->
@@ -1747,6 +1793,7 @@ tr.type-sub:hover td {
     </div>
   </div>
 </div>
+<?php } ?>
 
 <!-- =========================================================
      EXCEL SPREADSHEET MODAL (Authentic Excel Window Design)
@@ -2048,6 +2095,87 @@ tr.type-sub:hover td {
   var AUTO_DATA_1_B_10_B = <?= isset($AutoData_1_b_10_b) ? json_encode($AutoData_1_b_10_b) : '{}' ?>;
   var AUTO_DATA_1_C_1 = <?= isset($AutoData_1_c_1) ? json_encode($AutoData_1_c_1) : '[]' ?>;
   var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
+  var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+  var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  var CURRENT_FILTER_INSTANSI = "<?= !empty($FilterInstansi) ? $FilterInstansi : '' ?>";
+
+  <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    $(document).ready(function() {
+      $("#Provinsi").change(function() {
+        var provinsiKode = $(this).val();
+        if (provinsiKode === "") {
+          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>').prop('disabled', true);
+          $("#FilterInstansiGroup").hide();
+          $("#FilterInstansiBeforeLogin").html('<option value="">-- Semua Instansi --</option>');
+          return;
+        }
+
+        $.ajax({
+          url: BASE_URL + "Instansi/GetListKabKota",
+          type: "POST",
+          data: { Kode: provinsiKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() { 
+            $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+            $("#FilterInstansiGroup").hide();
+          },
+          success: function(Data) {
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+              }
+            } else {
+              KabKota = '<option value="">Tidak ada data untuk provinsi ini</option>';
+            }
+            $("#KabKota").html(KabKota).prop('disabled', false);
+            $("#FilterInstansiGroup").hide();
+          },
+          error: function() {
+            $("#KabKota").html('<option value="">Error memuat data</option>').prop('disabled', false);
+          }
+        });
+      });
+
+      $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") {
+          alert("Mohon Pilih Provinsi");
+          return;
+        }
+        if ($("#KabKota").val() === "") {
+          alert("Mohon Pilih Kab/Kota");
+          return;
+        }
+
+        var kodeWilayah = $("#KabKota").val();
+        var tahunVal = (selectTahun && selectTahun.value) ? selectTahun.value : '<?= $TahunAktif ?>';
+        window.location.href = BASE_URL + "Instansi/TabelIPPD?tahun=" + tahunVal + "&kodewilayah=" + kodeWilayah;
+      });
+
+      <?php if (!empty($HasFiltered) && !empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+        
+        $.ajax({
+          url: BASE_URL + "Instansi/GetListKabKota",
+          type: "POST",
+          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          success: function(Data) {
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+              }
+            }
+            $("#KabKota").html(KabKota).prop('disabled', false);
+          }
+        });
+      <?php } ?>
+    });
+  <?php } ?>
 
   var tbody = document.getElementById("tbodyIppd");
   var selectTahun = document.getElementById("selectTahun");

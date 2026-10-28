@@ -359,9 +359,9 @@
         ->row_array();
       $NamaDaerah = $rowWilayahInst['Nama'] ?? '';
     }
-  } elseif (!empty($_SESSION['NamaInstansi'])) {
+  } elseif (isset($_SESSION['Level']) && !empty($_SESSION['NamaInstansi'])) {
     $LoginInfo = $_SESSION['NamaInstansi'];
-  } elseif (!empty($_SESSION['Username'])) {
+  } elseif (isset($_SESSION['Level']) && !empty($_SESSION['Username'])) {
     $LoginInfo = $_SESSION['Username'];
   }
 
@@ -380,20 +380,20 @@
         <i class="fas fa-bars"></i>
       </button>
 
-      <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 4) { ?>
-      <?php if (!empty($NamaDaerah)) { ?>
+      <?php if (isset($_SESSION['Level'])) { ?>
+        <?php if ((int)$_SESSION['Level'] === 4 && !empty($NamaDaerah)) { ?>
           <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($NamaDaerah) ?>">
             <i class="fas fa-map-marker-alt"></i>
             <?= html_escape($NamaDaerah) ?>
           </span>
-      <?php } ?>
-      <?php } ?>
+        <?php } ?>
 
         <?php if (!empty($LoginInfo)) { ?>
           <span class="login-badge" title="<?= html_escape($LoginInfo) ?>">
             <i class="fas fa-user"></i>
             <?= html_escape($LoginInfo) ?>
           </span>
+        <?php } ?>
       <?php } ?>
     </div>
 
