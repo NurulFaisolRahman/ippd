@@ -2180,48 +2180,22 @@ tr.type-sub:hover td {
     </div>
   </div>
 
-  <!-- Toolbar & Filter -->
-  <div class="toolbar-card">
-    <div class="toolbar-filters">
-      <div class="t-field">
-        <label for="selectTahun">Tahun Anggaran</label>
-        <select id="selectTahun" class="t-select">
-          <?php foreach ($ListTahun as $th): ?>
-            <option value="<?= $th ?>" <?= ((int)$th === $tahunAktif) ? 'selected' : '' ?>><?= $th ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
+  <!-- Hidden parameters required for scoring logic & server synchronization -->
+  <input type="hidden" id="selectTahun" value="<?= $tahunAktif ?>">
+  <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+  <input type="hidden" id="inputSearch" value="">
 
-      <?php if (!empty($ListInstansi) && empty($InstansiId)): ?>
-      <div class="t-field">
-        <label for="selectInstansi">Perangkat Daerah / Instansi</label>
-        <select id="selectInstansi" class="t-select" onchange="window.location.href='<?= base_url('Instansi/TabelIPPD') ?>?tahun=<?= $tahunAktif ?>&instansi_id=' + this.value">
-          <?php foreach ($ListInstansi as $inst): ?>
-            <option value="<?= $inst['id'] ?>" <?= ((int)$inst['id'] === (int)$filterInstansi) ? 'selected' : '' ?>><?= htmlspecialchars($inst['nama']) ?></option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-      <?php else: ?>
-      <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
-      <?php endif; ?>
-
-      <div class="t-field">
-        <label for="inputSearch">Pencarian Uraian</label>
-        <input type="text" id="inputSearch" class="t-input" placeholder="Cari indikator / kata kunci...">
-      </div>
-    </div>
-
-    <div class="toolbar-actions">
-      <button type="button" class="btn-ui" id="btnExpandAll" title="Buka seluruh rincian tabel">
-        <i class="fa fa-plus-square-o"></i> Buka Semua
-      </button>
-      <button type="button" class="btn-ui" id="btnCollapseAll" title="Tutup seluruh rincian tabel">
-        <i class="fa fa-minus-square-o"></i> Tutup Semua
-      </button>
-      <button type="button" class="btn-ui btn-ui-primary" id="btnSaveAll" title="Simpan seluruh perubahan nilai">
-        <i class="fa fa-save"></i> Simpan Semua Penilaian
-      </button>
-    </div>
+  <!-- Table Actions Toolbar -->
+  <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 16px;">
+    <button type="button" class="btn-ui" id="btnExpandAll" title="Buka seluruh rincian tabel">
+      <i class="fa fa-plus-square-o"></i> Buka Semua
+    </button>
+    <button type="button" class="btn-ui" id="btnCollapseAll" title="Tutup seluruh rincian tabel">
+      <i class="fa fa-minus-square-o"></i> Tutup Semua
+    </button>
+    <button type="button" class="btn-ui btn-ui-primary" id="btnSaveAll" title="Simpan seluruh perubahan nilai">
+      <i class="fa fa-save"></i> Simpan Semua Penilaian
+    </button>
   </div>
 
   <!-- Table Card -->
@@ -10585,7 +10559,7 @@ tr.type-sub:hover td {
   }
 
   // Event Listeners for Toolbar and Tree
-  if (selectTahun) {
+  if (selectTahun && selectTahun.tagName === 'SELECT') {
     selectTahun.addEventListener("change", function(){
       var url = new URL(window.location.href);
       url.searchParams.set("tahun", this.value);
@@ -11746,7 +11720,7 @@ tr.type-sub:hover td {
     if (e.target === modalDetail) closeDetailModal();
   });
 
-  if (selectTahun) selectTahun.addEventListener("change", reloadData);
+  if (selectTahun && selectTahun.tagName === 'SELECT') selectTahun.addEventListener("change", reloadData);
   if (selectInstansi && selectInstansi.tagName === 'SELECT') selectInstansi.addEventListener("change", reloadData);
   if (inputSearch) inputSearch.addEventListener("input", renderTable);
 
