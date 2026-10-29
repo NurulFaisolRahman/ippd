@@ -71,18 +71,153 @@
         padding: 6px;
         }
 
-        td.text-center > .button-icon-btn.button-icon-btn-cl{
-        display: inline-flex !important;      /* ikut text-align center */
-        justify-content: center;
-        align-items: center;
-        gap: 8px;                  /* jarak antar tombol */
+        /* ================= AKSI BUTTON DALAM TABEL ================= */
+        .btn-action-group,
+        .btn-group-flex,
+        .btn-table-action-group,
+        td.text-center > .button-icon-btn.button-icon-btn-cl,
+        td.text-center .button-icon-btn.button-icon-btn-cl {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            vertical-align: middle !important;
         }
 
-        /* jaga kalau wrapper tidak langsung child (kadang ada div lain) */
-        td.text-center .button-icon-btn.button-icon-btn-cl{
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
+        .btn-action-table,
+        .btn-action-custom,
+        .btn-table-action,
+        .btn-action-group .btn,
+        .btn-group-flex .btn,
+        td.text-center > .button-icon-btn.button-icon-btn-cl .btn,
+        td.text-center .button-icon-btn.button-icon-btn-cl .btn,
+        td.text-center .btn.BtnEdit,
+        td.text-center .btn.BtnHapus,
+        td.text-center .btn.BtnEditMaster,
+        td.text-center .btn.BtnHapusMaster,
+        td.text-center .btn.BtnEditDetail,
+        td.text-center .btn.BtnHapusDetail,
+        td.text-center .btn.BtnAddDetail,
+        td.text-center .btn.EditHeader,
+        td.text-center .btn.HapusHeader,
+        td.text-center .btn.EditKolom,
+        td.text-center .btn.HapusKolom,
+        td.text-center .btn.TambahKolom {
+            width: 32px !important;
+            height: 32px !important;
+            min-width: 32px !important;
+            padding: 0 !important;
+            border-radius: 6px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            border: none !important;
+            font-size: 13px !important;
+            line-height: 1 !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            transition: all 0.15s ease-in-out !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        .btn-action-group .btn:hover,
+        .btn-group-flex .btn:hover,
+        td.text-center .button-icon-btn.button-icon-btn-cl .btn:hover,
+        td.text-center .btn.BtnEdit:hover,
+        td.text-center .btn.BtnHapus:hover,
+        td.text-center .btn.BtnEditMaster:hover,
+        td.text-center .btn.BtnHapusMaster:hover,
+        td.text-center .btn.BtnEditDetail:hover,
+        td.text-center .btn.BtnHapusDetail:hover,
+        td.text-center .btn.BtnAddDetail:hover,
+        td.text-center .btn.EditHeader:hover,
+        td.text-center .btn.HapusHeader:hover,
+        td.text-center .btn.EditKolom:hover,
+        td.text-center .btn.HapusKolom:hover,
+        td.text-center .btn.TambahKolom:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+            opacity: 0.95 !important;
+        }
+
+        /* Edit / Warning Button Style */
+        .btn-action-edit,
+        td.text-center .btn.btn-amber,
+        td.text-center .btn.btn-warning,
+        td.text-center .btn.BtnEdit,
+        td.text-center .btn.BtnEditDetail,
+        td.text-center .btn.EditHeader {
+            background-color: #f59e0b !important;
+            border: 1px solid #d97706 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-edit:hover,
+        td.text-center .btn.btn-amber:hover,
+        td.text-center .btn.btn-warning:hover,
+        td.text-center .btn.BtnEdit:hover,
+        td.text-center .btn.BtnEditDetail:hover,
+        td.text-center .btn.EditHeader:hover {
+            background-color: #d97706 !important;
+            color: #ffffff !important;
+        }
+
+        /* Delete / Danger Button Style */
+        .btn-action-delete,
+        td.text-center .btn.btn-danger,
+        td.text-center .btn.BtnHapus,
+        td.text-center .btn.BtnHapusMaster,
+        td.text-center .btn.BtnHapusDetail,
+        td.text-center .btn.HapusHeader,
+        td.text-center .btn.HapusKolom {
+            background-color: #ef4444 !important;
+            border: 1px solid #dc2626 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-delete:hover,
+        td.text-center .btn.btn-danger:hover,
+        td.text-center .btn.BtnHapus:hover,
+        td.text-center .btn.BtnHapusMaster:hover,
+        td.text-center .btn.BtnHapusDetail:hover,
+        td.text-center .btn.HapusHeader:hover,
+        td.text-center .btn.HapusKolom:hover {
+            background-color: #dc2626 !important;
+            color: #ffffff !important;
+        }
+
+        /* Add / Success Button Style */
+        .btn-action-add,
+        td.text-center .btn.btn-success,
+        td.text-center .btn.BtnAddDetail,
+        td.text-center .btn.TambahKolom {
+            background-color: #10b981 !important;
+            border: 1px solid #059669 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-add:hover,
+        td.text-center .btn.btn-success:hover,
+        td.text-center .btn.BtnAddDetail:hover,
+        td.text-center .btn.TambahKolom:hover {
+            background-color: #059669 !important;
+            color: #ffffff !important;
+        }
+
+        /* Info / Master Button Style */
+        .btn-action-info,
+        td.text-center .btn.btn-info,
+        td.text-center .btn.BtnEditMaster,
+        td.text-center .btn.EditKolom {
+            background-color: #0284c7 !important;
+            border: 1px solid #0369a1 !important;
+            color: #ffffff !important;
+        }
+        .btn-action-info:hover,
+        td.text-center .btn.btn-info:hover,
+        td.text-center .btn.BtnEditMaster:hover,
+        td.text-center .btn.EditKolom:hover {
+            background-color: #0369a1 !important;
+            color: #ffffff !important;
         }
 
         /* Modal Positioning & Centering (Tidak tertimpa header & berada di tengah halaman) */

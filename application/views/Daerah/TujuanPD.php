@@ -25,58 +25,44 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-          <div class="data-table-list">
+          <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
 
             <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-              <div class="form-example-wrap" style="margin-bottom: 20px;">
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row filter-row">
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                  <div style="flex: 1 1 200px; min-width: 180px;">
+                    <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Provinsi</option>
+                      <?php foreach ($Provinsi as $prov) { ?>
+                        <option value="<?= html_escape($prov['Kode']) ?>"
+                          <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                          <?= html_escape($prov['Nama']) ?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="Provinsi"><b>Provinsi</b></label>
-                          <select class="form-control filter-select" id="Provinsi">
-                            <option value="">Pilih Provinsi</option>
-                            <?php foreach ($Provinsi as $prov) { ?>
-                              <option value="<?= html_escape($prov['Kode']) ?>"
-                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                <?= html_escape($prov['Nama']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </div>
-                      </div>
+                  <div style="flex: 1 1 200px; min-width: 180px;">
+                    <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Kab/Kota</option>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="KabKota"><b>Kab/Kota</b></label>
-                          <select class="form-control filter-select" id="KabKota">
-                            <option value="">Pilih Kab/Kota</option>
-                          </select>
-                        </div>
-                      </div>
+                  <!-- FILTER INSTANSI -->
+                  <div style="flex: 1 1 220px; min-width: 180px; display: none;" id="FilterInstansiGroup">
+                    <label for="FilterInstansiBeforeLogin" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Filter Instansi</label>
+                    <select class="form-control" id="FilterInstansiBeforeLogin" style="height: 38px; border-radius: 6px;">
+                      <option value="">-- Semua Instansi --</option>
+                    </select>
+                  </div>
 
-                      <!-- FILTER INSTANSI -->
-                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroup" style="display: none;">
-                        <div class="filter-group">
-                          <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
-                          <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
-                            <option value="">-- Semua Instansi --</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 28px;">
-                          <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                            <b>Filter</b>
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
+                  <div style="flex: 0 0 auto;">
+                    <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                      Filter
+                    </button>
                   </div>
                 </div>
               </div>
@@ -86,7 +72,7 @@
                   $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                   $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
                 ?>
-                <div class="alert alert-info" style="margin-bottom: 20px;">
+                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px;">
                   <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
                   <?php 
                   $filter_instansi_id = $this->input->get('instansi_id', TRUE);
@@ -102,40 +88,27 @@
 
             <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
             <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
-              <div class="form-example-wrap" style="margin-bottom: 20px;">
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row filter-row">
-                      <div class="col-lg-4 col-md-6">
-                        <div class="filter-group">
-                          <label for="FilterInstansi"><b>Filter Instansi</b></label>
-                          <select class="form-control filter-select" id="FilterInstansi">
-                            <option value="">-- Semua Instansi --</option>
-                            <?php foreach ($ListInstansi as $ins) { ?>
-                              <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
-                                <?= html_escape($ins['nama']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </div>
-                      </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                  <div style="flex: 1 1 300px; min-width: 220px;">
+                    <label for="FilterInstansi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Filter Instansi</label>
+                    <select class="form-control" id="FilterInstansi" style="height: 38px; border-radius: 6px;">
+                      <option value="">-- Semua Instansi --</option>
+                      <?php foreach ($ListInstansi as $ins) { ?>
+                        <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                          <?= html_escape($ins['nama']) ?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 38px;">
-                          <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
-                            <b>Tampilkan</b>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 38px;">
-                          <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
-                            <b>Reset</b>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                  <div style="flex: 0 0 auto; display: flex; gap: 10px;">
+                    <button class="btn btn-info notika-btn-info" id="FilterInstansiBtn" style="height: 38px; padding: 0 20px; font-weight: 700; border-radius: 6px;">
+                      Tampilkan
+                    </button>
+                    <button class="btn btn-default notika-btn-default" id="ResetFilterBtn" style="height: 38px; padding: 0 20px; font-weight: 700; border-radius: 6px;">
+                      Reset
+                    </button>
                   </div>
                 </div>
               </div>
@@ -146,7 +119,7 @@
             <?php if ($IsRole4) { ?>
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
-                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuanPD">
+                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputTujuanPD" style="height: 38px; padding: 0 20px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
                     <i class="notika-icon bi-plus-lg"></i> <b>Tambah Tujuan PD</b>
                   </button>
                 </div>
@@ -177,29 +150,31 @@
                         <td class="text-center" style="vertical-align: middle;"><?= htmlspecialchars($row['tahun_akhir'], ENT_QUOTES, 'UTF-8') ?></td>
                         <?php if ($IsRole4) { ?>
                           <td class="text-center" style="vertical-align: middle;">
-                            <div class="button-icon-btn button-icon-btn-cl sm-res-mg-t-30">
-                              <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
+                            <?php if ($InstansiId == ($row['id_instansi'] ?? null)) { ?>
+                              <div class="btn-action-group">
                                 <button
-                                  class="btn btn-sm btn-amber amber-icon-notika btn-reco-mg btn-button-mg BtnEdit"
+                                  class="btn btn-sm btn-warning btn-action-edit BtnEdit"
                                   data-id="<?= (int)$row['id'] ?>"
                                   data-sasaranid="<?= isset($row['sasaran_id']) ? (int)$row['sasaran_id'] : 0 ?>"
                                   data-tujuan="<?= htmlspecialchars($row['tujuan_pd'], ENT_QUOTES, 'UTF-8') ?>"
                                   data-tahunmulai="<?= htmlspecialchars($row['tahun_mulai'], ENT_QUOTES, 'UTF-8') ?>"
                                   data-tahunakhir="<?= htmlspecialchars($row['tahun_akhir'], ENT_QUOTES, 'UTF-8') ?>"
+                                  title="Edit Data"
                                 >
                                   <i class="notika-icon notika-edit"></i>
                                 </button>
 
                                 <button
-                                  class="btn btn-sm btn-danger amber-icon-notika btn-reco-mg btn-button-mg BtnHapus"
+                                  class="btn btn-sm btn-danger btn-action-delete BtnHapus"
                                   data-id="<?= (int)$row['id'] ?>"
+                                  title="Hapus Data"
                                 >
                                   <i class="notika-icon notika-trash"></i>
                                 </button>
-                              <?php } else { ?>
-                                <span class="text-muted">-</span>
-                              <?php } ?>
-                            </div>
+                              </div>
+                            <?php } else { ?>
+                              <span class="text-muted">-</span>
+                            <?php } ?>
                           </td>
                         <?php } ?>
                       </tr>

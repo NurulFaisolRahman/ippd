@@ -6,58 +6,46 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-          <div class="data-table-list">
+          <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
 
             <!-- FILTER WILAYAH (Provinsi, Kab/Kota, dan Instansi) - SEBELUM LOGIN -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-              <div class="form-example-wrap" style="margin-bottom: 20px;">
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row filter-row">
+              <div class="filter-wrapper" style="background: #f8fafc; padding: 18px 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 15px;">
 
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="Provinsi"><b>Provinsi</b></label>
-                          <select class="form-control filter-select" id="Provinsi">
-                            <option value="">Pilih Provinsi</option>
-                            <?php foreach ($Provinsi as $prov) { ?>
-                              <option value="<?= html_escape($prov['Kode']) ?>"
-                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                <?= html_escape($prov['Nama']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="KabKota"><b>Kab/Kota</b></label>
-                          <select class="form-control filter-select" id="KabKota">
-                            <option value="">Pilih Kab/Kota</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-3 col-md-6" id="FilterInstansiGroup" style="display: none;">
-                        <div class="filter-group">
-                          <label for="FilterInstansiBeforeLogin"><b>Filter Instansi</b></label>
-                          <select class="form-control filter-select" id="FilterInstansiBeforeLogin">
-                            <option value="">-- Semua Instansi --</option>
-                          </select>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 28px;">
-                          <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                            <b>Filter</b>
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
+                  <div style="flex: 1 1 200px; min-width: 180px;">
+                    <label for="Provinsi" style="font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; display: block;">Provinsi</label>
+                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 100%;">
+                      <option value="">Pilih Provinsi</option>
+                      <?php foreach ($Provinsi as $prov) { ?>
+                        <option value="<?= html_escape($prov['Kode']) ?>"
+                          <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                          <?= html_escape($prov['Nama']) ?>
+                        </option>
+                      <?php } ?>
+                    </select>
                   </div>
+
+                  <div style="flex: 1 1 200px; min-width: 180px;">
+                    <label for="KabKota" style="font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; display: block;">Kab/Kota</label>
+                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 100%;">
+                      <option value="">Pilih Kab/Kota</option>
+                    </select>
+                  </div>
+
+                  <div id="FilterInstansiGroup" style="flex: 1 1 220px; min-width: 180px; display: none;">
+                    <label for="FilterInstansiBeforeLogin" style="font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; display: block;">Filter Instansi</label>
+                    <select class="form-control" id="FilterInstansiBeforeLogin" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 100%;">
+                      <option value="">-- Semua Instansi --</option>
+                    </select>
+                  </div>
+
+                  <div style="flex: 0 0 auto;">
+                    <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 22px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,102,204,0.2);">
+                      <i class="notika-icon bi bi-filter"></i> <span>Filter</span>
+                    </button>
+                  </div>
+
                 </div>
               </div>
 
@@ -66,7 +54,7 @@
                   $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                   $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
                 ?>
-                <div class="alert alert-info" style="margin-bottom: 20px;">
+                <div class="alert alert-info" style="border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #00c292; background: #e8f9f5; color: #007a5c; border-top: none; border-right: none; border-bottom: none; box-shadow: 0 2px 6px rgba(0,0,0,0.03);">
                   <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
                   <?php 
                   $filter_instansi_id = $this->input->get('instansi_id', TRUE);
@@ -82,40 +70,27 @@
 
             <!-- FILTER INSTANSI (UNTUK YANG SUDAH LOGIN DAN BUKAN ROLE 4) -->
             <?php if ($IsLoggedIn && !$IsRole4 && !empty($KodeWilayah) && !empty($ListInstansi)) { ?>
-              <div class="form-example-wrap" style="margin-bottom: 20px;">
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row filter-row">
-                      <div class="col-lg-4 col-md-6">
-                        <div class="filter-group">
-                          <label for="FilterInstansi"><b>Filter Instansi</b></label>
-                          <select class="form-control filter-select" id="FilterInstansi">
-                            <option value="">-- Semua Instansi --</option>
-                            <?php foreach ($ListInstansi as $ins) { ?>
-                              <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
-                                <?= html_escape($ins['nama']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </div>
-                      </div>
+              <div class="filter-wrapper" style="background: #f8fafc; padding: 18px 20px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 25px;">
+                <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 15px;">
+                  <div style="flex: 1 1 300px; min-width: 200px;">
+                    <label for="FilterInstansi" style="font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; display: block;">Filter Instansi</label>
+                    <select class="form-control" id="FilterInstansi" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; width: 100%;">
+                      <option value="">-- Semua Instansi --</option>
+                      <?php foreach ($ListInstansi as $ins) { ?>
+                        <option value="<?= $ins['id'] ?>" <?= ($FilterInstansiId == $ins['id']) ? 'selected' : '' ?>>
+                          <?= html_escape($ins['nama']) ?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 38px;">
-                          <button class="btn btn-info notika-btn-info btn-block" id="FilterInstansiBtn">
-                            <b>Tampilkan</b>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 38px;">
-                          <button class="btn btn-default notika-btn-default btn-block" id="ResetFilterBtn">
-                            <b>Reset</b>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
+                  <div style="flex: 0 0 auto; display: flex; gap: 10px;">
+                    <button class="btn btn-info notika-btn-info" id="FilterInstansiBtn" style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                      <i class="notika-icon bi bi-funnel"></i> <span>Tampilkan</span>
+                    </button>
+                    <button class="btn btn-default notika-btn-default" id="ResetFilterBtn" style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; background: #fff; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                      <i class="notika-icon bi bi-arrow-clockwise"></i> <span>Reset</span>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -124,17 +99,15 @@
 
             <!-- Tombol Tambah MASTER (HANYA UNTUK ROLE 4) -->
             <?php if ($IsRole4) { ?>
-              <div class="basic-tb-hd">
-                <div class="button-icon-btn sm-res-mg-t-30">
-                  <button type="button"
-                          class="btn btn-success notika-btn-success"
-                          data-toggle="modal"
-                          data-target="#ModalInputMaster">
-                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah NSPK & Sasaran (Header)</b>
-                  </button>
-                </div>
+              <div class="basic-tb-hd" style="margin-bottom: 20px;">
+                <button type="button"
+                        class="btn btn-success notika-btn-success"
+                        data-toggle="modal"
+                        data-target="#ModalInputMaster"
+                        style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,194,146,0.25);">
+                  <i class="notika-icon bi bi-plus-lg" style="font-size: 15px;"></i> <span>Tambah NSPK & Sasaran (Header)</span>
+                </button>
               </div>
-              <br>
             <?php } ?>
 
             <!-- TABLE (MASTER-DETAIL) -->
@@ -275,17 +248,18 @@
                   <?php if ($IsRole4) { ?>
                   <td class="text-center">
                     <div class="btn-group-flex">
-                      <button class="btn btn-info btn-sm BtnEditMaster"
+                      <button class="btn btn-info btn-sm btn-action-info BtnEditMaster"
                         data-id="<?= html_escape($m['id']) ?>"
                         data-norma="<?= html_escape($m['nspk_norma_id'] ?? '') ?>"
                         data-standar="<?= html_escape($m['nspk_standar_id'] ?? '') ?>"
                         data-prosedur="<?= html_escape($m['nspk_prosedur_id'] ?? '') ?>"
                         data-kriteria="<?= html_escape($m['nspk_kriteria_id'] ?? '') ?>"
                         data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id'] ?? '') ?>"
-                        data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>">
+                        data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>"
+                        title="Edit Master">
                         <i class="notika-icon notika-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>">
+                      <button class="btn btn-danger btn-sm btn-action-delete BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>" title="Hapus Master">
                         <i class="notika-icon notika-trash"></i>
                       </button>
                     </div>
@@ -294,13 +268,14 @@
                   <!-- AKSI INDIKATOR (Baris Pertama) -->
                   <td class="text-center">
                     <div class="btn-group-flex">
-                      <button class="btn btn-success btn-sm BtnAddDetail" 
+                      <button class="btn btn-success btn-sm btn-action-add BtnAddDetail" 
                               data-master-id="<?= html_escape($m['id']) ?>"
                               data-detail-id="<?= html_escape($d0['id'] ?? 0) ?>"
-                              data-position="after">
+                              data-position="after"
+                              title="Tambah Detail">
                         <i class="notika-icon bi-plus-lg"></i>
                       </button>
-                      <button class="btn btn-warning btn-sm BtnEditDetail"
+                      <button class="btn btn-warning btn-sm btn-action-edit BtnEditDetail"
                         data-id="<?= html_escape((int)($d0['id'] ?? 0)) ?>"
                         data-parent-id="<?= html_escape((int)$m['id']) ?>"
                         data-sasaran-id="<?= html_escape((int)($d0['sasaran_id'] ?? 0)) ?>"
@@ -311,10 +286,11 @@
                         data-t2028="<?= html_escape($d0['t2028'] ?? '') ?>"
                         data-t2029="<?= html_escape($d0['t2029'] ?? '') ?>"
                         data-t2030="<?= html_escape($d0['t2030'] ?? '') ?>"
-                        data-keterangan="<?= html_escape($d0['keterangan'] ?? '') ?>">
+                        data-keterangan="<?= html_escape($d0['keterangan'] ?? '') ?>"
+                        title="Edit Detail">
                         <i class="notika-icon notika-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d0['id'] ?? 0) ?>">
+                      <button class="btn btn-danger btn-sm btn-action-delete BtnHapusDetail" data-id="<?= html_escape($d0['id'] ?? 0) ?>" title="Hapus Detail">
                         <i class="notika-icon notika-trash"></i>
                       </button>
                     </div>
@@ -338,13 +314,14 @@
                   <td class="text-center">-</td>
                   <td class="text-center">
                     <div class="btn-group-flex">
-                      <button class="btn btn-success btn-sm BtnAddDetail" 
+                      <button class="btn btn-success btn-sm btn-action-add BtnAddDetail" 
                               data-master-id="<?= html_escape($m['id']) ?>"
                               data-detail-id="<?= html_escape($d['id'] ?? 0) ?>"
-                              data-position="after">
+                              data-position="after"
+                              title="Tambah Detail">
                         <i class="notika-icon bi-plus-lg"></i>
                       </button>
-                      <button class="btn btn-warning btn-sm BtnEditDetail"
+                      <button class="btn btn-warning btn-sm btn-action-edit BtnEditDetail"
                         data-id="<?= html_escape((int)($d['id'] ?? 0)) ?>"
                         data-parent-id="<?= html_escape((int)$m['id']) ?>"
                         data-sasaran-id="<?= html_escape((int)($d['sasaran_id'] ?? 0)) ?>"
@@ -355,10 +332,11 @@
                         data-t2028="<?= html_escape($d['t2028'] ?? '') ?>"
                         data-t2029="<?= html_escape($d['t2029'] ?? '') ?>"
                         data-t2030="<?= html_escape($d['t2030'] ?? '') ?>"
-                        data-keterangan="<?= html_escape($d['keterangan'] ?? '') ?>">
+                        data-keterangan="<?= html_escape($d['keterangan'] ?? '') ?>"
+                        title="Edit Detail">
                         <i class="notika-icon notika-edit"></i>
                       </button>
-                      <button class="btn btn-danger btn-sm BtnHapusDetail" data-id="<?= html_escape($d['id'] ?? 0) ?>">
+                      <button class="btn btn-danger btn-sm btn-action-delete BtnHapusDetail" data-id="<?= html_escape($d['id'] ?? 0) ?>" title="Hapus Detail">
                         <i class="notika-icon notika-trash"></i>
                       </button>
                     </div>
@@ -447,27 +425,33 @@
                   <td>-</td>
                   <?php if ($IsRole4) { ?>
                   <td class="text-center">
-                    <button class="btn btn-info btn-sm BtnEditMaster"
-                      data-id="<?= html_escape($m['id']) ?>"
-                      data-norma="<?= html_escape($m['nspk_norma_id'] ?? '') ?>"
-                      data-standar="<?= html_escape($m['nspk_standar_id'] ?? '') ?>"
-                      data-prosedur="<?= html_escape($m['nspk_prosedur_id'] ?? '') ?>"
-                      data-kriteria="<?= html_escape($m['nspk_kriteria_id'] ?? '') ?>"
-                      data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id'] ?? '') ?>"
-                      data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>">
-                      <i class="notika-icon notika-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>">
-                      <i class="notika-icon notika-trash"></i>
-                    </button>
+                    <div class="btn-group-flex">
+                      <button class="btn btn-info btn-sm btn-action-info BtnEditMaster"
+                        data-id="<?= html_escape($m['id']) ?>"
+                        data-norma="<?= html_escape($m['nspk_norma_id'] ?? '') ?>"
+                        data-standar="<?= html_escape($m['nspk_standar_id'] ?? '') ?>"
+                        data-prosedur="<?= html_escape($m['nspk_prosedur_id'] ?? '') ?>"
+                        data-kriteria="<?= html_escape($m['nspk_kriteria_id'] ?? '') ?>"
+                        data-sasaran-relevan-id="<?= html_escape($m['sasaran_relevan_id'] ?? '') ?>"
+                        data-tujuan-id="<?= html_escape($m['tujuan_id'] ?? '') ?>"
+                        title="Edit Master">
+                        <i class="notika-icon notika-edit"></i>
+                      </button>
+                      <button class="btn btn-danger btn-sm btn-action-delete BtnHapusMaster" data-id="<?= html_escape($m['id']) ?>" title="Hapus Master">
+                        <i class="notika-icon notika-trash"></i>
+                      </button>
+                    </div>
                   </td>
                   <td class="text-center">
-                    <button class="btn btn-success btn-sm BtnAddDetail" 
-                            data-master-id="<?= html_escape($m['id']) ?>"
-                            data-detail-id="0"
-                            data-position="last">
-                      <i class="notika-icon bi-plus-lg"></i>
-                    </button>
+                    <div class="btn-group-flex">
+                      <button class="btn btn-success btn-sm btn-action-add BtnAddDetail" 
+                              data-master-id="<?= html_escape($m['id']) ?>"
+                              data-detail-id="0"
+                              data-position="last"
+                              title="Tambah Detail">
+                        <i class="notika-icon bi-plus-lg"></i>
+                      </button>
+                    </div>
                   </td>
                   <?php } ?>
                 </tr>
