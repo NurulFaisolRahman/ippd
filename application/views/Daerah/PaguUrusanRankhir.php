@@ -363,16 +363,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 <tbody id="tableBodyPaguRankhir">
                                     <?php if (empty($PaguUrusan)) { ?>
                                         <tr id="emptyRow">
-                                            <td colspan="7" class="text-center" style="padding: 40px 0;">
+                                            <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '6' : '4' ?>" class="text-center" style="padding: 40px 0;">
                                                 <i class="fa fa-info-circle fa-2x d-block mb-2" style="color: #999;"></i>
-                                                <p style="color: #666;">Belum ada data Pagu Urusan Rankhir</p>
+                                                <p style="color: #666; font-size: 14px; font-weight: bold; margin-top: 8px;">Belum ada data Pagu Urusan Rankhir untuk Tahun <?= html_escape($SelectedTahun) ?></p>
                                                 <small class="text-muted">
-                                                    Silakan sinkronisasi data dari Pagu Urusan atau tambahkan data di menu Pagu Urusan
+                                                    Silakan lakukan sinkronisasi data dari Pagu Anggaran Indikatif Perangkat Daerah atau input pagu pada tahun tersebut.
                                                 </small>
                                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                                     <br>
                                                     <button class="btn btn-sm btn-info" id="SyncRankhir" style="margin-top: 10px;">
-                                                        <i class="fa fa-sync"></i> Sinkronisasi Sekarang
+                                                        <i class="fa fa-sync"></i> Sinkronisasi Sekarang (Tahun <?= html_escape($SelectedTahun) ?>)
                                                     </button>
                                                 <?php } ?>
                                             </td>
@@ -1027,6 +1027,7 @@ $(document).ready(function() {
         window.location.href = url.toString();
     });
 
+    <?php if (!empty($PaguUrusan)) { ?>
     if ($('#data-table-pagu').length > 0) {
         try {
             if ($.fn.DataTable.isDataTable('#data-table-pagu')) {
@@ -1053,6 +1054,7 @@ $(document).ready(function() {
             console.log("DataTable error:", e);
         }
     }
+    <?php } ?>
 });
 </script>
 
