@@ -7,42 +7,32 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
+                    <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
                         <!-- Filter untuk pengguna yang belum login -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                        <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                        <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 0 0 auto;">
+                                        <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                                            Filter
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -56,7 +46,7 @@
                                         $pesan_error = "Tidak ada data untuk wilayah: $nama_wilayah";
                                     }
                                 ?>
-                                <div class="alert <?= empty($Visi) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px;">
+                                <div class="alert <?= empty($Visi) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px; border-radius: 8px;">
                                     <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
                                     <?php if (!empty($pesan_error)) { ?>
                                         <strong>Peringatan:</strong> <?= html_escape($pesan_error) ?>
@@ -66,13 +56,27 @@
 
                         <?php } ?>
 
-                        <div class="basic-tb-hd">
-                            <div class="button-icon-btn sm-res-mg-t-30">
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Visi RPJPD</b>
-                                    </button>
-                                <?php } ?>
+                        <!-- HEADER MENU -->
+                        <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                            <div class="row align-items-center">
+                                <div class="col-md-7 col-sm-6">
+                                    <h3 style="font-weight: 800; color: #1f2937; margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px;">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 8px; background: #e0f2fe; color: #0284c7; font-size: 18px;">
+                                            <i class="fa fa-flag"></i>
+                                        </span>
+                                        VISI RPJPD
+                                    </h3>
+                                    <div style="color: #64748b; font-size: 13px;">
+                                        Penyelarasan rumusan Visi RPJPD Daerah dengan Visi RPJPD Provinsi dan Visi RPJPN Nasional.
+                                    </div>
+                                </div>
+                                <div class="col-md-5 col-sm-6 text-right" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                        <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputVisi" style="border-radius: 6px; font-weight: 700; padding: 8px 18px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.25);">
+                                            <i class="fa fa-plus-circle"></i> Tambah Visi RPJPD
+                                        </button>
+                                    <?php } ?>
+                                </div>
                             </div>
                         </div>
 
@@ -224,147 +228,130 @@
     ?>
         <!-- MODAL INPUT -->
         <div class="modal fade" id="ModalInputVisi" role="dialog">
-            <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Tambah Visi RPJPD</h4>
+            <div class="modal-dialog modal-lg" style="max-width: 760px; width: 92%;">
+                <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+                    
+                    <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+                        <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #e6fcf5; color: #0ca678;">
+                                <i class="fa fa-flag"></i>
+                            </span>
+                            Tambah Visi RPJPD
+                        </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="form-example-wrap">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <!-- Periode -->
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode</b></label>
-                                                </div>
-                                                <div style="margin-bottom: 5px;" class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Tahun Mulai (YYYY)" style="width: 48%; display: inline-block;">
-                                                        <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Tahun Akhir (YYYY)" style="width: 48%; display: inline-block;">
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- Visi RPJPD -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPD</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <textarea class="form-control" rows="4" id="Visi" placeholder="Input Visi RPJPD"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+                        <!-- Periode -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode (Tahun) <span class="text-danger">*</span>
+                            </label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-control" id="TahunMulai" placeholder="Tahun Mulai (YYYY)" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                                <input type="text" class="form-control" id="TahunAkhir" placeholder="Tahun Akhir (YYYY)" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
 
-                                            <!-- ========================================================== -->
-                                            <!-- REFERENSI VISI RPJPDP (Provinsi) - DENGAN CHECKBOX         -->
-                                            <!-- ========================================================== -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode RPJPDP</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <select class="form-control" id="PeriodeRPJPDP">
-                                                            <option value="">Pilih Periode</option>
-                                                            <?php foreach ($uniquePeriodeRPJPDP as $key) { ?>
-                                                                <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPD Provinsi</b></label>
-                                                </div>
-                                                <div style="margin-top: 3px;" class="col-lg-9">
-                                                    <div class="accordion-stn">
-                                                        <div class="panel-group" data-collapse-color="nk-green" id="AccordionVisiRPJPDP" role="tablist" aria-multiselectable="true">
-                                                            <div class="panel panel-collapse notika-accrodion-cus">
-                                                                <div class="panel-heading" role="tab">
-                                                                    <b><a data-toggle="collapse" data-parent="#AccordionVisiRPJPDP" href="#VisiRPJPDP-one" aria-expanded="true">Pilih Visi RPJPD Provinsi (Bisa lebih dari 1)</a></b>
-                                                                </div>
-                                                                <div id="VisiRPJPDP-one" class="collapse in" role="tabpanel">
-                                                                    <div class="panel-body" style="padding-top: 0px;">
-                                                                        <div class="nk-int-st text-justify" id="VisiRPJPDPList">
-                                                                            <p class="text-muted">Pilih periode terlebih dahulu</p>
-                                                                        </div>
-                                                                        <div class="text-muted" style="margin-top: 5px; font-size: 12px;">
-                                                                            <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <!-- Visi RPJPD -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="Visi" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Visi RPJPD <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" rows="4" id="Visi" placeholder="Input rumusan Visi RPJPD..." style="border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; resize: vertical;"></textarea>
+                        </div>
 
-                                            <!-- ========================================================== -->
-                                            <!-- REFERENSI VISI RPJPN (Nasional) - DENGAN CHECKBOX          -->
-                                            <!-- ========================================================== -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode RPJPN</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <select class="form-control" id="PeriodeRPJPN">
-                                                            <option value="">Pilih Periode</option>
-                                                            <?php foreach ($uniquePeriodeRPJPN as $key) { ?>
-                                                                <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
+                        <!-- REFERENSI VISI RPJPDP (Provinsi) -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="PeriodeRPJPDP" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode RPJPD Provinsi
+                            </label>
+                            <select class="form-control" id="PeriodeRPJPDP" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; margin-bottom: 10px;">
+                                <option value="">Pilih Periode</option>
+                                <?php foreach ($uniquePeriodeRPJPDP as $key) { ?>
+                                    <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
+                                <?php } ?>
+                            </select>
+                            
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                                <div class="accordion-stn">
+                                    <div class="panel-group" id="AccordionVisiRPJPDP" role="tablist" style="margin-bottom: 0;">
+                                        <div class="panel panel-collapse notika-accrodion-cus" style="border: none; box-shadow: none; background: transparent; margin-bottom: 0;">
+                                            <div class="panel-heading" role="tab" style="padding: 0 0 10px 0;">
+                                                <a data-toggle="collapse" href="#VisiRPJPDP-one" aria-expanded="true" class="accordion-toggle-link" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #0284c7; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                                        <i class="fa fa-list" style="font-size: 13px; color: #0284c7;"></i> Pilih Visi RPJPD Provinsi (Bisa lebih dari 1)
+                                                    </span>
+                                                    <i class="fa fa-chevron-down accordion-arrow" style="font-size: 11px; color: #64748b; transition: transform 0.2s ease;"></i>
+                                                </a>
+                                            </div>
+                                            <div id="VisiRPJPDP-one" class="collapse in" role="tabpanel">
+                                                <div class="panel-body" style="padding: 0;">
+                                                    <div class="text-justify" id="VisiRPJPDPList" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto;">
+                                                        <p class="text-muted" style="margin: 0;">Pilih periode terlebih dahulu</p>
+                                                    </div>
+                                                    <div class="text-muted" style="margin-top: 6px; font-size: 11.5px; color: #64748b; text-align: left !important;">
+                                                        <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPN</b></label>
-                                                </div>
-                                                <div style="margin-top: 3px;" class="col-lg-9">
-                                                    <div class="accordion-stn">
-                                                        <div class="panel-group" data-collapse-color="nk-green" id="AccordionVisiRPJPN" role="tablist" aria-multiselectable="true">
-                                                            <div class="panel panel-collapse notika-accrodion-cus">
-                                                                <div class="panel-heading" role="tab">
-                                                                    <b><a data-toggle="collapse" data-parent="#AccordionVisiRPJPN" href="#VisiRPJPN-one" aria-expanded="true">Pilih Visi RPJPN (Bisa lebih dari 1)</a></b>
-                                                                </div>
-                                                                <div id="VisiRPJPN-one" class="collapse in" role="tabpanel">
-                                                                    <div class="panel-body" style="padding-top: 0px;">
-                                                                        <div class="nk-int-st text-justify" id="VisiRPJPNList">
-                                                                            <p class="text-muted">Pilih periode terlebih dahulu</p>
-                                                                        </div>
-                                                                        <div class="text-muted" style="margin-top: 5px; font-size: 12px;">
-                                                                            <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="form-example-int">
-                                        <div class="row">
-                                            <div class="col-lg-2"></div>
-                                            <div class="col-lg-9">
-                                                <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- REFERENSI VISI RPJPN (Nasional) -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="PeriodeRPJPN" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode RPJPN (Nasional)
+                            </label>
+                            <select class="form-control" id="PeriodeRPJPN" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; margin-bottom: 10px;">
+                                <option value="">Pilih Periode</option>
+                                <?php foreach ($uniquePeriodeRPJPN as $key) { ?>
+                                    <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
+                                <?php } ?>
+                            </select>
+                            
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                                <div class="accordion-stn">
+                                    <div class="panel-group" id="AccordionVisiRPJPN" role="tablist" style="margin-bottom: 0;">
+                                        <div class="panel panel-collapse notika-accrodion-cus" style="border: none; box-shadow: none; background: transparent; margin-bottom: 0;">
+                                            <div class="panel-heading" role="tab" style="padding: 0 0 10px 0;">
+                                                <a data-toggle="collapse" href="#VisiRPJPN-one" aria-expanded="true" class="accordion-toggle-link" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #0284c7; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                                        <i class="fa fa-list" style="font-size: 13px; color: #0284c7;"></i> Pilih Visi RPJPN (Bisa lebih dari 1)
+                                                    </span>
+                                                    <i class="fa fa-chevron-down accordion-arrow" style="font-size: 11px; color: #64748b; transition: transform 0.2s ease;"></i>
+                                                </a>
+                                            </div>
+                                            <div id="VisiRPJPN-one" class="collapse in" role="tabpanel">
+                                                <div class="panel-body" style="padding: 0;">
+                                                    <div class="text-justify" id="VisiRPJPNList" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto;">
+                                                        <p class="text-muted" style="margin: 0;">Pilih periode terlebih dahulu</p>
+                                                    </div>
+                                                    <div class="text-muted" style="margin-top: 6px; font-size: 11.5px; color: #64748b; text-align: left !important;">
+                                                        <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+
+                    <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+                            Batal
+                        </button>
+                        <button class="btn btn-success notika-btn-success" id="Input" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                            <i class="fa fa-save"></i> <b>SIMPAN</b>
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -373,150 +360,134 @@
         <!-- MODAL EDIT VISI RPJPD                                         -->
         <!-- ============================================================ -->
         <div class="modal fade" id="ModalEditVisi" role="dialog">
-            <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 550px;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Edit Visi RPJPD</h4>
+            <div class="modal-dialog modal-lg" style="max-width: 760px; width: 92%;">
+                <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+                    
+                    <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+                        <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+                            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #fef3c7; color: #d97706;">
+                                <i class="fa fa-pencil-square-o"></i>
+                            </span>
+                            Edit Visi RPJPD
+                        </h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
                     </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="form-example-wrap">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <!-- Periode -->
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode</b></label>
-                                                    <input type="hidden" class="form-control input-sm" id="Id">
-                                                    <input type="hidden" class="form-control input-sm" id="SavedVisiRPJPDP">
-                                                    <input type="hidden" class="form-control input-sm" id="SavedVisiRPJPN">
-                                                </div>
-                                                <div style="margin-bottom: 5px;" class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <input type="text" class="form-control input-sm" id="_TahunMulai" placeholder="Tahun Mulai (YYYY)" style="width: 48%; display: inline-block;">
-                                                        <input type="text" class="form-control input-sm" id="_TahunAkhir" placeholder="Tahun Akhir (YYYY)" style="width: 48%; display: inline-block;">
-                                                    </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- Visi RPJPD -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPD</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <textarea class="form-control" rows="4" id="_Visi" placeholder="Input Visi RPJPD"></textarea>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+                        <input type="hidden" id="Id">
+                        <input type="hidden" id="SavedVisiRPJPDP">
+                        <input type="hidden" id="SavedVisiRPJPN">
 
-                                            <!-- ========================================================== -->
-                                            <!-- REFERENSI VISI RPJPDP (Provinsi) - EDIT DENGAN CHECKBOX    -->
-                                            <!-- ========================================================== -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode RPJPDP</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <select class="form-control" id="PeriodeRPJPDP_">
-                                                            <option value="">Pilih Periode</option>
-                                                            <?php foreach ($uniquePeriodeRPJPDP as $key) { ?>
-                                                                <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPD Provinsi</b></label>
-                                                </div>
-                                                <div style="margin-top: 3px;" class="col-lg-9">
-                                                    <div class="accordion-stn">
-                                                        <div class="panel-group" data-collapse-color="nk-green" id="AccordionVisiRPJPDP_" role="tablist" aria-multiselectable="true">
-                                                            <div class="panel panel-collapse notika-accrodion-cus">
-                                                                <div class="panel-heading" role="tab">
-                                                                    <b><a data-toggle="collapse" data-parent="#AccordionVisiRPJPDP_" href="#_VisiRPJPDP" aria-expanded="true">Pilih Visi RPJPD Provinsi (Bisa lebih dari 1)</a></b>
-                                                                </div>
-                                                                <div id="_VisiRPJPDP" class="collapse in" role="tabpanel">
-                                                                    <div class="panel-body" style="padding-top: 0px;">
-                                                                        <div class="nk-int-st text-justify" id="VisiRPJPDPList_">
-                                                                            <p class="text-muted">Pilih periode terlebih dahulu</p>
-                                                                        </div>
-                                                                        <div class="text-muted" style="margin-top: 5px; font-size: 12px;">
-                                                                            <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <!-- Periode -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode (Tahun) <span class="text-danger">*</span>
+                            </label>
+                            <div style="display: flex; gap: 12px;">
+                                <input type="text" class="form-control" id="_TahunMulai" placeholder="Tahun Mulai (YYYY)" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                                <input type="text" class="form-control" id="_TahunAkhir" placeholder="Tahun Akhir (YYYY)" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
 
-                                            <!-- ========================================================== -->
-                                            <!-- REFERENSI VISI RPJPN (Nasional) - EDIT DENGAN CHECKBOX      -->
-                                            <!-- ========================================================== -->
-                                            <div class="row" style="margin-top: 9px;">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Periode RPJPN</b></label>
-                                                </div>
-                                                <div class="col-lg-9">
-                                                    <div class="nk-int-st">
-                                                        <select class="form-control" id="PeriodeRPJPN_">
-                                                            <option value="">Pilih Periode</option>
-                                                            <?php foreach ($uniquePeriodeRPJPN as $key) { ?>
-                                                                <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="row">
-                                                <div class="col-lg-2">
-                                                    <label class="hrzn-fm"><b>Visi RPJPN</b></label>
-                                                </div>
-                                                <div style="margin-top: 3px;" class="col-lg-9">
-                                                    <div class="accordion-stn">
-                                                        <div class="panel-group" data-collapse-color="nk-green" id="AccordionVisiRPJPN_" role="tablist" aria-multiselectable="true">
-                                                            <div class="panel panel-collapse notika-accrodion-cus">
-                                                                <div class="panel-heading" role="tab">
-                                                                    <b><a data-toggle="collapse" data-parent="#AccordionVisiRPJPN_" href="#_VisiRPJPN" aria-expanded="true">Pilih Visi RPJPN (Bisa lebih dari 1)</a></b>
-                                                                </div>
-                                                                <div id="_VisiRPJPN" class="collapse in" role="tabpanel">
-                                                                    <div class="panel-body" style="padding-top: 0px;">
-                                                                        <div class="nk-int-st text-justify" id="VisiRPJPNList_">
-                                                                            <p class="text-muted">Pilih periode terlebih dahulu</p>
-                                                                        </div>
-                                                                        <div class="text-muted" style="margin-top: 5px; font-size: 12px;">
-                                                                            <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <!-- Visi RPJPD -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="_Visi" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Visi RPJPD <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" rows="4" id="_Visi" placeholder="Input rumusan Visi RPJPD..." style="border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; resize: vertical;"></textarea>
+                        </div>
 
-                                        </div>
-                                    </div>
-                                    <div class="form-example-int">
-                                        <div class="row">
-                                            <div class="col-lg-2"></div>
-                                            <div class="col-lg-9">
-                                                <button class="btn btn-success notika-btn-success" id="Edit"><b>Update</b></button>
+                        <!-- REFERENSI VISI RPJPDP (Provinsi) - EDIT -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="PeriodeRPJPDP_" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode RPJPD Provinsi
+                            </label>
+                            <select class="form-control" id="PeriodeRPJPDP_" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; margin-bottom: 10px;">
+                                <option value="">Pilih Periode</option>
+                                <?php foreach ($uniquePeriodeRPJPDP as $key) { ?>
+                                    <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
+                                <?php } ?>
+                            </select>
+                            
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                                <div class="accordion-stn">
+                                    <div class="panel-group" id="AccordionVisiRPJPDP_" role="tablist" style="margin-bottom: 0;">
+                                        <div class="panel panel-collapse notika-accrodion-cus" style="border: none; box-shadow: none; background: transparent; margin-bottom: 0;">
+                                            <div class="panel-heading" role="tab" style="padding: 0 0 10px 0;">
+                                                <a data-toggle="collapse" href="#_VisiRPJPDP" aria-expanded="true" class="accordion-toggle-link" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #0284c7; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                                        <i class="fa fa-list" style="font-size: 13px; color: #0284c7;"></i> Pilih Visi RPJPD Provinsi (Bisa lebih dari 1)
+                                                    </span>
+                                                    <i class="fa fa-chevron-down accordion-arrow" style="font-size: 11px; color: #64748b; transition: transform 0.2s ease;"></i>
+                                                </a>
+                                            </div>
+                                            <div id="_VisiRPJPDP" class="collapse in" role="tabpanel">
+                                                <div class="panel-body" style="padding: 0;">
+                                                    <div class="text-justify" id="VisiRPJPDPList_" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto;">
+                                                        <p class="text-muted" style="margin: 0;">Pilih periode terlebih dahulu</p>
+                                                    </div>
+                                                    <div class="text-muted" style="margin-top: 6px; font-size: 11.5px; color: #64748b; text-align: left !important;">
+                                                        <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- REFERENSI VISI RPJPN (Nasional) - EDIT -->
+                        <div class="form-group" style="margin-bottom: 18px;">
+                            <label for="PeriodeRPJPN_" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                Periode RPJPN (Nasional)
+                            </label>
+                            <select class="form-control" id="PeriodeRPJPN_" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px; margin-bottom: 10px;">
+                                <option value="">Pilih Periode</option>
+                                <?php foreach ($uniquePeriodeRPJPN as $key) { ?>
+                                    <option value="<?= $key['Id'] ?>"><?= $key['TahunMulai'] . ' - ' . $key['TahunAkhir'] ?></option>
+                                <?php } ?>
+                            </select>
+                            
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px;">
+                                <div class="accordion-stn">
+                                    <div class="panel-group" id="AccordionVisiRPJPN_" role="tablist" style="margin-bottom: 0;">
+                                        <div class="panel panel-collapse notika-accrodion-cus" style="border: none; box-shadow: none; background: transparent; margin-bottom: 0;">
+                                            <div class="panel-heading" role="tab" style="padding: 0 0 10px 0;">
+                                                <a data-toggle="collapse" href="#_VisiRPJPN" aria-expanded="true" class="accordion-toggle-link" style="display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: #0284c7; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                                    <span style="display: inline-flex; align-items: center; gap: 8px;">
+                                                        <i class="fa fa-list" style="font-size: 13px; color: #0284c7;"></i> Pilih Visi RPJPN (Bisa lebih dari 1)
+                                                    </span>
+                                                    <i class="fa fa-chevron-down accordion-arrow" style="font-size: 11px; color: #64748b; transition: transform 0.2s ease;"></i>
+                                                </a>
+                                            </div>
+                                            <div id="_VisiRPJPN" class="collapse in" role="tabpanel">
+                                                <div class="panel-body" style="padding: 0;">
+                                                    <div class="text-justify" id="VisiRPJPNList_" style="background: #fff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto;">
+                                                        <p class="text-muted" style="margin: 0;">Pilih periode terlebih dahulu</p>
+                                                    </div>
+                                                    <div class="text-muted" style="margin-top: 6px; font-size: 11.5px; color: #64748b; text-align: left !important;">
+                                                        <i class="fa fa-info-circle"></i> Centang lebih dari satu untuk multi-pilih
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
+
+                    <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+                            Batal
+                        </button>
+                        <button class="btn btn-success notika-btn-success" id="Edit" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                            <i class="fa fa-save"></i> <b>Update</b>
+                        </button>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -524,6 +495,155 @@
 </div>
 
 <style>
+/* Accordion Fix - Hilangkan icon default Notika yang menumpuk dan rapikan tampilan */
+.notika-accrodion-cus .panel-heading:before,
+.notika-accrodion-cus .panel-heading:after,
+.panel-collapse .panel-heading:before,
+.panel-collapse .panel-heading:after {
+    display: none !important;
+    content: none !important;
+}
+.accordion-toggle-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    text-decoration: none !important;
+    user-select: none;
+}
+.accordion-toggle-link:hover,
+.accordion-toggle-link:focus {
+    text-decoration: none !important;
+    color: #0284c7 !important;
+}
+.accordion-toggle-link.collapsed .accordion-arrow {
+    transform: rotate(-90deg) !important;
+}
+
+/* Modal Header styling - Tombol silang pojok kanan, judul pojok kiri */
+.modal-header {
+    position: relative !important;
+    padding: 16px 24px !important;
+}
+.modal-header:before,
+.modal-header:after {
+    display: none !important;
+}
+.modal-header .close {
+    position: absolute !important;
+    right: 20px !important;
+    top: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 24px !important;
+    opacity: 0.6 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: transparent !important;
+    z-index: 10 !important;
+    transition: opacity 0.2s;
+}
+.modal-header .close:hover {
+    opacity: 1 !important;
+}
+.modal-header .modal-title {
+    text-align: left !important;
+    margin: 0 !important;
+    padding-right: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+}
+
+/* Styling Tabel Sesuai Tema Notika / Menu Lain */
+#data-table-basic {
+    border-collapse: collapse;
+    width: 100% !important;
+}
+#data-table-basic thead th {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 11.5px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 10px 8px !important;
+    vertical-align: middle !important;
+}
+#data-table-basic tbody td {
+    border: 1px solid #e2e8f0;
+    vertical-align: middle !important;
+    font-size: 12px;
+}
+#data-table-basic tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+/* ==============================================
+   UNIFIED BUTTON STYLING
+   ============================================== */
+.btn {
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    font-weight: 600 !important;
+}
+.btn-sm, .btn-xs {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+.btn.Edit, .btn.EditSasaran, .btn.EditPeriodeMisi, .btn-amber {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.btn.Edit:hover, .btn.EditSasaran:hover, .btn.EditPeriodeMisi:hover, .btn-amber:hover {
+    background-color: #d97706 !important;
+    border-color: #d97706 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(245, 158, 11, 0.35) !important;
+}
+.btn.Hapus, .btn.HapusSasaran, .btn.HapusPeriodeMisi, .btn-danger {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+.btn.Hapus:hover, .btn.HapusSasaran:hover, .btn.HapusPeriodeMisi:hover, .btn-danger:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(239, 68, 68, 0.35) !important;
+}
+.button-icon-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    margin: 0 !important;
+}
+.button-icon-btn .btn-reco-mg,
+.button-icon-btn .btn-button-mg {
+    margin: 0 !important;
+}
+
 .filter-row {
     display: flex;
     align-items: flex-end;
@@ -610,9 +730,26 @@ var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
 var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 
 jQuery(document).ready(function($) {
+    // Handler toggle collapse accordion untuk minimize & maximize
+    $(document).on('click', '.accordion-toggle-link', function(e) {
+        e.preventDefault();
+        var target = $(this).attr('href');
+        if (target && $(target).length) {
+            $(target).collapse('toggle');
+        }
+    });
+
+    $(document).on('show.bs.collapse', '.collapse', function() {
+        $('a[href="#' + $(this).attr('id') + '"]').removeClass('collapsed').attr('aria-expanded', 'true');
+    });
+
+    $(document).on('hide.bs.collapse', '.collapse', function() {
+        $('a[href="#' + $(this).attr('id') + '"]').addClass('collapsed').attr('aria-expanded', 'false');
+    });
+
     // ==============================================
-        // FILTER WILAYAH UNTUK PENGGUNA BELUM LOGIN
-        // ==============================================
+    // FILTER WILAYAH UNTUK PENGGUNA BELUM LOGIN
+    // ==============================================
         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
         $("#Provinsi").change(function() {
             if ($(this).val() === "") {

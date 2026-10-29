@@ -7,43 +7,37 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
+                    <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
                         
                         <!-- Filter untuk pengguna yang belum login -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="filter-box-custom" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 18px 20px; margin-bottom: 25px;">
+                                <div class="row align-items-center" style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 15px;">
+                                    <div style="flex: 1; min-width: 220px;">
+                                        <label for="Provinsi" style="font-weight: 600; color: #475569; margin-bottom: 6px; display: block; font-size: 13px;">
+                                            <i class="fa fa-map-marker" style="margin-right: 5px; color: #3b82f6;"></i>Provinsi
+                                        </label>
+                                        <select class="form-control" id="Provinsi" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1; min-width: 220px;">
+                                        <label for="KabKota" style="font-weight: 600; color: #475569; margin-bottom: 6px; display: block; font-size: 13px;">
+                                            <i class="fa fa-building" style="margin-right: 5px; color: #3b82f6;"></i>Kab/Kota
+                                        </label>
+                                        <select class="form-control" id="KabKota" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                        </select>
+                                    </div>
+                                    <div style="min-width: 130px;">
+                                        <button class="btn btn-primary" id="Filter" style="border-radius: 8px; height: 40px; padding: 0 20px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; box-shadow: 0 2px 4px rgba(59,130,246,0.25);">
+                                            <i class="fa fa-filter"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -55,21 +49,29 @@
                                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                                 $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
                             ?>
-                            <div class="alert alert-info" style="margin-bottom: 20px;">
-                                <strong>Wilayah:</strong> <?= $nama_wilayah ?>
+                            <div class="alert alert-info" style="border-radius: 8px; margin-bottom: 25px; border-left: 4px solid #0284c7; background: #f0f9ff; color: #0369a1; padding: 12px 18px;">
+                                <i class="fa fa-map-marker" style="margin-right: 6px;"></i><strong>Wilayah:</strong> <?= $nama_wilayah ?>
                             </div>
                         <?php } ?>
 
-                        <!-- Tombol Tambah -->
-                        <div class="basic-tb-hd">
-                            <h2><b>SASARAN POKOK DAN IUP</b></h2>
-                            <div class="button-icon-btn sm-res-mg-t-30">
-                                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputSasaranPokok">
-                                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Sasaran Pokok</b>
-                                </button>
-                                <?php } ?>
+                        <!-- Header Halaman & Tombol Tambah -->
+                        <div class="page-header-title-box" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding-bottom: 18px; border-bottom: 1px solid #e2e8f0;">
+                            <div>
+                                <h2 style="font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px;">
+                                    <span style="background: #eff6ff; color: #2563eb; width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; font-size: 18px;">
+                                        <i class="fa fa-bullseye"></i>
+                                    </span>
+                                    SASARAN POKOK DAN IUP
+                                </h2>
+                                <p style="margin: 5px 0 0 50px; color: #64748b; font-size: 13px;">Manajemen Data Sasaran Pokok dan Indikator Utama Pembangunan (IUP) RPJPD</p>
                             </div>
+                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                            <div>
+                                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#ModalInputSasaranPokok" style="border-radius: 8px; padding: 9px 20px; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                                    <i class="fa fa-plus-circle"></i> Tambah Sasaran Pokok
+                                </button>
+                            </div>
+                            <?php } ?>
                         </div>
 
                         <!-- ============================================================
@@ -410,56 +412,42 @@
 MODAL INPUT SASARAN POKOK
 ============================================================ -->
 <div class="modal fade" id="ModalInputSasaranPokok" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Tambah Sasaran Pokok</b></h4>
+    <div class="modal-dialog" style="max-width: 650px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-plus-circle" style="color: #10b981;"></i> Tambah Sasaran Pokok
+                </h4>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Periode</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <select class="form-control" id="InputPeriodeSasaran">
-                                <option value="">-- Pilih Periode --</option>
-                                <?php if (!empty($PeriodeList)) {
-                                    foreach ($PeriodeList as $p) { ?>
-                                        <option value="<?= $p['Id'] ?>"><?= html_escape($p['Periode']) ?></option>
-                                    <?php } 
-                                } ?>
-                            </select>
-                        </div>
-                    </div>
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Periode <span class="text-danger">*</span></label>
+                    <select class="form-control" id="InputPeriodeSasaran" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                        <option value="">-- Pilih Periode --</option>
+                        <?php if (!empty($PeriodeList)) {
+                            foreach ($PeriodeList as $p) { ?>
+                                <option value="<?= $p['Id'] ?>"><?= html_escape($p['Periode']) ?></option>
+                            <?php } 
+                        } ?>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Misi</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <select class="form-control" id="InputMisiSasaran" disabled>
-                                <option value="">-- Pilih Periode Terlebih Dahulu --</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Misi <span class="text-danger">*</span></label>
+                    <select class="form-control" id="InputMisiSasaran" disabled style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                        <option value="">-- Pilih Periode Terlebih Dahulu --</option>
+                    </select>
                 </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Sasaran Pokok</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <textarea class="form-control" rows="3" id="InputSasaranPokok" placeholder="Masukkan Sasaran Pokok"></textarea>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Sasaran Pokok <span class="text-danger">*</span></label>
+                    <textarea class="form-control" rows="3" id="InputSasaranPokok" placeholder="Masukkan Sasaran Pokok" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: none; resize: vertical;"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnInputSasaran"><b>SIMPAN</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-success" id="BtnInputSasaran" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Simpan
+                </button>
             </div>
         </div>
     </div>
@@ -469,14 +457,16 @@ MODAL INPUT SASARAN POKOK
 MODAL INPUT SASARAN POKOK (QUICK - DI DALAM TABEL)
 ============================================================ -->
 <div class="modal fade" id="ModalInputSasaranPokokQuick" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 500px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Tambah Sasaran Pokok</b></h4>
+    <div class="modal-dialog" style="max-width: 650px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-plus-circle" style="color: #10b981;"></i> Tambah Sasaran Pokok (Quick Add)
+                </h4>
             </div>
-            <div class="modal-body">
-                <div class="alert alert-info" style="margin-bottom: 15px;">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
+                <div class="alert alert-info" style="border-radius: 8px; margin-bottom: 18px; border-left: 4px solid #0284c7; background: #f0f9ff; color: #0369a1; padding: 12px 18px;">
                     <div class="row">
                         <div class="col-md-6">
                             <strong>Periode:</strong> <span id="InfoPeriodeSasaranQuick" class="text-primary">-</span>
@@ -486,28 +476,24 @@ MODAL INPUT SASARAN POKOK (QUICK - DI DALAM TABEL)
                         </div>
                     </div>
                     <div style="margin-top: 8px;">
-                        <span class="label label-success">Quick Add</span> 
-                        <small>Menambahkan sasaran pada misi ini</small>
+                        <span class="label label-success" style="border-radius: 4px; padding: 3px 8px;">Quick Add</span> 
+                        <small style="color: #64748b; margin-left: 5px;">Menambahkan sasaran pada misi ini</small>
                     </div>
                 </div>
                 
                 <input type="hidden" id="InputSasaranIdMisiQuick" value="">
                 <input type="hidden" id="InputSasaranVisiIdQuick" value="">
 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Sasaran Pokok</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <textarea class="form-control" rows="3" id="InputSasaranPokokQuick" placeholder="Masukkan Sasaran Pokok"></textarea>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Sasaran Pokok <span class="text-danger">*</span></label>
+                    <textarea class="form-control" rows="3" id="InputSasaranPokokQuick" placeholder="Masukkan Sasaran Pokok" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: none; resize: vertical;"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnInputSasaranQuick"><b>SIMPAN</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-success" id="BtnInputSasaranQuick" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Simpan
+                </button>
             </div>
         </div>
     </div>
@@ -517,20 +503,22 @@ MODAL INPUT SASARAN POKOK (QUICK - DI DALAM TABEL)
 MODAL INPUT IUP (DIPERBAIKI)
 ============================================================ -->
 <div class="modal fade" id="ModalInputIUP" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Tambah Indikator Utama Pembangunan (IUP)</b></h4>
+    <div class="modal-dialog" style="max-width: 700px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-plus-circle" style="color: #10b981;"></i> Tambah Indikator Utama Pembangunan (IUP)
+                </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
                 <!-- 🔴 HIDDEN FIELD UNTUK ID SASARAN -->
                 <input type="hidden" id="InputIUPIdSasaran" value="">
                 <input type="hidden" id="InputIUPIdMisi" value="">
                 <input type="hidden" id="InputIUPVisiId" value="">
 
                 <!-- 🔴 TAMPILKAN INFORMASI SASARAN -->
-                <div class="alert alert-info" style="margin-bottom: 15px;">
+                <div class="alert alert-info" style="border-radius: 8px; margin-bottom: 18px; border-left: 4px solid #0284c7; background: #f0f9ff; color: #0369a1; padding: 12px 18px;">
                     <div class="row">
                         <div class="col-md-6">
                             <strong>Periode:</strong> <span id="InfoPeriodeIUP" class="text-primary">-</span>
@@ -544,70 +532,48 @@ MODAL INPUT IUP (DIPERBAIKI)
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Indikator</b> <span class="text-danger">*</span></label>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Indikator <span class="text-danger">*</span></label>
+                    <textarea class="form-control" rows="2" id="InputIndikatorIUP" placeholder="Masukkan Indikator Utama Pembangunan" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: none; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Satuan</label>
+                    <input type="text" class="form-control" id="InputSatuanIUP" placeholder="Contoh: Tahun, %, Jiwa, dll" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap I <small style="color: #64748b;">(2025-2029)</small></label>
+                            <input type="text" class="form-control" id="InputTarget1IUP" placeholder="Target 2025-2029" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
-                        <div class="col-lg-9">
-                            <textarea class="form-control" rows="2" id="InputIndikatorIUP" placeholder="Masukkan Indikator Utama Pembangunan"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap II <small style="color: #64748b;">(2030-2034)</small></label>
+                            <input type="text" class="form-control" id="InputTarget2IUP" placeholder="Target 2030-2034" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Satuan</b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="InputSatuanIUP" placeholder="Contoh: Tahun, %, Jiwa, dll">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap III <small style="color: #64748b;">(2035-2039)</small></label>
+                            <input type="text" class="form-control" id="InputTarget3IUP" placeholder="Target 2035-2039" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap I<br><small>2025-2029</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="InputTarget1IUP" placeholder="Target 2025-2029">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap II<br><small>2030-2034</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="InputTarget2IUP" placeholder="Target 2030-2034">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap III<br><small>2035-2039</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="InputTarget3IUP" placeholder="Target 2035-2039">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap IV<br><small>2040-2045</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="InputTarget4IUP" placeholder="Target 2040-2045">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap IV <small style="color: #64748b;">(2040-2045)</small></label>
+                            <input type="text" class="form-control" id="InputTarget4IUP" placeholder="Target 2040-2045" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnInputIUP"><b>SIMPAN</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-success" id="BtnInputIUP" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Simpan
+                </button>
             </div>
         </div>
     </div>
@@ -617,104 +583,101 @@ MODAL INPUT IUP (DIPERBAIKI)
 MODAL EDIT PERIODE DAN MISI
 ============================================================ -->
 <div class="modal fade" id="ModalEditPeriodeMisi" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Edit Periode dan Misi</b></h4>
+    <div class="modal-dialog" style="max-width: 650px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-pencil-square-o" style="color: #3b82f6;"></i> Edit Periode dan Misi
+                </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
                 <input type="hidden" id="EditIdMisi" value="">
                 <input type="hidden" id="EditVisiIdLama" value="">
                 
-                <div class="alert alert-info" style="margin-bottom: 15px;">
+                <div class="alert alert-info" style="border-radius: 8px; margin-bottom: 18px; border-left: 4px solid #0284c7; background: #f0f9ff; color: #0369a1; padding: 12px 18px;">
                     <strong>Misi yang akan diedit:</strong><br>
-                    <span id="EditMisiLamaInfo" class="text-primary">-</span>
+                    <span id="EditMisiLamaInfo" class="text-primary" style="font-weight: 600;">-</span>
                 </div>
                 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Periode Baru</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <select class="form-control" id="EditPeriodeSelect">
-                                <option value="">-- Pilih Periode --</option>
-                                <?php if (!empty($PeriodeList)) {
-                                    foreach ($PeriodeList as $p) { ?>
-                                        <option value="<?= $p['Id'] ?>"><?= html_escape($p['Periode']) ?></option>
-                                    <?php } 
-                                } ?>
-                            </select>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Periode Baru <span class="text-danger">*</span></label>
+                    <select class="form-control" id="EditPeriodeSelect" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                        <option value="">-- Pilih Periode --</option>
+                        <?php if (!empty($PeriodeList)) {
+                            foreach ($PeriodeList as $p) { ?>
+                                <option value="<?= $p['Id'] ?>"><?= html_escape($p['Periode']) ?></option>
+                            <?php } 
+                        } ?>
+                    </select>
                 </div>
                 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Misi Baru</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <select class="form-control" id="EditMisiSelect" disabled>
-                                <option value="">-- Pilih Periode Terlebih Dahulu --</option>
-                            </select>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 18px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Misi Baru <span class="text-danger">*</span></label>
+                    <select class="form-control" id="EditMisiSelect" disabled style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                        <option value="">-- Pilih Periode Terlebih Dahulu --</option>
+                    </select>
                 </div>
                 
-                <div class="alert alert-warning" style="margin-top: 15px;">
-                    <i class="notika-icon notika-warning"></i>
+                <div class="alert alert-warning" style="border-radius: 8px; margin-bottom: 0; border-left: 4px solid #f59e0b; background: #fffbeb; color: #b45309; padding: 12px 18px;">
+                    <i class="fa fa-exclamation-triangle" style="margin-right: 6px;"></i>
                     <strong>Perhatian:</strong> Mengubah misi akan memindahkan semua sasaran pokok dari misi lama ke misi baru.
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnEditPeriodeMisi"><b>UPDATE</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-primary" id="BtnEditPeriodeMisi" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(59,130,246,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Update
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <!-- ============================================================
-MODAL KONFIRMASI HAPUS PERIODE DAN MISI============================================================ -->
+MODAL KONFIRMASI HAPUS PERIODE DAN MISI
+============================================================ -->
 <div class="modal fade" id="ModalHapusPeriodeMisi" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);">
-        <div class="modal-content">
-            <div class="modal-header" style="background-color: #f44336; color: white;">
-                <button type="button" class="close" data-dismiss="modal" style="color: white;">&times;</button>
-                <h4 class="modal-title"><b><i class="notika-icon notika-danger"></i> Konfirmasi Hapus</b></h4>
+    <div class="modal-dialog" style="max-width: 550px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #fee2e2; background: #fef2f2; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #ef4444; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #dc2626; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-trash-o" style="color: #dc2626;"></i> Konfirmasi Hapus Misi
+                </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
                 <input type="hidden" id="HapusIdMisi" value="">
                 
-                <div class="alert alert-danger" style="margin-bottom: 15px;">
+                <div class="alert alert-danger" style="border-radius: 8px; margin-bottom: 18px; border-left: 4px solid #ef4444; background: #fef2f2; color: #b91c1c; padding: 12px 18px;">
                     <strong>PERINGATAN!</strong> Menghapus misi akan menghapus:
-                    <ul style="margin-top: 10px; padding-left: 20px;">
+                    <ul style="margin-top: 8px; margin-bottom: 0; padding-left: 20px;">
                         <li>Misi ini</li>
                         <li>Semua Sasaran Pokok yang terkait</li>
                         <li>Semua IUP yang terkait dengan sasaran pokok</li>
                     </ul>
                 </div>
                 
-                <div id="HapusInfoData" style="margin-bottom: 15px;">
+                <div id="HapusInfoData" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-bottom: 15px;">
                     <div class="row">
                         <div class="col-md-6">
-                            <strong>Periode:</strong> <span id="HapusInfoPeriode" class="text-primary">-</span>
+                            <strong style="color: #475569;">Periode:</strong> <span id="HapusInfoPeriode" class="text-primary" style="font-weight: 600;">-</span>
                         </div>
                         <div class="col-md-6">
-                            <strong>Misi:</strong> <span id="HapusInfoMisi" class="text-primary">-</span>
+                            <strong style="color: #475569;">Misi:</strong> <span id="HapusInfoMisi" class="text-primary" style="font-weight: 600;">-</span>
                         </div>
                     </div>
                 </div>
                 
-                <p class="text-center" style="margin-top: 15px; color: #f44336;">
-                    <strong>Data yang dihapus tidak dapat dikembalikan!</strong>
+                <p class="text-center" style="margin: 10px 0 0; color: #dc2626; font-weight: 600; font-size: 13px;">
+                    <i class="fa fa-info-circle"></i> Data yang dihapus tidak dapat dikembalikan!
                 </p>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="BtnHapusPeriodeMisi"><b>YA, HAPUS</b></button>
-                <button class="btn btn-default" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-danger" id="BtnHapusPeriodeMisi" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(239,68,68,0.3);">
+                    <i class="fa fa-trash" style="margin-right: 5px;"></i> Ya, Hapus
+                </button>
             </div>
         </div>
     </div>
@@ -724,28 +687,26 @@ MODAL KONFIRMASI HAPUS PERIODE DAN MISI=========================================
 MODAL EDIT SASARAN POKOK
 ============================================================ -->
 <div class="modal fade" id="ModalEditSasaranPokok" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Edit Sasaran Pokok</b></h4>
+    <div class="modal-dialog" style="max-width: 650px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-pencil-square-o" style="color: #3b82f6;"></i> Edit Sasaran Pokok
+                </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
                 <input type="hidden" id="EditSasaranId">
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Sasaran Pokok</b> <span class="text-danger">*</span></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <textarea class="form-control" rows="3" id="EditSasaranPokok" placeholder="Masukkan Sasaran Pokok"></textarea>
-                        </div>
-                    </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Sasaran Pokok <span class="text-danger">*</span></label>
+                    <textarea class="form-control" rows="3" id="EditSasaranPokok" placeholder="Masukkan Sasaran Pokok" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: none; resize: vertical;"></textarea>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnEditSasaran"><b>UPDATE</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-primary" id="BtnEditSasaran" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(59,130,246,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Update
+                </button>
             </div>
         </div>
     </div>
@@ -755,80 +716,60 @@ MODAL EDIT SASARAN POKOK
 MODAL EDIT IUP
 ============================================================ -->
 <div class="modal fade" id="ModalEditIUP" role="dialog">
-    <div class="modal-dialog modals-default" style="position: absolute;left: 50%;top: 50%;transform: translate(-50%, -50%);overflow-x: hidden;overflow-y: auto;max-height: 600px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title"><b>Edit IUP</b></h4>
+    <div class="modal-dialog" style="max-width: 700px; margin: 30px auto;">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden;">
+            <div class="modal-header" style="position: relative; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; color: #64748b; background: transparent; border: none; z-index: 10; margin: 0; padding: 0; line-height: 1;">&times;</button>
+                <h4 class="modal-title" style="margin: 0; text-align: left; font-size: 17px; font-weight: 700; color: #1e293b; padding-right: 40px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-pencil-square-o" style="color: #3b82f6;"></i> Edit Indikator Utama Pembangunan (IUP)
+                </h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="padding: 24px; max-height: calc(100vh - 200px); overflow-y: auto;">
                 <input type="hidden" id="EditIUPId">
                 <input type="hidden" id="EditIUPIdSasaran">
                 
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Indikator</b> <span class="text-danger">*</span></label>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Indikator <span class="text-danger">*</span></label>
+                    <textarea class="form-control" rows="2" id="EditIndikatorIUP" placeholder="Masukkan Indikator Utama Pembangunan" style="border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: none; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Satuan</label>
+                    <input type="text" class="form-control" id="EditSatuanIUP" placeholder="Contoh: Tahun, %, Jiwa, dll" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap I <small style="color: #64748b;">(2025-2029)</small></label>
+                            <input type="text" class="form-control" id="EditTarget1IUP" placeholder="Target 2025-2029" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
-                        <div class="col-lg-9">
-                            <textarea class="form-control" rows="2" id="EditIndikatorIUP" placeholder="Masukkan Indikator Utama Pembangunan"></textarea>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap II <small style="color: #64748b;">(2030-2034)</small></label>
+                            <input type="text" class="form-control" id="EditTarget2IUP" placeholder="Target 2030-2034" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Satuan</b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="EditSatuanIUP" placeholder="Contoh: Tahun, %, Jiwa, dll">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap III <small style="color: #64748b;">(2035-2039)</small></label>
+                            <input type="text" class="form-control" id="EditTarget3IUP" placeholder="Target 2035-2039" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap I<br><small>2025-2029</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="EditTarget1IUP" placeholder="Target 2025-2029">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap II<br><small>2030-2034</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="EditTarget2IUP" placeholder="Target 2030-2034">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap III<br><small>2035-2039</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="EditTarget3IUP" placeholder="Target 2035-2039">
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="row">
-                        <div class="col-lg-3">
-                            <label><b>Target Tahap IV<br><small>2040-2045</small></b></label>
-                        </div>
-                        <div class="col-lg-9">
-                            <input type="text" class="form-control" id="EditTarget4IUP" placeholder="Target 2040-2045">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label style="font-weight: 600; color: #334155; margin-bottom: 6px; display: block; font-size: 13px;">Target Tahap IV <small style="color: #64748b;">(2040-2045)</small></label>
+                            <input type="text" class="form-control" id="EditTarget4IUP" placeholder="Target 2040-2045" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 40px; box-shadow: none;">
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-success" id="BtnEditIUP"><b>UPDATE</b></button>
-                <button class="btn btn-danger" data-dismiss="modal"><b>BATAL</b></button>
+            <div class="modal-footer" style="padding: 14px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; padding: 8px 18px; font-weight: 600; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">Batal</button>
+                <button type="button" class="btn btn-primary" id="BtnEditIUP" style="border-radius: 8px; padding: 8px 22px; font-weight: 600; box-shadow: 0 2px 6px rgba(59,130,246,0.3);">
+                    <i class="fa fa-save" style="margin-right: 5px;"></i> Update
+                </button>
             </div>
         </div>
     </div>
@@ -837,11 +778,11 @@ MODAL EDIT IUP
 <!-- CSS -->
 <style>
     /* ==============================================
-   MODAL STYLING
-   ============================================== */
+       MODAL STYLING & CORNER ALIGNMENT
+       ============================================== */
     .modal {
         text-align: center;
-        padding: 0!important;
+        padding: 0 !important;
     }
     .modal:before {
         content: '';
@@ -854,31 +795,36 @@ MODAL EDIT IUP
         display: inline-block;
         text-align: left;
         vertical-align: middle;
-        width: 700px; 
-        max-width: 95%; 
+        width: 100%;
+        max-width: 650px;
     }
     .modal-lg {
-        width: 95% !important;
-        max-width: 1200px !important;
+        max-width: 900px !important;
     }
 
     .modal-header {
         position: relative !important;
-        padding: 15px 20px !important;
-        border-bottom: 1px solid #e5e5e5 !important;
-        background: #fafafa !important;
-        border-radius: 4px 4px 0 0 !important;
+        padding: 16px 24px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        background: #f8fafc !important;
+        border-top-left-radius: 12px !important;
+        border-top-right-radius: 12px !important;
+    }
+
+    .modal-header:before,
+    .modal-header:after {
+        display: none !important;
     }
 
     .modal-header .close {
         position: absolute !important;
-        right: 15px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        font-size: 28px !important;
-        font-weight: 700 !important;
+        right: 20px !important;
+        top: 16px !important;
+        margin: 0 !important;
+        font-size: 24px !important;
+        font-weight: 400 !important;
         line-height: 1 !important;
-        color: #333 !important;
+        color: #64748b !important;
         text-shadow: none !important;
         opacity: 0.6 !important;
         background: transparent !important;
@@ -886,19 +832,20 @@ MODAL EDIT IUP
         padding: 0 !important;
         z-index: 10 !important;
         cursor: pointer !important;
-        width: 35px !important;
-        height: 35px !important;
+        width: 32px !important;
+        height: 32px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         border-radius: 50% !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.2s ease !important;
     }
 
     .modal-header .close:hover {
         opacity: 1 !important;
-        background: rgba(0,0,0,0.08) !important;
-        transform: translateY(-50%) rotate(90deg) !important;
+        color: #0f172a !important;
+        background: rgba(0,0,0,0.05) !important;
+        transform: rotate(90deg) !important;
     }
 
     .modal-header .close:focus {
@@ -906,60 +853,41 @@ MODAL EDIT IUP
         opacity: 0.8 !important;
     }
 
-    .modal-header .close span {
-        display: inline-block !important;
-        font-size: 30px !important;
-        line-height: 1 !important;
-    }
-
     .modal-header h4.modal-title {
-        font-size: 18px;
-        margin: 0;
-        padding-right: 40px;
-        font-weight: 600;
+        font-size: 17px !important;
+        margin: 0 !important;
+        padding-right: 40px !important;
+        font-weight: 700 !important;
+        color: #1e293b !important;
+        text-align: left !important;
     }
 
     .modal-body {
-        padding: 20px 25px !important;
+        padding: 24px !important;
         max-height: calc(100vh - 200px);
         overflow-y: auto;
     }
 
     .modal-footer {
-        padding: 12px 20px !important;
-        border-top: 1px solid #e5e5e5 !important;
-        background: #fafafa !important;
-        border-radius: 0 0 4px 4px !important;
+        padding: 14px 24px !important;
+        border-top: 1px solid #e2e8f0 !important;
+        background: #f8fafc !important;
+        border-bottom-left-radius: 12px !important;
+        border-bottom-right-radius: 12px !important;
     }
 
-    .filter-row {
-        display: flex;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        gap: 10px;
+    /* Table Header Styling */
+    .table thead th {
+        background-color: #f1f5f9 !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        font-size: 13px !important;
+        border-bottom: 2px solid #cbd5e1 !important;
+        border-top: 1px solid #cbd5e1 !important;
+        vertical-align: middle !important;
     }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .filter-group label {
-        font-size: 14px;
-        margin-bottom: 5px;
-    }
-    .filter-select {
-        width: 260px;
-        font-size: 14px;
-        padding: 5px 8px;
-    }
-    @media (max-width: 768px) {
-        .filter-row {
-            flex-direction: column;
-            gap: 15px;
-        }
-        .filter-select {
-            width: 100%;
-        }
+    .table-bordered th, .table-bordered td {
+        border-color: #e2e8f0 !important;
     }
     .table th {
         text-align: center;
@@ -968,27 +896,77 @@ MODAL EDIT IUP
     .table td {
         vertical-align: middle;
     }
-    .modal-body {
-        padding: 20px 30px;
-    }
-    .modal-dialog {
-        max-width: 800px;
-    }
     .text-danger {
         color: #ff0000;
     }
-    .btn-sm {
-        padding: 4px 10px;
-        font-size: 12px;
-        margin: 1px;
+    /* ==============================================
+       UNIFIED BUTTON STYLING
+       ============================================== */
+    .btn {
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        font-weight: 600 !important;
     }
-    .btn-xs {
-        padding: 2px 8px;
-        font-size: 10px;
-        line-height: 1.4;
+    .btn-sm, .btn-xs {
+        border-radius: 6px !important;
+        font-weight: 600 !important;
     }
-    .btn-xs i {
-        font-size: 10px;
+    .btn.Edit, .btn.EditSasaran, .btn.EditPeriodeMisi, .btn-amber {
+        background-color: #f59e0b !important;
+        border-color: #f59e0b !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 5px 9px !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .btn.Edit:hover, .btn.EditSasaran:hover, .btn.EditPeriodeMisi:hover, .btn-amber:hover {
+        background-color: #d97706 !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 6px rgba(245, 158, 11, 0.35) !important;
+    }
+    .btn.Hapus, .btn.HapusSasaran, .btn.HapusPeriodeMisi, .btn-danger {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 5px 9px !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.25) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .btn.Hapus:hover, .btn.HapusSasaran:hover, .btn.HapusPeriodeMisi:hover, .btn-danger:hover {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 6px rgba(239, 68, 68, 0.35) !important;
+    }
+    .TambahSasaranRow, .TambahIUP {
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        padding: 4px 8px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.12) !important;
+    }
+    .button-icon-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        margin: 0 !important;
+    }
+    .button-icon-btn .btn-reco-mg,
+    .button-icon-btn .btn-button-mg {
+        margin: 0 !important;
     }
     .alert-info {
         background-color: #d9edf7;
@@ -1020,14 +998,6 @@ MODAL EDIT IUP
     .label-success {
         background-color: #5cb85c;
         color: #fff;
-    }
-    .btn-amber {
-        background-color: #ffbf00;
-        color: #333;
-    }
-    .btn-amber:hover {
-        background-color: #e6ac00;
-        color: #333;
     }
     .basic-tb-hd {
         display: flex;
