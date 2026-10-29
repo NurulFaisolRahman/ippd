@@ -19398,17 +19398,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // ============================================================
         public function KeterkaitanIndikatorPembangunan()
         {
-            if (!isset($_SESSION['Level']) || ($_SESSION['Level'] != 1 && $_SESSION['Level'] != 3 && $_SESSION['Level'] != 4)) {
-                redirect('Home');
-            }
-
             $Header['Title'] = 'Keterkaitan Indikator Pembangunan Daerah';
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
-                        $this->input->post('KodeWilayah', TRUE));
+                        ($this->input->get('KodeWilayah', TRUE) ?: $this->input->post('KodeWilayah', TRUE)));
 
             $isProvinsi = (strlen($KodeWilayah) == 2);
-            $Data['Provinsi'] = $this->db->where('CHAR_LENGTH(Kode)', 2)->get('kodewilayah')->result_array();
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
             if ($KodeWilayah) {
                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
@@ -20121,17 +20117,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // ============================================================
         public function DukunganPrioritasPembangunan()
         {
-            if (!isset($_SESSION['Level']) || ($_SESSION['Level'] != 1 && $_SESSION['Level'] != 3 && $_SESSION['Level'] != 4)) {
-                redirect('Home');
-            }
-
             $Header['Title'] = 'Dukungan Prioritas Pembangunan';
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
-                        $this->input->post('KodeWilayah', TRUE));
+                        ($this->input->get('KodeWilayah', TRUE) ?: $this->input->post('KodeWilayah', TRUE)));
 
             $isProvinsi = (strlen($KodeWilayah) == 2);
-            $Data['Provinsi'] = $this->db->where('CHAR_LENGTH(Kode)', 2)->get('kodewilayah')->result_array();
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
             if ($KodeWilayah) {
                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();

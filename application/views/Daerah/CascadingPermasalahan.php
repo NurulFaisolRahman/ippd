@@ -249,14 +249,17 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 
                 <!-- Filter Bar: Wilayah & Tahun RKPD -->
-                <div class="filter-wrapper">
+                <div class="filter-card-custom">
+                    <div class="filter-header-title">
+                        <i class="fa fa-filter"></i> Filter Wilayah &amp; Tahun
+                    </div>
                     <form method="GET" action="<?= base_url('Daerah/CascadingPermasalahan') ?>" id="FormFilterCascading">
                         <div class="row" style="display: flex; align-items: flex-end; flex-wrap: wrap;">
                             
                             <?php if (empty($_SESSION['KodeWilayah'])) { ?>
                                 <div class="col-lg-4 col-md-4 col-sm-6" style="margin-bottom: 10px;">
-                                    <label style="font-weight: 700; font-size: 13px; color: #334155;">Pilih Provinsi</label>
-                                    <select class="form-control" id="FilterProvinsi" style="height: 40px; border-radius: 6px;">
+                                    <label style="font-weight: 600; font-size: 12px; color: #475569; margin-bottom: 6px; display: block;">Provinsi</label>
+                                    <select class="form-control filter-select-custom" id="FilterProvinsi">
                                         <option value="">-- Pilih Provinsi --</option>
                                         <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
                                             <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2) == $prov['Kode']) ? 'selected' : '' ?>>
@@ -266,8 +269,8 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                                     </select>
                                 </div>
                                 <div class="col-lg-4 col-md-4 col-sm-6" style="margin-bottom: 10px;">
-                                    <label style="font-weight: 700; font-size: 13px; color: #334155;">Pilih Kabupaten / Kota</label>
-                                    <select class="form-control" name="KodeWilayah" id="FilterKabKota" style="height: 40px; border-radius: 6px;">
+                                    <label style="font-weight: 600; font-size: 12px; color: #475569; margin-bottom: 6px; display: block;">Kabupaten / Kota</label>
+                                    <select class="form-control filter-select-custom" name="KodeWilayah" id="FilterKabKota">
                                         <option value="">-- Pilih Kabupaten / Kota --</option>
                                     </select>
                                 </div>
@@ -276,11 +279,11 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                             <?php } ?>
 
                             <!-- Filter Tahun Perencanaan RKPD -->
-                            <div class="col-lg-3 col-md-3 col-sm-6" style="margin-bottom: 10px;">
-                                <label style="font-weight: 700; font-size: 13px; color: #334155;">
-                                    <i class="fa fa-calendar" style="color: #15803d;"></i> Tahun Perencanaan RKPD
+                            <div class="col-lg-2 col-md-2 col-sm-6" style="margin-bottom: 10px;">
+                                <label style="font-weight: 600; font-size: 12px; color: #475569; margin-bottom: 6px; display: block;">
+                                    <i class="fa fa-calendar" style="color: #2d6a4f;"></i> Tahun RKPD
                                 </label>
-                                <select class="form-control" name="tahun" id="FilterTahun" style="height: 40px; border-radius: 6px; font-weight: 600;">
+                                <select class="form-control filter-select-custom" name="tahun" id="FilterTahun">
                                     <?php foreach ($ListTahun as $th) { ?>
                                         <option value="<?= html_escape($th) ?>" <?= ($SelectedTahun == $th) ? 'selected' : '' ?>>
                                             Tahun <?= html_escape($th) ?>
@@ -290,13 +293,18 @@ $isDaerah = isset($IsDaerah) ? $IsDaerah : (isset($_SESSION['Username']) || isse
                             </div>
 
                             <div class="col-lg-2 col-md-2 col-sm-6" style="margin-bottom: 10px;">
-                                <button type="submit" class="btn btn-primary notika-btn-primary btn-block" style="height: 40px; font-weight: 700; border-radius: 6px; background: #15803d; border-color: #166534;">
-                                    <i class="fa fa-filter"></i> Tampilkan
+                                <button type="submit" class="btn btn-primary-custom" style="height: 38px; width: 100%; font-size: 13px;">
+                                    <i class="fa fa-search"></i> Filter
                                 </button>
                             </div>
 
                         </div>
                     </form>
+                    <?php if (!empty($NamaWilayah)) { ?>
+                        <div class="wilayah-terpilih-badge">
+                            <i class="fa fa-map-marker"></i> Wilayah Terpilih: <strong><?= html_escape($NamaWilayah) ?></strong>
+                        </div>
+                    <?php } ?>
                 </div>
 
                 <?php if (empty($KodeWilayah)) { ?>
@@ -2063,7 +2071,7 @@ $(document).ready(function() {
 
     }
 
-    // Filter Provinsi/KabKota untuk admin
+    // Filter Provinsi/KabKota
     $('#FilterProvinsi').on('change', function() {
         var provKode = $(this).val();
         if (!provKode) {
@@ -2071,10 +2079,10 @@ $(document).ready(function() {
             return;
         }
         $.ajax({
-            url: BaseURL + 'Daerah/GetKabKotaByProvinsi',
+            url: BaseURL + 'Daerah/GetListKabKota',
             type: 'POST',
             dataType: 'json',
-            data: { KodeProvinsi: provKode },
+            data: { Kode: provKode },
             success: function(kabList) {
                 var opt = '<option value="">-- Pilih Kabupaten / Kota --</option>';
                 if (kabList) {
@@ -2092,10 +2100,10 @@ $(document).ready(function() {
     var initProv = $('#FilterProvinsi').val();
     if (initProv) {
         $.ajax({
-            url: BaseURL + 'Daerah/GetKabKotaByProvinsi',
+            url: BaseURL + 'Daerah/GetListKabKota',
             type: 'POST',
             dataType: 'json',
-            data: { KodeProvinsi: initProv },
+            data: { Kode: initProv },
             success: function(kabList) {
                 var opt = '<option value="">-- Pilih Kabupaten / Kota --</option>';
                 if (kabList) {
@@ -2109,6 +2117,13 @@ $(document).ready(function() {
             }
         });
     }
+
+    $('#FormFilterCascading').on('submit', function() {
+        var kw = $('#FilterKabKota').val();
+        if (kw) {
+            $.post(BaseURL + 'Daerah/SetTempKodeWilayah', { KodeWilayah: kw });
+        }
+    });
 
     render();
 });

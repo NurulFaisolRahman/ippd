@@ -56,6 +56,73 @@
         .filter-select{ width:100%; }
         }
 
+        /* ================= FILTER WILAYAH SEPERTI TABULASI ================= */
+        .filter-card-custom {
+            background: #ffffff !important;
+            border-radius: 12px !important;
+            padding: 18px 24px !important;
+            margin-bottom: 20px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04) !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        .filter-card-custom .filter-header-title {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            color: #1e293b !important;
+            margin-bottom: 14px !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+        .filter-card-custom .filter-header-title i {
+            color: #2d6a4f !important;
+        }
+        .filter-card-custom .col-filter label {
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            color: #475569 !important;
+            margin-bottom: 5px !important;
+            display: block !important;
+        }
+        .filter-card-custom .filter-select-custom {
+            width: 100% !important;
+            height: 38px !important;
+            border-radius: 8px !important;
+            border: 1px solid #cbd5e1 !important;
+            font-size: 13px !important;
+            padding: 6px 10px !important;
+            color: #1e293b !important;
+            background-color: #ffffff !important;
+        }
+        .btn-primary-custom {
+            background: #2d6a4f !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            box-shadow: 0 4px 12px rgba(45, 106, 79, 0.25) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            transition: all .15s ease !important;
+            cursor: pointer !important;
+        }
+        .btn-primary-custom:hover {
+            background: #1e3d34 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 16px rgba(30, 61, 52, 0.35) !important;
+        }
+        .wilayah-terpilih-badge {
+            margin-top: 14px !important;
+            padding: 10px 14px !important;
+            background: #f2fbf5 !important;
+            border-left: 4px solid #2d6a4f !important;
+            border-radius: 6px !important;
+            font-size: 12.5px !important;
+            color: #334155 !important;
+        }
+
         #data-table-basic {
         font-size: 12px;
         }
@@ -91,6 +158,9 @@
         .btn-table-action,
         .btn-action-group .btn,
         .btn-group-flex .btn,
+        .btn-xs-custom,
+        .btn-aksi,
+        td.text-center .btn-aksi,
         td.text-center > .button-icon-btn.button-icon-btn-cl .btn,
         td.text-center .button-icon-btn.button-icon-btn-cl .btn,
         td.text-center .btn.BtnEdit,
@@ -105,11 +175,11 @@
         td.text-center .btn.EditKolom,
         td.text-center .btn.HapusKolom,
         td.text-center .btn.TambahKolom {
-            width: 32px !important;
-            height: 32px !important;
-            min-width: 32px !important;
+            width: 30px !important;
+            height: 30px !important;
+            min-width: 30px !important;
             padding: 0 !important;
-            border-radius: 6px !important;
+            border-radius: 4px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -119,11 +189,13 @@
             margin: 0 !important;
             cursor: pointer !important;
             transition: all 0.15s ease-in-out !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
         }
 
         .btn-action-group .btn:hover,
         .btn-group-flex .btn:hover,
+        .btn-action-custom:hover,
+        .btn-xs-custom:hover,
         td.text-center .button-icon-btn.button-icon-btn-cl .btn:hover,
         td.text-center .btn.BtnEdit:hover,
         td.text-center .btn.BtnHapus:hover,
@@ -138,68 +210,116 @@
         td.text-center .btn.HapusKolom:hover,
         td.text-center .btn.TambahKolom:hover {
             transform: translateY(-1px) !important;
-            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
             opacity: 0.95 !important;
         }
 
-        /* Edit / Warning Button Style */
+        /* Container grup tombol aksi dalam tabel */
+        .action-group,
+        .btn-group-aksi,
+        .item-actions-group,
+        .level-actions {
+            display: inline-flex !important;
+            flex-direction: row !important;
+            gap: 5px !important;
+            align-items: center !important;
+            justify-content: center !important;
+            white-space: nowrap !important;
+            margin-top: 5px !important;
+        }
+
+        /* Tombol Tambah sub-elemen dalam baris tabel (memiliki teks deskripsi seperti Tambah Isu / Sasaran / Indikator) */
+        .btn-action-custom.btn-action-add,
+        .btn-action-add,
+        .btn-add-level,
+        .btn-xs-custom.btn-add-level,
+        .btn-sub-add {
+            width: auto !important;
+            min-width: unset !important;
+            height: 28px !important;
+            padding: 0 10px !important;
+            font-size: 11.5px !important;
+            font-weight: 600 !important;
+            border-radius: 4px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            white-space: nowrap !important;
+            background-color: #10b981 !important;
+            border: 1px solid #059669 !important;
+            color: #ffffff !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
+            cursor: pointer !important;
+        }
+        .btn-action-custom.btn-action-add:hover,
+        .btn-action-add:hover,
+        .btn-add-level:hover,
+        .btn-xs-custom.btn-add-level:hover,
+        .btn-sub-add:hover {
+            background-color: #059669 !important;
+            color: #ffffff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 2px 5px rgba(5, 150, 105, 0.25) !important;
+        }
+
+        /* Edit / Warning Button Style (Sesuai Keterkaitan: Amber/Orange) */
         .btn-action-edit,
+        .btn-action-custom.btn-action-edit,
+        .btn-edit-level,
+        .btn-xs-custom.btn-edit-level,
+        .btn-aksi,
+        .btn-aksi.btn-warning,
         td.text-center .btn.btn-amber,
         td.text-center .btn.btn-warning,
         td.text-center .btn.BtnEdit,
         td.text-center .btn.BtnEditDetail,
         td.text-center .btn.EditHeader {
-            background-color: #f59e0b !important;
-            border: 1px solid #d97706 !important;
+            background-color: #f0ad4e !important;
+            border: 1px solid #eea236 !important;
             color: #ffffff !important;
         }
         .btn-action-edit:hover,
+        .btn-action-custom.btn-action-edit:hover,
+        .btn-edit-level:hover,
+        .btn-xs-custom.btn-edit-level:hover,
         td.text-center .btn.btn-amber:hover,
         td.text-center .btn.btn-warning:hover,
         td.text-center .btn.BtnEdit:hover,
         td.text-center .btn.BtnEditDetail:hover,
         td.text-center .btn.EditHeader:hover {
-            background-color: #d97706 !important;
+            background-color: #ec971f !important;
+            border-color: #d58512 !important;
             color: #ffffff !important;
         }
 
-        /* Delete / Danger Button Style */
+        /* Delete / Danger Button Style (Sesuai Keterkaitan: Merah) */
         .btn-action-delete,
+        .btn-action-custom.btn-action-delete,
+        .btn-del-level,
+        .btn-xs-custom.btn-del-level,
         td.text-center .btn.btn-danger,
         td.text-center .btn.BtnHapus,
         td.text-center .btn.BtnHapusMaster,
         td.text-center .btn.BtnHapusDetail,
         td.text-center .btn.HapusHeader,
         td.text-center .btn.HapusKolom {
-            background-color: #ef4444 !important;
-            border: 1px solid #dc2626 !important;
+            background-color: #d9534f !important;
+            border: 1px solid #d43f3a !important;
             color: #ffffff !important;
         }
         .btn-action-delete:hover,
+        .btn-action-custom.btn-action-delete:hover,
+        .btn-del-level:hover,
+        .btn-xs-custom.btn-del-level:hover,
         td.text-center .btn.btn-danger:hover,
         td.text-center .btn.BtnHapus:hover,
         td.text-center .btn.BtnHapusMaster:hover,
         td.text-center .btn.BtnHapusDetail:hover,
         td.text-center .btn.HapusHeader:hover,
         td.text-center .btn.HapusKolom:hover {
-            background-color: #dc2626 !important;
-            color: #ffffff !important;
-        }
-
-        /* Add / Success Button Style */
-        .btn-action-add,
-        td.text-center .btn.btn-success,
-        td.text-center .btn.BtnAddDetail,
-        td.text-center .btn.TambahKolom {
-            background-color: #10b981 !important;
-            border: 1px solid #059669 !important;
-            color: #ffffff !important;
-        }
-        .btn-action-add:hover,
-        td.text-center .btn.btn-success:hover,
-        td.text-center .btn.BtnAddDetail:hover,
-        td.text-center .btn.TambahKolom:hover {
-            background-color: #059669 !important;
+            background-color: #c9302c !important;
+            border-color: #ac2925 !important;
             color: #ffffff !important;
         }
 

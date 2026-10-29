@@ -81,47 +81,49 @@
                             
                             <!-- Filter Wilayah -->
                             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>">
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:18px 24px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); border:1px solid #cbd5e1;">
+                                <div class="filter-header-title" style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa fa-filter" style="color:#2d6a4f;"></i> Filter Wilayah
+                                </div>
+                                <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Provinsi</label>
+                                        <select class="form-control filter-select-custom" id="Provinsi" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php }} ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Kabupaten / Kota</label>
+                                        <select class="form-control filter-select-custom" id="KabKota" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                            <?php if (!empty($KodeWilayah)) { 
+                                                $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                            ?>
+                                                <option value="<?= html_escape($KodeWilayah) ?>" selected>
+                                                    <?= html_escape($selected_kab['Nama'] ?? $NamaWilayah) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="width:auto;">
+                                        <button type="button" class="btn btn-primary-custom" id="Filter" style="height:38px; padding:0 22px; font-size:13px;">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
-                            <?php } ?>
 
-                            <?php if (!empty($KodeWilayah)) { ?>
-                            <div class="alert alert-info" style="margin-bottom: 20px;">
-                                <strong>Wilayah:</strong> <?= html_escape($NamaWilayah) ?>
+                                <?php if (!empty($KodeWilayah)) { ?>
+                                    <div style="margin-top:14px; padding:10px 14px; background:#f2fbf5; border-left:4px solid #2d6a4f; border-radius:6px; font-size:12.5px; color:#334155;">
+                                        <strong>Wilayah Terpilih:</strong> <?= html_escape($NamaWilayah) ?>
+                                    </div>
+                                <?php } ?>
                             </div>
                             <?php } ?>
 
@@ -200,21 +202,19 @@
                                         </td>
                                         <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
                                         <td class="text-center" style="vertical-align: middle; background-color: #f9f9f9; border: 1px solid #ddd;">
-                                            <div class="btn-group" style="display: inline-flex; gap: 4px; flex-wrap: wrap; justify-content: center;">
-                                                <button class="btn btn-sm btn-warning EditPaguUrusan" 
+                                            <div class="action-group">
+                                                <button type="button" class="btn-action-custom btn-action-edit EditPaguUrusan" 
                                                         data-id="<?= $row['id'] ?>"
                                                         data-pagu="<?= html_escape($row['pagu']) ?>"
                                                         data-instansi="<?= html_escape($row['instansi_id'] ?? '') ?>"
                                                         data-tahun="<?= html_escape($row['tahun'] ?? $SelectedTahun) ?>"
-                                                        title="Edit"
-                                                        style="padding: 4px 10px; font-size: 12px; background-color: #f0ad4e; border-color: #eea236; color: #fff; border-radius: 4px;">
-                                                    <i class="fa fa-edit"></i> Edit
+                                                        title="Edit Data">
+                                                    <i class="fa fa-pencil"></i>
                                                 </button>
-                                                <button class="btn btn-sm btn-danger HapusPaguUrusan" 
+                                                <button type="button" class="btn-action-custom btn-action-delete HapusPaguUrusan" 
                                                         data-id="<?= $row['id'] ?>"
-                                                        title="Hapus"
-                                                        style="padding: 4px 10px; font-size: 12px; border-radius: 4px;">
-                                                    <i class="fa fa-trash"></i> Hapus
+                                                        title="Hapus Data">
+                                                    <i class="fa fa-trash"></i>
                                                 </button>
                                             </div>
                                         </td>
@@ -405,13 +405,67 @@ jQuery(document).ready(function($) {
         });
 
         $("#Filter").click(function() {
-            var KabKota = $("#KabKota").val();
-            if (KabKota === "") {
-                alert("Pilih Provinsi dan Kab/Kota terlebih dahulu!");
+            var prov = $("#Provinsi").val();
+            var kabKota = $("#KabKota").val();
+            if (!prov) {
+                alert("Mohon Pilih Provinsi");
                 return;
             }
-            window.location.href = BaseURL + "Daerah/PaguUrusan?KodeWilayah=" + KabKota;
+            if (!kabKota) {
+                alert("Mohon Pilih Kab/Kota");
+                return;
+            }
+
+            var $btn = $(this);
+            $btn.prop('disabled', true).text('Memuat...');
+
+            $.ajax({
+                url: BaseURL + "Daerah/SetTempKodeWilayah",
+                type: "POST",
+                data: {
+                    KodeWilayah: kabKota,
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                },
+                success: function(res) {
+                    if (res === '1' || res.trim() === '1' || res === 'success' || res.trim() === 'success') {
+                        window.location.reload();
+                    } else {
+                        alert(res || "Gagal menyimpan filter wilayah!");
+                        $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
+                    }
+                },
+                error: function() {
+                    alert("Gagal menghubungi server!");
+                    $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
+                }
+            });
         });
+
+        <?php if (!empty($KodeWilayah)) { ?>
+            var curKodePagu = "<?= $KodeWilayah ?>";
+            var curProvPagu = curKodePagu.substring(0, 2);
+            if ($('#Provinsi').val() && $('#KabKota option').length <= 1) {
+                $.ajax({
+                    url: BaseURL + 'Daerah/GetListKabKota',
+                    type: 'POST',
+                    data: {
+                        Kode: curProvPagu,
+                        [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                    },
+                    dataType: 'json',
+                    success: function(res) {
+                        var html = '<option value="">Pilih Kab/Kota</option>';
+                        if (res && res.length > 0) {
+                            $.each(res, function(i, item) {
+                                var sel = (item.Kode === curKodePagu) ? 'selected' : '';
+                                html += '<option value="' + item.Kode + '" ' + sel + '>' + item.Nama + '</option>';
+                            });
+                        }
+                        $('#KabKota').html(html);
+                    }
+                });
+            }
+        <?php } ?>
     <?php } ?>
     
     /* ================= FILTER TAHUN ================= */
