@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 /**
  * View E-LKPJ: BAB 3.4 Bagian B - Capaian Kinerja Indikator Kinerja Daerah (IKD)
  * Menarik data murni dari relasi tabel master IKD pada menu RPJMD (Read-Only)
- * Dilengkapi fitur Generate Narasi Analisis Tren AI (Google Gemini) dinamis per indikator
+ * Dilengkapi fitur Generate Narasi Analisis Tren AI (AI) dinamis per indikator
  */
 $this->load->view('Daerah/sidebar');
 $this->load->view('Daerah/Cssumum');
@@ -869,7 +869,7 @@ body {
                           </div>
                           <div class="button-icon-btn button-icon-btn-cl notika-action-group no-print">
                             <?php if ($canCrud): ?>
-                              <button type="button" id="btnGenAI_<?= $pRow['id'] ?>" class="btn btn-sm btn-info notika-btn-info info-icon-notika btn-notika-subrow" onclick="generateNarasiIndikator(<?= $pRow['id'] ?>, '<?= $aspKey ?>')" data-toggle="tooltip" data-placement="top" title="Generate narasi resmi analisis tren dengan AI Google Gemini">
+                              <button type="button" id="btnGenAI_<?= $pRow['id'] ?>" class="btn btn-sm btn-info notika-btn-info info-icon-notika btn-notika-subrow" onclick="generateNarasiIndikator(<?= $pRow['id'] ?>, '<?= $aspKey ?>')" data-toggle="tooltip" data-placement="top" title="Generate narasi resmi analisis tren dengan AI AI">
                                 <i class="fa fa-magic"></i>
                               </button>
                               <button type="button" id="btnSaveAI_<?= $pRow['id'] ?>" class="btn btn-sm btn-success notika-btn-success success-icon-notika btn-notika-subrow" onclick="simpanNarasiIndikator(<?= $pRow['id'] ?>)" data-toggle="tooltip" data-placement="top" title="Simpan perubahan narasi ke database">
@@ -888,7 +888,7 @@ body {
                         <!-- Loader Box -->
                         <div id="loadingAI_<?= $pRow['id'] ?>" class="narasi-loader-box">
                           <span style="color: #1d4ed8; font-weight: 600; font-size: 12.5px;">
-                            <i class="fa fa-spinner fa-spin"></i> AI (Gemini) sedang menyusun analisis tren 2021 - 2025 untuk <?= htmlspecialchars($pRow['uraian_indikator']) ?>... Mohon tunggu sejenak.
+                            <i class="fa fa-spinner fa-spin"></i> AI sedang menyusun analisis tren 2021 - 2025 untuk <?= htmlspecialchars($pRow['uraian_indikator']) ?>... Mohon tunggu sejenak.
                           </span>
                         </div>
 
@@ -1067,7 +1067,7 @@ async function generateNarasiIndikator(id, aspekKey = '') {
       Swal.fire({
         icon: 'success',
         title: 'Narasi Berhasil Disusun!',
-        text: 'Analisis tren 2021 - 2025 telah dibuat oleh AI (Gemini) dan otomatis tersimpan ke dokumen LKPJ.',
+        text: 'Analisis tren 2021 - 2025 telah dibuat oleh AI dan otomatis tersimpan ke dokumen LKPJ.',
         timer: 2500,
         showConfirmButton: true,
         confirmButtonColor: '#2563eb'
@@ -1238,7 +1238,7 @@ async function executeBatchGenerate(selector, scopeLabel) {
 
   const confirmRes = await Swal.fire({
     title: `Generate Narasi AI (${scopeLabel})?`,
-    text: `Sistem AI (Gemini) akan menganalisis tren data dan menyusun narasi untuk ${items.length} indikator secara berurutan.`,
+    text: `Sistem AI akan menganalisis tren data dan menyusun narasi untuk ${items.length} indikator secara berurutan.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#2563eb',
@@ -1250,7 +1250,7 @@ async function executeBatchGenerate(selector, scopeLabel) {
   if (!confirmRes.isConfirmed) return;
 
   Swal.fire({
-    title: 'Sedang Memproses AI (Gemini)...',
+    title: 'Sedang Memproses AI...',
     html: `Memproses indikator ke-<b id="batchProgressNum">1</b> dari <b>${items.length}</b>...<br><span style="font-size: 12px; color: #64748b;">Harap tunggu sejenak, proses ini berjalan otomatis.</span>`,
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading()

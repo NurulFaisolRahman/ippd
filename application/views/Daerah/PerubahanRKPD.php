@@ -1055,7 +1055,7 @@ const WILAYAH = {
 let renjaData = {
   perangkatDaerah: <?= json_encode($NamaInstansi) ?>,
   tahunAktif: <?= (int)$TahunAktif ?>,
-  tahunList: [2026, 2027, 2028, 2029, 2030],
+  tahunList: [2025, 2026, 2027, 2028, 2029],
   paguAnggaran: 0,
   rincianPagu: [],
   prioritasNasionalList: [],
@@ -1959,7 +1959,7 @@ function loadRenjaDataServer(tahun, instansiId){
 
 function buildYearTabs(){
   const wrap = document.getElementById('yearTabs');
-  const years = (renjaData.tahunList && renjaData.tahunList.length > 0) ? renjaData.tahunList : [2026, 2027, 2028, 2029, 2030];
+  const years = (renjaData.tahunList && renjaData.tahunList.length > 0) ? renjaData.tahunList : [2025, 2026, 2027, 2028, 2029];
   const activeYear = renjaData.tahunAktif || 2026;
   
   wrap.innerHTML = years.map(function(y){

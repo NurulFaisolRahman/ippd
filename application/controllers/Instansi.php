@@ -28018,8 +28018,8 @@ public function updateStatusPerjanjianKinerja() {
         $str24 = $formatVal($n24);
         $str25 = $formatVal($n25);
 
-        $prompt = "Anda adalah penyusun narasi resmi dan analis kebijakan pembangunan daerah untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
-                  "Tugas Anda adalah menyusun teks narasi analisis dan interpretasi tren perkembangan salah satu Indikator Kinerja Utama (IKU) makro daerah berdasarkan data empiris kurun waktu 2021 sampai 2025 berikut:\n\n" .
+        $prompt = "Anda adalah Analis Kebijakan dan Pembangunan Daerah Senior untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
+                  "Tugas Anda adalah melakukan ANALISIS MENDALAM dan evaluasi komprehensif terhadap tren perkembangan Indikator Kinerja Utama (IKU) makro daerah kurun waktu 2021 sampai 2025 berikut, BUKAN SEKADAR MEMBACA DERETAN ANGKA:\n\n" .
                   "DATA INDIKATOR:\n" .
                   "- Nama / Uraian Indikator: {$uraian}\n" .
                   "- Wilayah: {$namaWilayah}\n" .
@@ -28599,8 +28599,8 @@ public function updateStatusPerjanjianKinerja() {
         $str24 = $formatVal($n24);
         $str25 = $formatVal($n25);
 
-        $prompt = "Anda adalah analis kebijakan pembangunan daerah dan penyusun narasi resmi untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
-                  "Tugas Anda adalah menyusun teks narasi analisis dan interpretasi tren perkembangan salah satu Indikator Kinerja Daerah (IKD) pada Aspek {$aspekNama} kurun waktu 2021 sampai 2025 berikut:\n\n" .
+        $prompt = "Anda adalah Analis Kebijakan dan Pembangunan Daerah Senior untuk dokumen Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
+                  "Tugas Anda adalah melakukan ANALISIS MENDALAM dan evaluasi komprehensif terhadap tren perkembangan Indikator Kinerja Daerah (IKD) pada Aspek {$aspekNama} kurun waktu 2021 sampai 2025 berikut, BUKAN SEKADAR MEMBACA DERETAN ANGKA:\n\n" .
                   "DATA INDIKATOR:\n" .
                   "- Aspek: Aspek {$aspekNama}\n" .
                   "- Nama / Uraian Indikator: {$uraian}\n" .
@@ -32053,20 +32053,24 @@ public function updateStatusPerjanjianKinerja() {
             if ($rkp2024 && !empty($rkp2024['TPT'])) {
                 $autoData_1_b_10_a['mn_real'] = str_replace(',', '.', trim($rkp2024['TPT']));
             }
-            $rkp2026 = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
-            if ($rkp2026 && !empty($rkp2026['TPT'])) {
-                $autoData_1_b_10_a['mn_target'] = str_replace(',', '.', trim($rkp2026['TPT']));
+            $rkpTarget = $this->db->where('Tahun', (string)$tahun)->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if (!$rkpTarget) {
+                $rkpTarget = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            }
+            if ($rkpTarget && !empty($rkpTarget['TPT'])) {
+                $autoData_1_b_10_a['mn_target'] = str_replace(',', '.', trim($rkpTarget['TPT']));
             }
         }
 
         // 2. Tarik target RKPD dari menu /Daerah/IKDTahunBerjalan (tabel ikd_tahun_berjalan)
         if (!empty($KodeWilayah) && $this->db->table_exists('ikd_tahun_berjalan')) {
-            $ikd_tb = $this->db->where('kode_wilayah', $KodeWilayah)
+            $this->db->where('kode_wilayah', $KodeWilayah)
                 ->where('(indikator_kinerja_daerah LIKE "%pengangguran%" OR indikator_kinerja_daerah LIKE "%tpt%")', NULL, FALSE)
-                ->where('deleted_at IS NULL')
-                ->order_by('tahun', 'DESC')
-                ->order_by('id', 'DESC')
-                ->get('ikd_tahun_berjalan')->row_array();
+                ->where('deleted_at IS NULL');
+            if (!empty($tahun)) {
+                $this->db->where('tahun', (string)$tahun);
+            }
+            $ikd_tb = $this->db->order_by('id', 'DESC')->get('ikd_tahun_berjalan')->row_array();
             if ($ikd_tb && !empty($ikd_tb['target'])) {
                 $autoData_1_b_10_a['md_target'] = str_replace(['%', ','], ['', '.'], trim($ikd_tb['target']));
             }
@@ -32084,13 +32088,13 @@ public function updateStatusPerjanjianKinerja() {
             }
 
             if (empty($autoData_1_b_10_a['md_target']) || $autoData_1_b_10_a['md_target'] === '3.77') {
-                $tm2026 = $this->db->where('kode_wilayah', $KodeWilayah)
-                    ->where('tahun', 2026)
+                $tmTarget = $this->db->where('kode_wilayah', $KodeWilayah)
+                    ->where('tahun', (int)$tahun)
                     ->where('(indikator LIKE "%pengangguran%" OR indikator LIKE "%tpt%")', NULL, FALSE)
                     ->where('deleted_at IS NULL')
                     ->get('target_makro_ekonomi')->row_array();
-                if ($tm2026 && !empty($tm2026['target_rkpd_kabkota'])) {
-                    $autoData_1_b_10_a['md_target'] = str_replace(',', '.', trim($tm2026['target_rkpd_kabkota']));
+                if ($tmTarget && !empty($tmTarget['target_rkpd_kabkota'])) {
+                    $autoData_1_b_10_a['md_target'] = str_replace(',', '.', trim($tmTarget['target_rkpd_kabkota']));
                 }
             }
         }
@@ -32128,9 +32132,12 @@ public function updateStatusPerjanjianKinerja() {
             if ($rkp2024 && !empty($rkp2024['Kemiskinan'])) {
                 $autoData_1_b_10_b['mn_real'] = str_replace(',', '.', trim($rkp2024['Kemiskinan']));
             }
-            $rkp2026 = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
-            if ($rkp2026 && !empty($rkp2026['Kemiskinan'])) {
-                $autoData_1_b_10_b['mn_target'] = str_replace(',', '.', trim($rkp2026['Kemiskinan']));
+            $rkpTarget = $this->db->where('Tahun', (string)$tahun)->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            if (!$rkpTarget) {
+                $rkpTarget = $this->db->where('Tahun', '2026')->where('deleted_at IS NULL')->get('sasaran_pembangunan_rkp')->row_array();
+            }
+            if ($rkpTarget && !empty($rkpTarget['Kemiskinan'])) {
+                $autoData_1_b_10_b['mn_target'] = str_replace(',', '.', trim($rkpTarget['Kemiskinan']));
             }
         }
 
@@ -32145,13 +32152,13 @@ public function updateStatusPerjanjianKinerja() {
                 $autoData_1_b_10_b['md_real'] = str_replace(',', '.', trim($tm2024['target_rkpd_kabkota']));
             }
 
-            $tm2026 = $this->db->where('kode_wilayah', $KodeWilayah)
-                ->where('tahun', 2026)
+            $tmTarget = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (int)$tahun)
                 ->where('(indikator LIKE "%kemiskinan%" OR indikator LIKE "%miskin%")', NULL, FALSE)
                 ->where('deleted_at IS NULL')
                 ->get('target_makro_ekonomi')->row_array();
-            if ($tm2026 && !empty($tm2026['target_rkpd_kabkota'])) {
-                $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($tm2026['target_rkpd_kabkota']));
+            if ($tmTarget && !empty($tmTarget['target_rkpd_kabkota'])) {
+                $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($tmTarget['target_rkpd_kabkota']));
             }
         }
 
@@ -32165,7 +32172,9 @@ public function updateStatusPerjanjianKinerja() {
                 if (!empty($sas_miskin['baseline_2024'])) {
                     $autoData_1_b_10_b['md_real'] = str_replace(',', '.', trim($sas_miskin['baseline_2024']));
                 }
-                if (!empty($sas_miskin['target_2026'])) {
+                if (!empty($sas_miskin['target_' . $tahun])) {
+                    $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($sas_miskin['target_' . $tahun]));
+                } elseif (!empty($sas_miskin['target_2026'])) {
                     $autoData_1_b_10_b['md_target'] = str_replace(',', '.', trim($sas_miskin['target_2026']));
                 }
             }
@@ -32188,10 +32197,7 @@ public function updateStatusPerjanjianKinerja() {
         if ($this->db->table_exists('rkpd_keterkaitan_indikator') && !empty($KodeWilayah)) {
             $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL');
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $cnt_1b1b = $this->db->count_all_results('rkpd_keterkaitan_indikator');
             if ($cnt_1b1b > 0) {
@@ -32258,10 +32264,7 @@ public function updateStatusPerjanjianKinerja() {
         if (!$has_persandingan_1b1d && $this->db->table_exists('rkpd_keterkaitan_indikator') && !empty($KodeWilayah)) {
             $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL');
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $cnt_ket = $this->db->count_all_results('rkpd_keterkaitan_indikator');
             if ($cnt_ket > 0) {
@@ -32355,10 +32358,7 @@ public function updateStatusPerjanjianKinerja() {
                     ->where('deleted_at IS NULL')
                     ->where('p_daerah_json IS NOT NULL AND p_daerah_json != "" AND p_daerah_json != "[]"', NULL, FALSE);
                 if (!empty($tahun)) {
-                    $cloneQ = clone $this->db;
-                    if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                        $this->db->where('tahun', (string)$tahun);
-                    }
+                    $this->db->where('tahun', (string)$tahun);
                 }
                 $row_ket = $this->db->get('rkpd_keterkaitan_indikator')->row_array();
                 if ($row_ket) {
@@ -32433,10 +32433,7 @@ public function updateStatusPerjanjianKinerja() {
                 ->where('deleted_at IS NULL')
                 ->where('p_daerah_json IS NOT NULL AND p_daerah_json != "" AND p_daerah_json != "[]"', NULL, FALSE);
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $row_ket6 = $this->db->get('rkpd_keterkaitan_indikator')->row_array();
             if ($row_ket6) {
@@ -32509,10 +32506,7 @@ public function updateStatusPerjanjianKinerja() {
                 ->where('deleted_at IS NULL')
                 ->where('p_daerah_json IS NOT NULL AND p_daerah_json != "" AND p_daerah_json != "[]"', NULL, FALSE);
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $row_ket7 = $this->db->get('rkpd_keterkaitan_indikator')->row_array();
             if ($row_ket7) {
@@ -32585,10 +32579,7 @@ public function updateStatusPerjanjianKinerja() {
                 ->where('deleted_at IS NULL')
                 ->where('p_daerah_json IS NOT NULL AND p_daerah_json != "" AND p_daerah_json != "[]"', NULL, FALSE);
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $row_ket8 = $this->db->get('rkpd_keterkaitan_indikator')->row_array();
             if ($row_ket8) {
@@ -32686,11 +32677,7 @@ public function updateStatusPerjanjianKinerja() {
                 ->where('kode_wilayah', $KodeWilayah)
                 ->where('deleted_at IS NULL');
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                $chkCount = $cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_keterkaitan_indikator');
-                if ($chkCount > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $rows_1b1a = $this->db->order_by('id_pn ASC, id ASC')
                 ->get('rkpd_keterkaitan_indikator')
@@ -32836,10 +32823,7 @@ public function updateStatusPerjanjianKinerja() {
         if ($this->db->table_exists('tema_pembangunan') && !empty($KodeWilayah)) {
             $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL');
             if (!empty($tahun)) {
-                $cloneQ = clone $this->db;
-                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('tema_pembangunan') > 0) {
-                    $this->db->where('tahun', (string)$tahun);
-                }
+                $this->db->where('tahun', (string)$tahun);
             }
             $temaRows = $this->db->order_by('tahun DESC, id DESC')->get('tema_pembangunan')->result_array();
             if (!empty($temaRows)) {
@@ -33333,7 +33317,7 @@ public function updateStatusPerjanjianKinerja() {
             $Data['NamaWilayah'] = $wilayah ? $wilayah['Nama'] : '';
         }
 
-        $Data['ListTahun'] = [2027, 2026, 2025, 2024, 2023];
+        $Data['ListTahun'] = [2025, 2026, 2027, 2028, 2029];
         $Data['TahunAktif'] = $tahun;
         $Data['FilterInstansi'] = $inst_id_clean;
         $Data['MasterData'] = $this->get_ippd_master_data();
@@ -43064,6 +43048,8 @@ public function updateStatusPerjanjianKinerja() {
         $bab = $this->input->post('bab', TRUE) ?: '1';
         $tabel = $this->input->post('tabel', TRUE) ?: '1.1';
         $tahun = (int)($this->input->post('tahun', TRUE) ?: (isset($_SESSION['Tahun']) ? $_SESSION['Tahun'] : 2026));
+        $mode_analisis = $this->input->post('mode_analisis', TRUE) ?: 'komprehensif';
+        $custom_prompt = trim((string)$this->input->post('custom_prompt', TRUE));
         $KodeWilayah = $this->get_kode_wilayah();
 
         // Ambil nama wilayah
@@ -43091,30 +43077,74 @@ public function updateStatusPerjanjianKinerja() {
         $dataContext = $contextData['dataContext'];
         $panduanKhusus = $contextData['panduanKhusus'];
 
-        $prompt = "Anda adalah penyusun narasi resmi dan komunikator pembangunan daerah yang bertugas menyusun teks narasi penjelasan data untuk dokumen resmi Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah Daerah.\n\n" .
-                  "Tugas Anda adalah menyusun narasi interpretasi data yang komunikatif, wajar, mengalir luwes, mudah dipahami oleh orang awam/masyarakat umum, bernada positif, dan profesional mengenai pelaksanaan program dan capaian Pemerintah Daerah berdasarkan data empiris berikut:\n\n" .
+        // Panduan fokus analitis sesuai opsi mode yang dipilih pengguna
+        $modeGuidance = '';
+        switch ($mode_analisis) {
+            case 'evaluasi_kinerja':
+                $modeGuidance = "FOKUS ANALISIS TERPILIH: EVALUASI CAPAIAN, KESENJANGAN & IDENTIFIKASI DEVIASI (GAP ANALYSIS)\n" .
+                                "- Evaluasi secara tajam dan terukur kesenjangan/disparitas capaian data antar indikator, antar wilayah (kecamatan), atau antar komponen.\n" .
+                                "- Soroti area atau komponen dengan performa terendah dan tertinggi, bandingkan terhadap target atau standar ideal, serta bedah akar masalah (bottleneck) di lapangan.\n" .
+                                "- Rumuskan langkah-langkah korektif dan mitigasi taktis yang harus diambil oleh Pemerintah Daerah.";
+                break;
+            case 'efisiensi_anggaran':
+                $modeGuidance = "FOKUS ANALISIS TERPILIH: EFISIENSI, EFEKTIVITAS & DAMPAK KESEJAHTERAAN PUBLIK\n" .
+                                "- Analisis rasio efisiensi pemanfaatan sumber daya daerah, sarana prasarana, atau alokasi pendanaan terhadap output hasil yang dirasakan masyarakat (value for money).\n" .
+                                "- Hubungkan data empiris dengan kemanfaatannya terhadap kemudahan akses layanan masyarakat, penyerapan tenaga kerja, dan pemerataan kesejahteraan warga.\n" .
+                                "- Berikan rekomendasi konkret untuk optimalisasi efisiensi belanja dan peningkatan produktivitas sumber daya daerah ke depan.";
+                break;
+            case 'eksekutif':
+                $modeGuidance = "FOKUS ANALISIS TERPILIH: RINGKASAN EKSEKUTIF PIMPINAN DAERAH (BUPATI & DPRD)\n" .
+                                "- Sajikan intisari narasi dalam perspektif pengambil keputusan tingkat pimpinan secara padat, tajam, dan langsung ke substansi pokok.\n" .
+                                "- Soroti angka-angka kunci penentu, evaluasi implikasi strategis, pemetaan risiko masa depan, serta rekomendasi intervensi kebijakan prioritas yang perlu segera diputuskan.";
+                break;
+            case 'komprehensif':
+            default:
+                $modeGuidance = "FOKUS ANALISIS TERPILIH: KOMPREHENSIF & REKOMENDASI KEBIJAKAN STRATEGIS\n" .
+                                "- Lakukan telaah menyeluruh: interpretasikan pola data empiris, analisis perbandingan relatif antar kategori/wilayah, serta faktor pendorong capaian tersebut.\n" .
+                                "- Hubungkan capaian dengan target pembangunan daerah serta rumuskan rekomendasi kebijakan strategis yang solutif, terencana, dan berkelanjutan untuk naskah LKPJ.";
+                break;
+        }
+
+        // Integrasi instruksi kustom pengguna jika diisi
+        $userCustomGuidance = '';
+        if (!empty($custom_prompt)) {
+            $userCustomGuidance = "\nINSTRUKSI KHUSUS PENGGUNA TERHADAP DATA INI (PRIORITAS UTAMA):\n" .
+                                  "Pengguna memberikan instruksi dan fokus analitis khusus berikut:\n" .
+                                  "\"" . $custom_prompt . "\"\n" .
+                                  "Wajib integrasikan instruksi ini secara mendalam dan utamakan poin-poin yang diminta tersebut ke dalam analisis data.\n";
+        }
+
+        $prompt = "Anda adalah Analis Data Kebijakan dan Perencanaan Pembangunan Daerah Senior untuk penyusunan naskah resmi Laporan Keterangan Pertanggungjawaban (LKPJ) Pemerintah {$namaWilayah}.\n\n" .
+                  "Tugas utama Anda adalah melakukan ANALISIS MENDALAM terhadap data empiris berikut, BUKAN SEKADAR MEMBACA ATAU MENULIS ULANG DERETAN TABEL ANGKA. Anda harus membedah makna data, menganalisis pola, membandingkan disparitas antar indikator/wilayah, mengidentifikasi faktor penyebab/pendorong, dan merumuskan rekomendasi kebijakan strategis bagi Pemerintah Daerah.\n\n" .
+                  "DATA EMPIRIS:\n" .
                   $dataContext . "\n\n" .
-                  "PANDUAN & KETENTUAN PENULISAN (WAJIB DIPATUHI SECARA KETAT):\n" .
-                  "1. Gaya Bahasa Normal, Wajar, & Bernada Positif (HINDARI Pujian Personal/Sanjungan Berlebihan):\n" .
-                  "   - Buat narasi kedinasan yang normal, wajar, dan berkalimat positif berdasarkan fakta data capaian pembangunan.\n" .
-                  "   - DILARANG KERAS mencantumkan frasa sanjungan atau klise seperti 'Pemerintah Kabupaten Situbondo di bawah kepemimpinan Bupati yang penuh dedikasi', 'di bawah kepemimpinan Bupati...', 'kepemimpinan Bupati yang visioner', 'kepemimpinan yang penuh dedikasi', atau kalimat pujian berlebihan sejenisnya.\n" .
-                  "   - Gunakan sebutan subjek secara wajar dan normal, yaitu '" . $namaWilayah . "' atau 'Pemerintah Daerah'.\n" .
-                  "   - Nuansa positif dibangun melalui fakta keberhasilan program: peningkatan fasilitas publik, kelancaran pelayanan masyarakat, ketertiban administrasi, dan kemanfaatan nyata bagi warga, BUKAN melalui pujian personal kepada kepala daerah.\n" .
-                  "2. Penulisan Angka Wajib Menggunakan Angka/Digit (Dilarang Mengeja Angka Menjadi Kata):\n" .
-                  "   - Setiap kali menuliskan atau menyebutkan angka, kuantitas, jumlah, nilai, nominal anggaran, persentase, luas, perbandingan, maupun tahun, WAJIB DITAMPILKAN DALAM BENTUK ANGKA/DIGIT NUMERIK (contoh: '17 kecamatan', '136 desa', '95,4%', 'Rp 2.500.000.000', '3.500 Ha', '1.250 orang', 'tahun 2025').\n" .
-                  "   - DILARANG KERAS mengeja angka menjadi deretan kata huruf (misalnya: JANGAN tulis 'tujuh belas kecamatan', JANGAN tulis 'seratus tiga puluh enam desa', JANGAN tulis 'sembilan puluh lima koma empat persen', JANGAN tulis 'dua miliar lima ratus juta rupiah'). Seluruh data kuantitatif wajib tampil sebagai angka numerik agar praktis, jelas, dan mudah dibaca oleh siapa pun.\n" .
-                  "3. Bahasa Lugas & Mudah Dipahami Orang Awam:\n" .
-                  "   - Gunakan tata bahasa Indonesia yang baik, santun, lugas, mengalir enak dibaca, dan mudah dipahami oleh masyarakat luas tanpa mengurangi akurasi data resmi.\n" .
-                  "   - Hindari istilah teknis yang rumit, kaku, atau membingungkan pembaca awam. Jika mencantumkan istilah anggaran atau statistik (seperti PAD, Dana Transfer, Belanja Modal, SILPA, atau rasio), langsung jelaskan maknanya secara sederhana dalam konteks manfaat langsung bagi kehidupan dan fasilitas masyarakat sehari-hari.\n" .
-                  "4. Karakteristik Narasi Unik Setiap Tabel:\n" .
-                  "   - Setiap tabel memiliki substansi dan kekhasan indikator masing-masing. Respon Anda harus UNIK dan SPESIFIK membahas indikator pada tabel ini.\n" .
-                  "   - Dilarang keras menggunakan kalimat pembuka yang klise, seragam, atau kaku antar tabel.\n" .
+                  $modeGuidance . "\n" .
+                  $userCustomGuidance . "\n" .
+                  "PANDUAN & KETENTUAN PENULISAN WAJIB (DIPATUHI SECARA KETAT):\n" .
+                  "1. Analisis Kritis Berbasis Data (Bukan Sekadar Mengulang Baris Tabel):\n" .
+                  "   - DILARANG HANYA mengulang atau menyebutkan daftar angka baris per baris secara pasif.\n" .
+                  "   - Lakukan analisis komparatif, telaah proporsi, disparitas (kesenjangan tertinggi vs terendah), pola konsentrasi spasial/kategori, serta implikasi sosial, ekonomi, dan tata kelola pemerintahan.\n" .
+                  "   - Uraikan faktor penyebab atau pendorong di balik fakta data tersebut serta dampaknya terhadap efektivitas pelayanan publik dan kesejahteraan warga.\n" .
+                  "   - Sertakan rekomendasi arah kebijakan atau solusi konkret yang terukur untuk perbaikan dan keberlanjutan program pembangunan daerah.\n" .
+                  "2. Gaya Bahasa Kedinasan LKPJ yang Lugas, Netral & Positif (HINDARI Pujian Personal):\n" .
+                  "   - Buat narasi kedinasan resmi, wajar, objektif, dan profesional berdasarkan fakta data capaian pembangunan.\n" .
+                  "   - DILARANG KERAS mencantumkan frasa sanjungan atau klise seperti 'di bawah kepemimpinan Bupati yang penuh dedikasi', 'di bawah kepemimpinan Bupati...', 'kepemimpinan Bupati yang visioner', 'kepemimpinan yang penuh dedikasi', atau kalimat pujian berlebihan sejenisnya.\n" .
+                  "   - Gunakan sebutan subjek resmi, yaitu '" . $namaWilayah . "' atau 'Pemerintah Daerah'.\n" .
+                  "   - Nuansa positif dibangun melalui fakta keberhasilan program, kelancaran pelayanan masyarakat, dan kemanfaatan nyata bagi warga, BUKAN melalui pujian personal kepada kepala daerah.\n" .
+                  "3. Penulisan Angka Wajib Menggunakan Angka/Digit Numerik (DILARANG Mengeja Angka Menjadi Kata):\n" .
+                  "   - Seluruh kuantitas, jumlah, nominal anggaran, persentase, luas, perbandingan, maupun tahun WAJIB DITAMPILKAN DALAM BENTUK ANGKA/DIGIT NUMERIK (contoh: '17 kecamatan', '136 desa', '95,4%', 'Rp 2.500.000.000', '3.500 Ha', '1.250 orang', 'tahun 2025').\n" .
+                  "   - DILARANG KERAS mengeja angka menjadi deretan kata huruf (misalnya: JANGAN tulis 'tujuh belas kecamatan', JANGAN tulis 'sembilan puluh lima koma empat persen', JANGAN tulis 'dua miliar rupiah'). Seluruh data kuantitatif wajib tampil sebagai angka numerik agar praktis, jelas, dan mudah dibaca.\n" .
+                  "4. Bahasa Lugas, Padat, & Bermakna:\n" .
+                  "   - Gunakan tata bahasa Indonesia yang baik, lugas, mengalir enak dibaca, dan bermutu tinggi.\n" .
+                  "   - Jika mencantumkan istilah teknis atau anggaran, langsung jelaskan implikasinya bagi pelayanan masyarakat.\n" .
+                  "   - Panduan spesifik tabel:\n" .
                   "   - " . $panduanKhusus . "\n" .
-                  "5. Panjang & Kedalaman Narasi:\n" .
-                  "   - Wajib menyusun narasi MINIMAL 2 PARAGRAF PANJANG yang komprehensif, enak dibaca, dan berbobot (direkomendasikan 2 sampai 3 paragraf utuh).\n" .
+                  "5. Struktur & Kedalaman Narasi:\n" .
+                  "   - Wajib menyusun narasi MINIMAL 2 HINGGA 3 PARAGRAF UTUH yang komprehensif, padat analisis, dan berbobot.\n" .
                   "   - Dilarang keras hanya menghasilkan 1 paragraf singkat atau sekadar rangkuman superfisial.\n" .
-                  "   - Paragraf pertama menguraikan data capaian kuantitatif utama (selalu tulis dalam angka/digit numerik, persentase, nominal) dengan bahasa yang membumi, jelas, dan mudah dimengerti maknanya oleh warga awam.\n" .
-                  "   - Paragraf kedua (dan ketiga) menguraikan manfaat positif yang dirasakan masyarakat dari program pemerintah daerah, serta komitmen keberlanjutan peningkatan pelayanan ke depan.\n" .
+                  "   - Paragraf 1: Analisis dinamika struktur data, perbandingan komparatif, dan telaah disparitas atau capaian krusial.\n" .
+                  "   - Paragraf 2: Diagnosis faktor penyebab/pendorong, evaluasi efektivitas, dan dampaknya terhadap tata kelola dan masyarakat.\n" .
+                  "   - Paragraf 3 (atau penutup Paragraf 2): Rekomendasi kebijakan strategis dan langkah tindak lanjut Pemerintah Daerah ke depan.\n" .
                   "6. Format Penulisan Bersih & Siap Cetak:\n" .
                   "   - Berikan teks narasi mengalir langsung dalam bentuk paragraf-paragraf yang rapi dan siap dicetak ke dalam laporan resmi LKPJ.\n" .
                   "   - DILARANG KERAS menggunakan simbol markdown seperti tanda bintang (*, **), tanda pagar (#), backtick (`), atau bullet points/penomoran. Gunakan tanda baca standar Bahasa Indonesia.";
@@ -44083,8 +44113,8 @@ public function updateStatusPerjanjianKinerja() {
         }
 
         $userMsg = (strpos($lastErrorMsg, '429') !== false || strpos($lastErrorMsg, 'quota') !== false || strpos($lastErrorMsg, 'RESOURCE_EXHAUSTED') !== false)
-            ? 'Layanan Google Gemini AI sedang mencapai batas kuota permintaan sesaat (rate limit). Mohon tunggu beberapa detik lalu klik tombol Generate kembali.'
-            : ('Gagal memproses narasi dengan Google Gemini AI: ' . ($lastErrorMsg ?: 'Respons kosong'));
+            ? 'Layanan AI sedang mencapai batas kuota sesaat. Mohon tunggu beberapa detik lalu coba kembali.'
+            : ('Gagal memproses narasi dengan AI: ' . ($lastErrorMsg ?: 'Respons kosong'));
 
         return [
             'status' => 'error',

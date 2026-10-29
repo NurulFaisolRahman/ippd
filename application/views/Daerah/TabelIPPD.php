@@ -2180,23 +2180,49 @@ tr.type-sub:hover td {
     </div>
   </div>
 
-  <!-- Hidden parameters required for scoring logic & server synchronization -->
-  <input type="hidden" id="selectTahun" value="<?= $tahunAktif ?>">
-  <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
-  <input type="hidden" id="inputSearch" value="">
+  <!-- Toolbar Filter Tahun & Instansi serta Aksi Tabel -->
+  <div style="background: #ffffff; border: 1px solid var(--ui-border); border-radius: var(--radius-md); padding: 14px 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; box-shadow: var(--shadow-card);">
+    <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <label for="selectTahun" style="margin: 0; font-size: 13px; font-weight: 700; color: #1e293b;">
+          <i class="fa fa-calendar" style="color: var(--ui-primary); margin-right: 4px;"></i> Tahun Penilaian:
+        </label>
+        <select id="selectTahun" class="form-control" style="width: 140px; display: inline-block; height: 36px; padding: 5px 10px; font-size: 13px; font-weight: 700; color: #0f172a; border: 1.5px solid #cbd5e1; border-radius: 6px;">
+          <?php 
+          $yearsToDisplay = !empty($ListTahun) ? $ListTahun : [2025, 2026, 2027, 2028, 2029];
+          sort($yearsToDisplay);
+          foreach ($yearsToDisplay as $y) { ?>
+            <option value="<?= $y ?>" <?= ($y == $tahunAktif) ? 'selected' : '' ?>>
+              Tahun <?= $y ?>
+            </option>
+          <?php } ?>
+        </select>
+      </div>
 
-  <!-- Table Actions Toolbar -->
-  <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-bottom: 16px;">
-    <button type="button" class="btn-ui" id="btnExpandAll" title="Buka seluruh rincian tabel">
-      <i class="fa fa-plus-square-o"></i> Buka Semua
-    </button>
-    <button type="button" class="btn-ui" id="btnCollapseAll" title="Tutup seluruh rincian tabel">
-      <i class="fa fa-minus-square-o"></i> Tutup Semua
-    </button>
-    <button type="button" class="btn-ui btn-ui-primary" id="btnSaveAll" title="Simpan seluruh perubahan nilai">
-      <i class="fa fa-save"></i> Simpan Semua Penilaian
-    </button>
+      <input type="hidden" id="selectInstansi" value="<?= $filterInstansi ?>">
+
+      <?php if (!empty($NamaWilayah)) { ?>
+        <span class="badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px;">
+          <i class="fa fa-map-marker"></i> <?= html_escape($NamaWilayah) ?>
+        </span>
+      <?php } ?>
+    </div>
+
+    <!-- Table Action Buttons -->
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+      <button type="button" class="btn-ui" id="btnExpandAll" title="Buka seluruh rincian tabel">
+        <i class="fa fa-plus-square-o"></i> Buka Semua
+      </button>
+      <button type="button" class="btn-ui" id="btnCollapseAll" title="Tutup seluruh rincian tabel">
+        <i class="fa fa-minus-square-o"></i> Tutup Semua
+      </button>
+      <button type="button" class="btn-ui btn-ui-primary" id="btnSaveAll" title="Simpan seluruh perubahan nilai">
+        <i class="fa fa-save"></i> Simpan Semua Penilaian
+      </button>
+    </div>
   </div>
+
+  <input type="hidden" id="inputSearch" value="">
 
   <!-- Table Card -->
   <div class="table-card">
@@ -10563,9 +10589,7 @@ tr.type-sub:hover td {
     selectTahun.addEventListener("change", function(){
       var url = new URL(window.location.href);
       url.searchParams.set("tahun", this.value);
-      if (selectInstansi && selectInstansi.value) {
-        url.searchParams.set("instansi_id", selectInstansi.value);
-      }
+      url.searchParams.delete("instansi_id");
       window.location.href = url.toString();
     });
   }

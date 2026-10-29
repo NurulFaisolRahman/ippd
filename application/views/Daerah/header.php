@@ -310,20 +310,10 @@ $isVerifikator = (
   $NamaDaerah  = '';
 
   if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 3) {
+    $LoginInfo = $_SESSION['Username'] ?? '';
     $KodeWilayah = $_SESSION['KodeWilayah'] ?? '';
 
     if (!empty($KodeWilayah)) {
-      $row = $this->db->select('Username')
-        ->from('akun')
-        ->where('KodeWilayah', $KodeWilayah)
-        ->where('Level', 3)
-        ->where('deleted_at IS NULL', null, false)
-        ->limit(1)
-        ->get()
-        ->row_array();
-
-      $LoginInfo = $row['Username'] ?? ($_SESSION['Username'] ?? '');
-
       // Ambil nama daerah dari tabel kodewilayah
       $rowWilayah = $this->db->select('Nama')
         ->from('kodewilayah')
@@ -332,8 +322,6 @@ $isVerifikator = (
         ->get()
         ->row_array();
       $NamaDaerah = $rowWilayah['Nama'] ?? '';
-    } else {
-      $LoginInfo = $_SESSION['Username'] ?? '';
     }
   } elseif (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4) {
     if (!empty($_SESSION['NamaInstansi'])) {

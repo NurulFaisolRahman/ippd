@@ -316,19 +316,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <?php } ?>
 
                         <!-- ============================================================ -->
-                        <!-- TOMBOL SINKRONISASI (HANYA ROLE 3)                          -->
+                        <!-- TOOLBAR ATAS (FILTER TAHUN & SINKRONISASI)                   -->
                         <!-- ============================================================ -->
-                        <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                            <div style="margin-bottom: 15px;">
-                                <button class="btn btn-info" id="SyncRankhir">
-                                    <i class="fa fa-sync"></i> Sinkronisasi Data
-                                </button>
-                                <span class="text-muted" style="margin-left: 10px; font-size: 12px;">
-                                    <i class="fa fa-info-circle"></i> 
-                                    Sinkronisasi akan menambahkan data baru dari Pagu Urusan ke tabel Rankhir
-                                </span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <label for="FilterTahunPaguRankhir" style="margin: 0; font-size: 13px; font-weight: bold; color: #333;">Tahun RKPD:</label>
+                                <select id="FilterTahunPaguRankhir" class="form-control" style="width: 140px; display: inline-block; height: 34px; padding: 4px 8px; font-size: 13px; color: #000; font-weight: bold;">
+                                    <?php foreach ($ListTahun as $th) { ?>
+                                        <option value="<?= html_escape($th) ?>" <?= ($th == $SelectedTahun) ? 'selected' : '' ?>>
+                                            Tahun <?= html_escape($th) ?>
+                                        </option>
+                                    <?php } ?>
+                                </select>
+                                <?php if (!empty($nama_wilayah)) { ?>
+                                    <span class="label label-primary" style="font-size: 12px; padding: 6px 10px;">
+                                        <i class="fa fa-map-marker-alt"></i> <?= html_escape($nama_wilayah) ?>
+                                    </span>
+                                <?php } ?>
                             </div>
-                        <?php } ?>
+                            <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                <div>
+                                    <button class="btn btn-info" id="SyncRankhir">
+                                        <i class="fa fa-sync"></i> Sinkronisasi Data (Tahun <?= html_escape($SelectedTahun) ?>)
+                                    </button>
+                                </div>
+                            <?php } ?>
+                        </div>
                         
                         <!-- ============================================================ -->
                         <!-- TABEL PAGU URUSAN RANKHIR                                   -->
@@ -972,6 +985,7 @@ $(document).off('click', '#SyncRankhir').on('click', '#SyncRankhir', function() 
         type: "POST",
         data: { 
             instansi_id: instansiId,
+            tahun: '<?= $SelectedTahun ?>',
             [CSRF_NAME]: CSRF_TOKEN 
         },
         dataType: "json",
@@ -1003,10 +1017,16 @@ $(document).on("hidden.bs.modal", ".modal", function() {
     $("html").css("overflow", "auto");
 });
 
-// ================================================================
-// INIT DATATABLE
+// INIT DATATABLE & FILTER TAHUN
 // ================================================================
 $(document).ready(function() {
+    $('#FilterTahunPaguRankhir').on('change', function() {
+        var tahun = $(this).val();
+        var url = new URL(window.location.href);
+        url.searchParams.set('tahun', tahun);
+        window.location.href = url.toString();
+    });
+
     if ($('#data-table-pagu').length > 0) {
         try {
             if ($.fn.DataTable.isDataTable('#data-table-pagu')) {

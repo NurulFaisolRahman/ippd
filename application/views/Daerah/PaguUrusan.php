@@ -125,13 +125,30 @@
                             </div>
                             <?php } ?>
 
-                            <!-- Tombol Tambah - HANYA UNTUK LEVEL 3 -->
-                            <div class="button-icon-btn sm-res-mg-t-30" style="display: flex; gap: 10px; flex-wrap: wrap;">
-                                <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPaguUrusan">
-                                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Pagu Perangkat Daerah</b>
-                                </button>
-                                <?php } ?>
+                            <!-- Toolbar Atas (Filter Tahun & Tombol Tambah) -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 15px;">
+                                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                    <label for="FilterTahunPagu" style="margin: 0; font-size: 13px; font-weight: bold; color: #333;">Tahun RKPD:</label>
+                                    <select id="FilterTahunPagu" class="form-control" style="width: 140px; display: inline-block; height: 34px; padding: 4px 8px; font-size: 13px; color: #000; font-weight: bold;">
+                                        <?php foreach ($ListTahun as $th) { ?>
+                                            <option value="<?= html_escape($th) ?>" <?= ($th == $SelectedTahun) ? 'selected' : '' ?>>
+                                                Tahun <?= html_escape($th) ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                    <?php if (!empty($NamaWilayah)) { ?>
+                                        <span class="label label-primary" style="font-size: 12px; padding: 6px 10px;">
+                                            <i class="fa fa-map-marker-alt"></i> <?= html_escape($NamaWilayah) ?>
+                                        </span>
+                                    <?php } ?>
+                                </div>
+                                <div class="button-icon-btn" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <?php if (!empty($KodeWilayah) && isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPaguUrusan">
+                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Pagu Perangkat Daerah</b>
+                                    </button>
+                                    <?php } ?>
+                                </div>
                             </div>
                         </div>
 
@@ -188,6 +205,7 @@
                                                         data-id="<?= $row['id'] ?>"
                                                         data-pagu="<?= html_escape($row['pagu']) ?>"
                                                         data-instansi="<?= html_escape($row['instansi_id'] ?? '') ?>"
+                                                        data-tahun="<?= html_escape($row['tahun'] ?? $SelectedTahun) ?>"
                                                         title="Edit"
                                                         style="padding: 4px 10px; font-size: 12px; background-color: #f0ad4e; border-color: #eea236; color: #fff; border-radius: 4px;">
                                                     <i class="fa fa-edit"></i> Edit
@@ -228,6 +246,20 @@
             </div>
             <div class="modal-body" style="padding: 20px; background: #fafafa;">
                 
+                <!-- TAHUN RKPD -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">
+                        <b>Tahun RKPD</b> <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control" id="InputTahun" style="height: 40px; font-size: 13px; font-weight: bold;">
+                        <?php foreach ($ListTahun as $th) { ?>
+                            <option value="<?= html_escape($th) ?>" <?= ($th == $SelectedTahun) ? 'selected' : '' ?>>
+                                Tahun <?= html_escape($th) ?>
+                            </option>
+                        <?php } ?>
+                    </select>
+                </div>
+
                 <!-- PERANGKAT DAERAH / DINAS (SINGLE) -->
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">
@@ -277,6 +309,18 @@
                 
                 <input type="hidden" id="EditId">
                 
+                <!-- TAHUN RKPD -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">
+                        <b>Tahun RKPD</b> <span class="text-danger">*</span>
+                    </label>
+                    <select class="form-control" id="EditTahun" style="height: 40px; font-size: 13px; font-weight: bold;">
+                        <?php foreach ($ListTahun as $th) { ?>
+                            <option value="<?= html_escape($th) ?>"><?= html_escape($th) ?></option>
+                        <?php } ?>
+                    </select>
+                </div>
+
                 <!-- PERANGKAT DAERAH / DINAS (SINGLE) -->
                 <div class="form-group" style="margin-bottom: 16px;">
                     <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px;">
@@ -369,6 +413,14 @@ jQuery(document).ready(function($) {
             window.location.href = BaseURL + "Daerah/PaguUrusan?KodeWilayah=" + KabKota;
         });
     <?php } ?>
+    
+    /* ================= FILTER TAHUN ================= */
+    $('#FilterTahunPagu').on('change', function() {
+        var tahun = $(this).val();
+        var url = new URL(window.location.href);
+        url.searchParams.set('tahun', tahun);
+        window.location.href = url.toString();
+    });
 
     /* ================= FORMAT ANGKA ================= */
     function formatNumber(num) {
@@ -412,9 +464,11 @@ jQuery(document).ready(function($) {
             }
         }
         
+        var tahun = $('#InputTahun').val() || '<?= $SelectedTahun ?>';
         var Data = {
             pagu: paguClean,
             instansi_id: instansiId,
+            tahun: tahun,
             [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
         };
         
@@ -452,8 +506,10 @@ jQuery(document).ready(function($) {
         var id = $(this).data('id');
         var pagu = $(this).data('pagu');
         var instansi = $(this).data('instansi');
+        var tahun = $(this).data('tahun') || '<?= $SelectedTahun ?>';
         
         $("#EditId").val(id);
+        $("#EditTahun").val(tahun);
         $("#EditPagu").val(formatNumber(String(pagu || '')));
         
         var singleInstansiId = '';
@@ -488,10 +544,12 @@ jQuery(document).ready(function($) {
             }
         }
         
+        var tahun = $('#EditTahun').val() || '<?= $SelectedTahun ?>';
         var Data = {
             id: id,
             pagu: paguClean,
             instansi_id: instansiId,
+            tahun: tahun,
             [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
         };
         

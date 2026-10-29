@@ -1034,6 +1034,66 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
   flex-wrap: wrap;
   gap: 12px;
 }
+.narasi-options-panel {
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.narasi-options-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.narasi-options-label {
+  font-size: 13px;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  min-width: 120px;
+}
+.narasi-pills-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.narasi-pill {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  outline: none;
+}
+.narasi-pill:hover {
+  border-color: #00c292;
+  color: #007a5a;
+  background: #f0fdf4;
+}
+.narasi-pill.active {
+  background: #00c292;
+  border-color: #00a87e;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 194, 146, 0.25);
+}
+.narasi-prompt-custom-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .narasi-textarea {
   width: 100%;
   border: 1.5px solid #cbd5e1;
@@ -4280,31 +4340,60 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
     <?php endif; ?>
 
     <!-- ============================================================= -->
-    <!-- NARASI & INTERPRETASI DATA (AI ASSISTANT GEMINI)              -->
+    <!-- NARASI & ANALISIS DATA CERDAS (AI)                            -->
     <!-- ============================================================= -->
     <div class="narasi-card-container no-print">
       <div class="narasi-card-header">
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div style="width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #00c292 0%, #008f6b 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; box-shadow: 0 2px 8px rgba(0, 194, 146, 0.3);">
-            <i class="fa fa-magic"></i>
+          <div style="width: 42px; height: 42px; border-radius: 10px; background: linear-gradient(135deg, #00c292 0%, #008f6b 100%); display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 18px; box-shadow: 0 2px 8px rgba(0, 194, 146, 0.25);">
+            <i class="fa fa-line-chart"></i>
           </div>
           <div>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #007a5a; letter-spacing: -0.2px;">
-                Narasi &amp; Interpretasi Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?> (AI Assistant)
-              </h4>
-              <span style="display: inline-flex; align-items: center; gap: 4px; background: #dcfce7; color: #15803d; border: 1px solid #86efac; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
-                <i class="fa fa-bolt"></i> Gemini AI
-              </span>
-            </div>
-            <p style="margin: 3px 0 0; font-size: 12px; color: #4b6358;">
-              <i class="fa fa-user-circle"></i> <b>Persona:</b> Peneliti Riset Ekonomi Pembangunan &mdash; Analisis komprehensif, evaluatif, dan siap cetak untuk LKPJ.
+            <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #007a5a; letter-spacing: -0.2px;">
+              Narasi &amp; Analisis Data Tabel <?= htmlspecialchars($activeTabel) ?><?= !empty($metaTabel['judul_singkat']) ? ' (' . htmlspecialchars($metaTabel['judul_singkat']) . ')' : '' ?>
+            </h4>
+            <p style="margin: 3px 0 0; font-size: 12px; color: #52796f;">
+              Analisis mendalam, evaluasi kinerja, diagnosis faktor penyebab, dan rekomendasi kebijakan strategis.
             </p>
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
-          <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('1', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
-            <i class="fa fa-magic"></i> <span>Generate Narasi AI</span>
+          <button type="button" id="btnGenerateAI" onclick="generateNarasiAI('1', '<?= $activeTabel ?>')" class="btn-notika-primary" style="background: linear-gradient(135deg, #00c292 0%, #009688 100%); border: none; color: #fff; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 3px 10px rgba(0, 194, 146, 0.25); transition: all 0.2s ease;">
+            <i class="fa fa-magic"></i> <span>Mulai Analisis Data</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OPSI PROMPT & FOKUS ANALISIS -->
+      <div class="narasi-options-panel">
+        <div class="narasi-options-row">
+          <div class="narasi-options-label">
+            <i class="fa fa-sliders" style="color: #00c292;"></i> <span>Fokus Analisis:</span>
+          </div>
+          <div class="narasi-pills-wrap">
+            <button type="button" class="narasi-pill active" data-mode="komprehensif" onclick="setNarasiMode(this, 'komprehensif')">
+              <i class="fa fa-check-circle"></i> Komprehensif &amp; Strategis
+            </button>
+            <button type="button" class="narasi-pill" data-mode="evaluasi_kinerja" onclick="setNarasiMode(this, 'evaluasi_kinerja')">
+              <i class="fa fa-circle-o"></i> Evaluasi Capaian &amp; Deviasi
+            </button>
+            <button type="button" class="narasi-pill" data-mode="efisiensi_anggaran" onclick="setNarasiMode(this, 'efisiensi_anggaran')">
+              <i class="fa fa-circle-o"></i> Efisiensi &amp; Dampak Layanan
+            </button>
+            <button type="button" class="narasi-pill" data-mode="eksekutif" onclick="setNarasiMode(this, 'eksekutif')">
+              <i class="fa fa-circle-o"></i> Ringkasan Eksekutif Pimpinan
+            </button>
+            <input type="hidden" id="selectedModeAnalisis" value="komprehensif">
+          </div>
+        </div>
+
+        <div class="narasi-prompt-custom-row">
+          <div style="flex: 1; position: relative;">
+            <input type="text" id="customPromptInput" class="form-control" placeholder="Instruksi Khusus / Fokus Analisis Tambahan (Opsional) - Contoh: Soroti perbandingan antar kecamatan pesisir dan pegunungan..." style="height: 38px; font-size: 12.5px; border-radius: 6px; border: 1px solid #cbd5e1; padding-left: 36px; background: #ffffff;">
+            <i class="fa fa-pencil" style="position: absolute; left: 12px; top: 12px; color: #94a3b8; font-size: 13px;"></i>
+          </div>
+          <button type="button" class="btn btn-default btn-sm" onclick="clearCustomPrompt()" title="Kosongkan instruksi khusus" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; color: #64748b; background: #ffffff; padding: 0 12px; display: inline-flex; align-items: center; justify-content: center;">
+            <i class="fa fa-times"></i>
           </button>
         </div>
       </div>
@@ -4313,12 +4402,12 @@ th.no-print, td.no-print, .btn-action-icon, .btn-action-edit, .btn-action-del, .
         <div id="aiLoadingIndicator" style="display: none; padding: 18px; background: #f8fafc; border: 1px dashed #00c292; border-radius: 8px; margin-bottom: 15px; text-align: center;">
           <div style="display: inline-flex; align-items: center; gap: 10px; color: #007a5a; font-weight: 600; font-size: 14px;">
             <i class="fa fa-circle-o-notch fa-spin fa-lg"></i>
-            <span>Gemini AI sedang meneliti dan menyusun narasi akademik Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
+            <span>Sistem sedang menganalisis data empiris Tabel <?= htmlspecialchars($activeTabel) ?>... Harap tunggu sejenak.</span>
           </div>
         </div>
 
         <div style="position: relative;">
-          <textarea id="narasiTabelAktif" class="narasi-textarea" rows="7" placeholder="Narasi interpretasi data akan muncul di sini setelah di-generate oleh AI, atau Anda dapat mengetikkan analisis data secara manual..."><?= htmlspecialchars($narasiTabel) ?></textarea>
+          <textarea id="narasiTabelAktif" class="narasi-textarea" rows="7" placeholder="Hasil analisis data akan muncul di sini setelah di-generate, atau Anda dapat menyempurnakan analisis secara manual..."><?= htmlspecialchars($narasiTabel) ?></textarea>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px;">
@@ -9827,7 +9916,30 @@ function exportTableToExcel() {
 }
 
 // ==============================================================
-// FITUR AI GENERATE & SIMPAN NARASI TABEL (GEMINI)
+// FITUR AI GENERATE & SIMPAN NARASI TABEL (AI)
+// ==============================================================
+function setNarasiMode(btnEl, mode) {
+  document.querySelectorAll('.narasi-pill').forEach(el => {
+    el.classList.remove('active');
+    const icon = el.querySelector('i');
+    if (icon) icon.className = 'fa fa-circle-o';
+  });
+  btnEl.classList.add('active');
+  const activeIcon = btnEl.querySelector('i');
+  if (activeIcon) activeIcon.className = 'fa fa-check-circle';
+  const modeInput = document.getElementById('selectedModeAnalisis');
+  if (modeInput) modeInput.value = mode;
+}
+
+function clearCustomPrompt() {
+  const inp = document.getElementById('customPromptInput');
+  if (inp) {
+    inp.value = '';
+    inp.focus();
+  }
+}
+
+// FITUR ANALISIS & SIMPAN NARASI TABEL (AI)
 // ==============================================================
 function generateNarasiAI(bab, tabel) {
   const btn = document.getElementById('btnGenerateAI');
@@ -9835,6 +9947,9 @@ function generateNarasiAI(bab, tabel) {
   const textarea = document.getElementById('narasiTabelAktif') || document.getElementById('narasiTabel1_1');
   
   if (!btn || !textarea) return;
+
+  const modeAnalisis = document.getElementById('selectedModeAnalisis')?.value || 'komprehensif';
+  const customPrompt = (document.getElementById('customPromptInput')?.value || '').trim();
 
   const originalBtnHtml = btn.innerHTML;
   btn.disabled = true;
@@ -9845,6 +9960,8 @@ function generateNarasiAI(bab, tabel) {
   formData.append('bab', bab);
   formData.append('tabel', tabel);
   formData.append('tahun', CURRENT_TAHUN);
+  formData.append('mode_analisis', modeAnalisis);
+  formData.append('custom_prompt', customPrompt);
 
   fetch(`${BASE_URL}Instansi/generate_narasi_ai`, {
     method: 'POST',
@@ -9861,8 +9978,8 @@ function generateNarasiAI(bab, tabel) {
       textarea.value = data.narasi;
       Swal.fire({
         icon: 'success',
-        title: 'Narasi Berhasil Di-generate!',
-        text: 'Analisis naratif akademik Tabel ' + tabel + ' telah dibuat oleh Gemini AI. Anda dapat meninjau, menyunting, atau menyimpannya.',
+        title: 'Analisis Berhasil Di-generate!',
+        text: 'Narasi analisis data Tabel ' + tabel + ' telah berhasil dibuat. Anda dapat meninjau, menyunting, atau menyimpannya.',
         timer: 3000,
         showConfirmButton: true,
         confirmButtonColor: '#00c292'
@@ -9870,8 +9987,8 @@ function generateNarasiAI(bab, tabel) {
     } else {
       Swal.fire({
         icon: 'error',
-        title: 'Gagal Generate Narasi',
-        text: data.message || 'Terjadi kesalahan saat memproses permintaan ke AI.'
+        title: 'Gagal Menganalisis Data',
+        text: data.message || 'Terjadi kesalahan saat memproses analisis data.'
       });
     }
   })

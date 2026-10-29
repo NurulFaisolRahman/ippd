@@ -59,19 +59,21 @@
 
                             <div class="basic-tb-hd" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
                                 <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
-                                    <?php if (!empty($TemaPembangunan)) { 
-                                        $tahun_options = array_unique(array_column($TemaPembangunan, 'tahun'));
-                                        rsort($tahun_options);
-                                    ?>
-                                        <div style="display: inline-flex; align-items: center; gap: 8px;">
-                                            <label for="FilterTahunTema" style="margin: 0; font-size: 13px; font-weight: bold; color: #333;">Tahun:</label>
-                                            <select id="FilterTahunTema" class="form-control" style="width: 140px; display: inline-block; height: 34px; padding: 4px 8px; font-size: 13px; color: #000;">
-                                                <option value="">Semua Tahun</option>
-                                                <?php foreach ($tahun_options as $th) { ?>
-                                                    <option value="<?= html_escape($th) ?>"><?= html_escape($th) ?></option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
+                                    <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                        <label for="FilterTahunTema" style="margin: 0; font-size: 13px; font-weight: bold; color: #333;">Tahun RKPD:</label>
+                                        <select id="FilterTahunTema" class="form-control" style="width: 140px; display: inline-block; height: 34px; padding: 4px 8px; font-size: 13px; color: #000; font-weight: bold;">
+                                            <?php foreach ($ListTahun as $th) { ?>
+                                                <option value="<?= html_escape($th) ?>" <?= ($th == $SelectedTahun) ? 'selected' : '' ?>>
+                                                    Tahun <?= html_escape($th) ?>
+                                                </option>
+                                            <?php } ?>
+                                            <option value="all" <?= ($SelectedTahun == 'all') ? 'selected' : '' ?>>Semua Tahun</option>
+                                        </select>
+                                    </div>
+                                    <?php if (!empty($NamaWilayah)) { ?>
+                                        <span class="label label-primary" style="font-size: 12px; padding: 6px 10px;">
+                                            <i class="fa fa-map-marker-alt"></i> <?= html_escape($NamaWilayah) ?>
+                                        </span>
                                     <?php } ?>
                                 </div>
 
@@ -431,7 +433,7 @@ MODAL INPUT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                     <div class="col-lg-12">
                         <div class="form-example-wrap" style="padding: 5px;">
                             
-                            <!-- TAHUN - INPUT MANUAL -->
+                            <!-- TAHUN -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -440,9 +442,15 @@ MODAL INPUT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <input type="number" class="form-control" id="Tahun" placeholder="Contoh: 2026" min="2000" max="2100" style="color: #000;" value="<?= date('Y') ?>">
+                                                <select class="form-control" id="Tahun" style="color: #000; font-weight: bold;">
+                                                    <?php foreach ($ListTahun as $th) { ?>
+                                                        <option value="<?= html_escape($th) ?>" <?= ($th == ($SelectedTahun !== 'all' ? $SelectedTahun : '2026')) ? 'selected' : '' ?>>
+                                                            <?= html_escape($th) ?>
+                                                        </option>
+                                                    <?php } ?>
+                                                </select>
                                                 <small class="text-muted" style="display: block; margin-top: 4px;">
-                                                    <i class="fa fa-info-circle"></i> Tahun untuk tema pembangunan (bebas diisi manual)
+                                                    <i class="fa fa-info-circle"></i> Pilih tahun rencana tema pembangunan (Periode 2025 - 2029)
                                                 </small>
                                             </div>
                                         </div>
@@ -588,7 +596,7 @@ MODAL EDIT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                             
                             <input type="hidden" id="EditId">
                             
-                            <!-- TAHUN - INPUT MANUAL -->
+                            <!-- TAHUN -->
                             <div class="form-example-int form-horizental">
                                 <div class="form-group">
                                     <div class="row">
@@ -597,7 +605,11 @@ MODAL EDIT TEMA - TAHUN INPUT MANUAL, TEMA NASIONAL AUTO REFRESH
                                         </div>
                                         <div class="col-lg-8">
                                             <div class="nk-int-st">
-                                                <input type="number" class="form-control" id="EditTahun" min="2000" max="2100" style="color: #000;">
+                                                <select class="form-control" id="EditTahun" style="color: #000; font-weight: bold;">
+                                                    <?php foreach ($ListTahun as $th) { ?>
+                                                        <option value="<?= html_escape($th) ?>"><?= html_escape($th) ?></option>
+                                                    <?php } ?>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -2043,22 +2055,17 @@ $("#UpdateTema").click(function() {
     });
 
     // ============================================================
-    // FILTER TAHUN TEMA (CLIENT-SIDE SNAPPY FILTER)
+    // FILTER TAHUN TEMA (NAVIGASI DINAMIS & SERVER-SIDE FILTER)
     // ============================================================
     $('#FilterTahunTema').on('change', function() {
-        var selectedTh = $(this).val();
-        if (!selectedTh || selectedTh === '') {
-            $('.tema-card-wrapper').show();
+        var tahun = $(this).val();
+        var url = new URL(window.location.href);
+        if (tahun) {
+            url.searchParams.set('tahun', tahun);
         } else {
-            $('.tema-card-wrapper').each(function() {
-                var th = $(this).data('tahun');
-                if (String(th) === String(selectedTh)) {
-                    $(this).show();
-                } else {
-                    $(this).hide();
-                }
-            });
+            url.searchParams.delete('tahun');
         }
+        window.location.href = url.toString();
     });
 
     // ============================================================

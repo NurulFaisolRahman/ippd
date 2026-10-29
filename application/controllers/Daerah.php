@@ -15659,16 +15659,41 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 // Tentukan KodeWilayah
                 $KodeWilayah = $this->_getKodeWilayah();
 
+                // Daftar tahun dinamis (periode 2025 - 2029)
+                $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+                $tahunRows = [];
+                if ($KodeWilayah) {
+                    $tahunRows = $this->db->distinct()->select('tahun')
+                        ->where('kode_wilayah', $KodeWilayah)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('tahun', 'ASC')
+                        ->get('tema_pembangunan')
+                        ->result_array();
+                }
+                $existingYears = array_filter(array_column($tahunRows, 'tahun'));
+                $listTahun = array_values(array_unique(array_merge($periodeYears, $existingYears)));
+                sort($listTahun);
+                $Data['ListTahun'] = $listTahun;
+
+                $selectedTahun = $this->input->get('tahun', TRUE);
+                if (empty($selectedTahun) || (!in_array($selectedTahun, $listTahun) && $selectedTahun !== 'all')) {
+                    $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
+                }
+                $Data['SelectedTahun'] = $selectedTahun;
+
                 if ($KodeWilayah) {
                     $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                     if ($wilayah) {
                         $Data['KodeWilayah'] = $KodeWilayah;
                         $Data['NamaWilayah'] = $wilayah['Nama'];
                         
-                        // Ambil data Tema dengan prioritasnya
+                        // Ambil data Tema dengan prioritasnya (filter tahun jika bukan all)
+                        $this->db->where('kode_wilayah', $KodeWilayah)
+                            ->where('deleted_at IS NULL');
+                        if ($selectedTahun !== 'all') {
+                            $this->db->where('tahun', $selectedTahun);
+                        }
                         $temas = $this->db
-                            ->where('kode_wilayah', $KodeWilayah)
-                            ->where('deleted_at IS NULL')
                             ->order_by('tahun', 'DESC')
                             ->order_by('id', 'ASC')
                             ->get('tema_pembangunan')
@@ -16347,28 +16372,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $Data['NamaWilayah'] = '';
             }
 
-            // Ambil daftar tahun dari tema_pembangunan (atau default)
+            // Ambil daftar tahun dari tema_pembangunan (periode 2025 - 2029)
             $tahunRows = [];
             if (!empty($KodeWilayah)) {
                 $tahunRows = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
+                    ->order_by('tahun', 'ASC')
                     ->get('tema_pembangunan')
                     ->result_array();
             }
 
-            $listTahun = array_filter(array_column($tahunRows, 'tahun'));
-            if (empty($listTahun)) {
-                $curY = (int)date('Y');
-                $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
-            }
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $existingYears = array_filter(array_column($tahunRows, 'tahun'));
+            $listTahun = array_values(array_unique(array_merge($periodeYears, $existingYears)));
+            sort($listTahun);
             $Data['ListTahun'] = $listTahun;
 
-            // Tahun aktif yang dipilih
+            // Tahun aktif yang dipilih (default 2026)
             $selectedTahun = $this->input->get('tahun', TRUE);
             if (empty($selectedTahun) || !in_array($selectedTahun, $listTahun)) {
-                $selectedTahun = !empty($listTahun) ? $listTahun[0] : (string)date('Y');
+                $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
@@ -17899,28 +17923,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['IsProvinsi'] = $isProvinsi;
 
-            // Ambil daftar tahun dari tema_pembangunan (atau default)
+            // Ambil daftar tahun dari tema_pembangunan (periode 2025 - 2029)
             $tahunRows = [];
             if (!empty($KodeWilayah)) {
                 $tahunRows = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
+                    ->order_by('tahun', 'ASC')
                     ->get('tema_pembangunan')
                     ->result_array();
             }
 
-            $listTahun = array_filter(array_column($tahunRows, 'tahun'));
-            if (empty($listTahun)) {
-                $curY = (int)date('Y');
-                $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
-            }
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $existingYears = array_filter(array_column($tahunRows, 'tahun'));
+            $listTahun = array_values(array_unique(array_merge($periodeYears, $existingYears)));
+            sort($listTahun);
             $Data['ListTahun'] = $listTahun;
 
-            // Tahun aktif yang dipilih
+            // Tahun aktif yang dipilih (default 2026)
             $selectedTahun = $this->input->get('tahun', TRUE);
             if (empty($selectedTahun) || !in_array($selectedTahun, $listTahun)) {
-                $selectedTahun = !empty($listTahun) ? $listTahun[0] : (string)date('Y');
+                $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
@@ -18786,8 +18809,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['IsProvinsi'] = $isProvinsi;
 
-            // Ambil daftar tahun dari cascading_rkpd_prioritas & tema_pembangunan (atau default)
-            $listTahun = [];
+            // Ambil daftar tahun dari cascading_rkpd_prioritas & tema_pembangunan (periode 2025 - 2029)
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $tahunRowsMerged = [];
             if (!empty($KodeWilayah)) {
                 $t1 = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
@@ -18801,24 +18825,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->get('tema_pembangunan')
                     ->result_array();
 
-                $tahunMerged = array_unique(array_filter(array_merge(
+                $tahunRowsMerged = array_unique(array_filter(array_merge(
                     array_column($t1, 'tahun'),
                     array_column($t2, 'tahun')
                 )));
-                rsort($tahunMerged);
-                $listTahun = array_values($tahunMerged);
             }
 
-            if (empty($listTahun)) {
-                $curY = (int)date('Y');
-                $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
-            }
+            $listTahun = array_values(array_unique(array_merge($periodeYears, $tahunRowsMerged)));
+            sort($listTahun);
             $Data['ListTahun'] = $listTahun;
 
-            // Tahun aktif yang dipilih
+            // Tahun aktif yang dipilih (default 2026)
             $selectedTahun = $this->input->get('tahun', TRUE);
             if (empty($selectedTahun) || !in_array($selectedTahun, $listTahun)) {
-                $selectedTahun = !empty($listTahun) ? $listTahun[0] : (string)date('Y');
+                $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
@@ -19396,28 +19416,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['IsProvinsi'] = $isProvinsi;
 
-            // Ambil daftar tahun dari tema_pembangunan (atau default)
+            // Ambil daftar tahun dari tema_pembangunan (periode 2025 - 2029)
             $tahunRows = [];
             if (!empty($KodeWilayah)) {
                 $tahunRows = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
+                    ->order_by('tahun', 'ASC')
                     ->get('tema_pembangunan')
                     ->result_array();
             }
 
-            $listTahun = array_filter(array_column($tahunRows, 'tahun'));
-            if (empty($listTahun)) {
-                $curY = (int)date('Y');
-                $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
-            }
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $existingYears = array_filter(array_column($tahunRows, 'tahun'));
+            $listTahun = array_values(array_unique(array_merge($periodeYears, $existingYears)));
+            sort($listTahun);
             $Data['ListTahun'] = $listTahun;
 
-            // Tahun aktif yang dipilih
+            // Tahun aktif yang dipilih (default 2026)
             $selectedTahun = $this->input->get('tahun', TRUE);
             if (empty($selectedTahun) || !in_array($selectedTahun, $listTahun)) {
-                $selectedTahun = !empty($listTahun) ? $listTahun[0] : (string)date('Y');
+                $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
@@ -20120,28 +20139,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             $Data['IsProvinsi'] = $isProvinsi;
 
-            // Ambil daftar tahun dari tema_pembangunan (atau default)
+            // Ambil daftar tahun dari tema_pembangunan (periode 2025 - 2029)
             $tahunRows = [];
             if (!empty($KodeWilayah)) {
                 $tahunRows = $this->db->distinct()->select('tahun')
                     ->where('kode_wilayah', $KodeWilayah)
                     ->where('deleted_at IS NULL')
-                    ->order_by('tahun', 'DESC')
+                    ->order_by('tahun', 'ASC')
                     ->get('tema_pembangunan')
                     ->result_array();
             }
 
-            $listTahun = array_filter(array_column($tahunRows, 'tahun'));
-            if (empty($listTahun)) {
-                $curY = (int)date('Y');
-                $listTahun = [(string)($curY), (string)($curY + 1), (string)($curY - 1)];
-            }
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $existingYears = array_filter(array_column($tahunRows, 'tahun'));
+            $listTahun = array_values(array_unique(array_merge($periodeYears, $existingYears)));
+            sort($listTahun);
             $Data['ListTahun'] = $listTahun;
 
-            // Tahun aktif yang dipilih
+            // Tahun aktif yang dipilih (default 2026)
             $selectedTahun = $this->input->get('tahun', TRUE);
             if (empty($selectedTahun) || !in_array($selectedTahun, $listTahun)) {
-                $selectedTahun = !empty($listTahun) ? $listTahun[0] : (string)date('Y');
+                $selectedTahun = in_array('2026', $listTahun) ? '2026' : $listTahun[0];
             }
             $Data['SelectedTahun'] = $selectedTahun;
 
@@ -21153,6 +21171,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         ?? $getKodeWilayah
                         ?? '';
             
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $Data['ListTahun'] = $periodeYears;
+            
+            $selectedTahun = $this->input->get('tahun', TRUE);
+            if (empty($selectedTahun) || !in_array($selectedTahun, $periodeYears)) {
+                $selectedTahun = '2026';
+            }
+            $Data['SelectedTahun'] = $selectedTahun;
+
             // Data untuk filter provinsi
             $Data['Provinsi'] = $this->db
                 ->where("Kode LIKE '__'")
@@ -21186,9 +21213,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $dinasMap[$d['id']] = $d['nama'];
                 }
                 
-                // Ambil data Pagu Urusan
+                // Ambil data Pagu Urusan per tahun yang dipilih
                 $paguList = $this->db
                     ->where('kode_wilayah', $kodeWilayah)
+                    ->where('tahun', $selectedTahun)
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
                     ->get('pagu_urusan')
@@ -21233,6 +21261,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
                 
                 // Ambil data dari POST
+                $tahun = trim($this->input->post('tahun', TRUE)) ?: '2026';
                 $pagu = trim($this->input->post('pagu', TRUE));
                 $instansiId = trim($this->input->post('instansi_id', TRUE));
 
@@ -21263,6 +21292,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 $data = [
                     'kode_wilayah' => $kodeWilayah,
+                    'tahun' => $tahun,
                     'kode_urusan' => null,
                     'urusan' => $namaDinas,
                     'pagu' => $paguClean,
@@ -21315,6 +21345,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
                 
                 $id = (int)$this->input->post('id', TRUE);
+                $tahun = trim($this->input->post('tahun', TRUE));
                 $pagu = trim($this->input->post('pagu', TRUE));
                 $instansiId = trim($this->input->post('instansi_id', TRUE));
                 
@@ -21357,6 +21388,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'instansi_id' => (string)$instansiId,
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
+
+                if (!empty($tahun)) {
+                    $data['tahun'] = $tahun;
+                }
                 
                 $this->db->where('id', $id);
                 $this->db->where('kode_wilayah', $kodeWilayah);
@@ -21794,26 +21829,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     if (!empty($t['tahun'])) $yearsCollected[] = (string)$t['tahun'];
                 }
                 
-                $yearsCollected = array_values(array_unique(array_filter($yearsCollected)));
+                $yearsCollected = array_values(array_unique(array_merge(['2025', '2026', '2027', '2028', '2029'], array_filter($yearsCollected))));
                 sort($yearsCollected, SORT_NUMERIC);
                 $listTahun = $yearsCollected;
                 
-                if (empty($listTahun)) {
-                    $curY = (int)date('Y');
-                    $listTahun = [(string)($curY - 1), (string)($curY), (string)($curY + 1), (string)($curY + 2), (string)($curY + 3)];
-                }
-                
-                // Tentukan SelectedTahun
+                // Tentukan SelectedTahun (default 2026)
                 $reqTahun = $this->input->get('tahun', TRUE);
                 if (!empty($reqTahun) && in_array((string)$reqTahun, $listTahun)) {
                     $selectedTahun = (string)$reqTahun;
                 } else {
-                    $curYStr = (string)date('Y');
-                    if (in_array($curYStr, $listTahun)) {
-                        $selectedTahun = $curYStr;
-                    } else {
-                        $selectedTahun = (string)$listTahun[0];
-                    }
+                    $selectedTahun = in_array('2026', $listTahun) ? '2026' : (string)$listTahun[0];
                 }
                 
                 // AMBIL DATA IKD OTOMATIS DARI RPJMD (tabel ikd)
@@ -22754,7 +22779,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return [
                     'perangkatDaerah' => 'PERANGKAT DAERAH',
                     'tahunAktif' => (int)$tahun,
-                    'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                    'tahunList' => [2025, 2026, 2027, 2028, 2029],
                     'paguAnggaran' => 0,
                     'rincianPagu' => [],
                     'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -23142,7 +23167,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return [
                 'perangkatDaerah' => $nama_instansi,
                 'tahunAktif' => (int)$tahun,
-                'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                'tahunList' => [2025, 2026, 2027, 2028, 2029],
                 'paguAnggaran' => $total_pagu,
                 'rincianPagu' => $rincian_pagu,
                 'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -23892,7 +23917,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return [
                     'perangkatDaerah' => 'PERANGKAT DAERAH',
                     'tahunAktif' => (int)$tahun,
-                    'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                    'tahunList' => [2025, 2026, 2027, 2028, 2029],
                     'paguAnggaran' => 0,
                     'rincianPagu' => [],
                     'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -24184,7 +24209,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return [
                 'perangkatDaerah' => $nama_instansi,
                 'tahunAktif' => (int)$tahun,
-                'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                'tahunList' => [2025, 2026, 2027, 2028, 2029],
                 'paguAnggaran' => $total_pagu,
                 'rincianPagu' => $rincian_pagu,
                 'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -24986,7 +25011,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return [
                     'perangkatDaerah' => 'PERANGKAT DAERAH',
                     'tahunAktif' => (int)$tahun,
-                    'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                    'tahunList' => [2025, 2026, 2027, 2028, 2029],
                     'paguAnggaran' => 0,
                     'rincianPagu' => [],
                     'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -25298,7 +25323,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return [
                 'perangkatDaerah' => $nama_instansi,
                 'tahunAktif' => (int)$tahun,
-                'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                'tahunList' => [2025, 2026, 2027, 2028, 2029],
                 'paguAnggaran' => $total_pagu,
                 'rincianPagu' => $rincian_pagu,
                 'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -25804,7 +25829,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return [
                     'perangkatDaerah' => 'PERANGKAT DAERAH',
                     'tahunAktif' => (int)$tahun,
-                    'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                    'tahunList' => [2025, 2026, 2027, 2028, 2029],
                     'paguAnggaran' => 0,
                     'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
                     'prioritasProvinsiList' => $prioritas_data['prioritasProvinsiList'],
@@ -26103,7 +26128,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             return [
                 'perangkatDaerah' => $nama_instansi,
                 'tahunAktif' => (int)$tahun,
-                'tahunList' => [2026, 2027, 2028, 2029, 2030],
+                'tahunList' => [2025, 2026, 2027, 2028, 2029],
                 'paguAnggaran' => $total_pagu,
                 'rincianPagu' => $rincian_pagu,
                 'prioritasNasionalList' => $prioritas_data['prioritasNasionalList'],
@@ -26202,8 +26227,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $Data['KodeWilayah'] = $KodeWilayah;
             $Data['NamaWilayah'] = '';
             $Data['ListInstansi'] = [];
-            $Data['PaguUrusan'] = [];
+            $periodeYears = ['2025', '2026', '2027', '2028', '2029'];
+            $Data['ListTahun'] = $periodeYears;
             
+            $selectedTahun = $this->input->get('tahun', TRUE);
+            if (empty($selectedTahun) || !in_array($selectedTahun, $periodeYears)) {
+                $selectedTahun = '2026';
+            }
+            $Data['SelectedTahun'] = $selectedTahun;
+
             // Ambil filter instansi dari URL
             $filterInstansiId = $this->input->get('instansi_id', TRUE);
             
@@ -26229,6 +26261,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $this->db->select('r.*')
                     ->from('pagu_urusan_rankhir r')
                     ->where('r.kode_wilayah', $KodeWilayah)
+                    ->where('r.tahun', $selectedTahun)
                     ->where('r.deleted_at IS NULL', null, false);
                 
                 // Filter instansi jika ada
@@ -26517,10 +26550,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             
             $filterInstansiId = $this->input->get('instansi_id', TRUE);
+            $selectedTahun = $this->input->get('tahun', TRUE) ?: '2026';
             
             $this->db->select('r.*')
                 ->from('pagu_urusan_rankhir r')
                 ->where('r.kode_wilayah', $kodeWilayah)
+                ->where('r.tahun', $selectedTahun)
                 ->where('r.deleted_at IS NULL', null, false);
             
             if (!empty($filterInstansiId)) {
@@ -26828,10 +26863,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 // Mulai transaksi
                 $this->db->trans_start();
                 
+                $tahun = trim($this->input->post('tahun', TRUE) ?: $this->input->get('tahun', TRUE)) ?: '2026';
+                
                 try {
-                    // Ambil semua data dari pagu_urusan yang aktif
+                    // Ambil semua data dari pagu_urusan yang aktif untuk tahun ini
                     $sourceData = $this->db
                         ->where('kode_wilayah', $kodeWilayah)
+                        ->where('tahun', $tahun)
                         ->where('deleted_at IS NULL', null, false)
                         ->order_by('id', 'ASC')
                         ->get('pagu_urusan')
@@ -26842,10 +26880,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $totalSkip = 0;
                     
                     foreach ($sourceData as $row) {
-                        // Cek apakah sudah ada di rankhir berdasarkan source_id
+                        // Cek apakah sudah ada di rankhir berdasarkan source_id dan tahun
                         $exists = $this->db
                             ->where('source_id', $row['id'])
                             ->where('kode_wilayah', $kodeWilayah)
+                            ->where('tahun', $tahun)
                             ->where('deleted_at IS NULL', null, false)
                             ->get('pagu_urusan_rankhir')
                             ->num_rows();
@@ -26855,6 +26894,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             $rankhirRow = $this->db
                                 ->where('source_id', $row['id'])
                                 ->where('kode_wilayah', $kodeWilayah)
+                                ->where('tahun', $tahun)
                                 ->where('deleted_at IS NULL', null, false)
                                 ->get('pagu_urusan_rankhir')
                                 ->row_array();
@@ -26879,6 +26919,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                     'source_urusan' => $row['urusan'],
                                     'source_pagu' => $row['pagu'],
                                     'source_instansi_id' => $row['instansi_id'] ?? null,
+                                    'tahun' => $tahun,
                                     'updated_at' => date('Y-m-d H:i:s')
                                 ]);
                             $totalUpdate += $this->db->affected_rows();
@@ -26886,6 +26927,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             // Insert baru
                             $this->db->insert('pagu_urusan_rankhir', [
                                 'kode_wilayah' => $kodeWilayah,
+                                'tahun' => $tahun,
                                 'kode_urusan' => $row['kode_urusan'],
                                 'urusan' => $row['urusan'],
                                 'pagu' => $row['pagu'],
@@ -27649,8 +27691,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 return;
             }
             
-            // Validasi tahun (2026-2030)
-            $validYears = [2026, 2027, 2028, 2029, 2030];
+            // Validasi tahun (2025-2029)
+            $validYears = [2025, 2026, 2027, 2028, 2029];
             if (!in_array($tahun, $validYears)) {
                 $tahun = 2026; // Default ke 2026
             }

@@ -897,7 +897,7 @@ textarea.form-control-ui {
         <p>Data perkembangan tahunan bersumber otomatis dari relasi Indikator Kinerja Utama (IKU) pada RPJMD Pemerintah <?= htmlspecialchars($NamaWilayah) ?></p>
       </div>
       <div class="card-action-group no-print" style="display: flex; gap: 8px; flex-wrap: wrap;">
-        <button type="button" class="btn btn-sm btn-info notika-btn-info" onclick="batchGenerateSemuaNarasi()" data-toggle="tooltip" title="Generate otomatis narasi tren AI (Gemini) untuk seluruh indikator" style="border-radius: 4px;">
+        <button type="button" class="btn btn-sm btn-info notika-btn-info" onclick="batchGenerateSemuaNarasi()" data-toggle="tooltip" title="Generate otomatis narasi tren AI untuk seluruh indikator" style="border-radius: 4px;">
           <i class="fa fa-magic"></i> Generate Semua Narasi AI
         </button>
       </div>
@@ -986,7 +986,7 @@ textarea.form-control-ui {
                       </div>
                       <div class="button-icon-btn button-icon-btn-cl notika-action-group no-print">
                         <?php if ($CanCrud): ?>
-                          <button type="button" id="btnGenAI_<?= $p['id'] ?>" class="btn btn-sm btn-info notika-btn-info info-icon-notika btn-notika-subrow" onclick="generateNarasiIndikator(<?= $p['id'] ?>)" data-toggle="tooltip" data-placement="top" title="Generate narasi otomatis menggunakan Gemini AI">
+                          <button type="button" id="btnGenAI_<?= $p['id'] ?>" class="btn btn-sm btn-info notika-btn-info info-icon-notika btn-notika-subrow" onclick="generateNarasiIndikator(<?= $p['id'] ?>)" data-toggle="tooltip" data-placement="top" title="Generate narasi otomatis menggunakan AI">
                             <i class="fa fa-magic"></i>
                           </button>
                           <button type="button" id="btnSaveAI_<?= $p['id'] ?>" class="btn btn-sm btn-success notika-btn-success success-icon-notika btn-notika-subrow" onclick="simpanNarasiIndikator(<?= $p['id'] ?>)" data-toggle="tooltip" data-placement="top" title="Simpan perubahan narasi ke database">
@@ -1005,7 +1005,7 @@ textarea.form-control-ui {
                     <!-- Indikator Loading AI -->
                     <div id="loadingAI_<?= $p['id'] ?>" class="narasi-loader-box">
                       <span style="color: #1d4ed8; font-weight: 600; font-size: 12.5px;">
-                        <i class="fa fa-spinner fa-spin"></i> AI (Gemini) sedang menyusun analisis tren 2021 - 2025 untuk <?= htmlspecialchars($p['uraian_indikator']) ?>... Mohon tunggu sejenak.
+                        <i class="fa fa-spinner fa-spin"></i> AI sedang menyusun analisis tren 2021 - 2025 untuk <?= htmlspecialchars($p['uraian_indikator']) ?>... Mohon tunggu sejenak.
                       </span>
                     </div>
 
@@ -1146,7 +1146,7 @@ function resetDefaultData() {
 }
 
 // ==============================================================
-// FITUR AI NARASI PER INDIKATOR PERKEMBANGAN (GEMINI)
+// FITUR AI NARASI PER INDIKATOR PERKEMBANGAN 
 // ==============================================================
 
 // Buka / Tutup Sub-Row Narasi Indikator
@@ -1163,7 +1163,7 @@ function toggleNarasiRow(id) {
   }
 }
 
-// Generate Narasi Analisis Tren dengan Gemini AI
+// Generate Narasi Analisis Tren dengan AI
 async function generateNarasiIndikator(id) {
   const btn = document.getElementById(`btnGenAI_${id}`);
   const loader = document.getElementById(`loadingAI_${id}`);
@@ -1216,7 +1216,7 @@ async function generateNarasiIndikator(id) {
       Swal.fire({
         icon: 'success',
         title: 'Narasi Berhasil Disusun!',
-        text: 'Analisis tren 2021 - 2025 telah dibuat oleh AI (Gemini) dan otomatis tersimpan ke dokumen LKPJ.',
+        text: 'Analisis tren 2021 - 2025 telah dibuat oleh AI dan otomatis tersimpan ke dokumen LKPJ.',
         timer: 2500,
         showConfirmButton: true,
         confirmButtonColor: '#2563eb'
@@ -1351,7 +1351,7 @@ async function batchGenerateSemuaNarasi() {
 
   const confirmRes = await Swal.fire({
     title: 'Generate Semua Narasi AI?',
-    text: `Sistem AI (Gemini) akan menganalisis tren data dan menyusun narasi untuk ${ids.length} indikator perkembangan secara berurutan.`,
+    text: `Sistem AI akan menganalisis tren data dan menyusun narasi untuk ${ids.length} indikator perkembangan secara berurutan.`,
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#2563eb',
@@ -1363,7 +1363,7 @@ async function batchGenerateSemuaNarasi() {
   if (!confirmRes.isConfirmed) return;
 
   Swal.fire({
-    title: 'Sedang Memproses AI (Gemini)...',
+    title: 'Sedang Memproses AI...',
     html: `Memproses indikator ke-<b id="batchProgressNum">1</b> dari <b>${ids.length}</b>...<br><span style="font-size: 12px; color: #64748b;">Harap tunggu sejenak, proses ini berjalan otomatis.</span>`,
     allowOutsideClick: false,
     didOpen: () => Swal.showLoading()
