@@ -4840,13 +4840,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 KEY `idx_kegiatan` (`KegiatanId`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-            // Pastikan kolom KodeProgram bertipe TEXT
-            $fields = $this->db->field_data('dukungan_kpu_rpjmd');
-            foreach ($fields as $f) {
-                if ($f->name === 'KodeProgram' && $f->type === 'varchar') {
-                    $this->db->query("ALTER TABLE `dukungan_kpu_rpjmd` MODIFY `KodeProgram` TEXT NOT NULL;");
-                    break;
-                }
+            // Pastikan view ps_program_prioritas & ps_kegiatan_prioritas tersedia
+            if (!$this->db->table_exists('ps_program_prioritas') && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                $this->db->query("CREATE OR REPLACE VIEW ps_program_prioritas AS SELECT * FROM rkp_ps_program_prioritas");
+            }
+            if (!$this->db->table_exists('ps_kegiatan_prioritas') && $this->db->table_exists('rkp_ps_kegiatan_prioritas')) {
+                $this->db->query("CREATE OR REPLACE VIEW ps_kegiatan_prioritas AS SELECT * FROM rkp_ps_kegiatan_prioritas");
             }
 
             // Provinsi (filter untuk pengguna yang belum login)
@@ -4962,6 +4961,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             if (empty($prioritasId)) {
                 echo json_encode([]);
                 return;
+            }
+
+            // Pastikan view ps_program_prioritas ada
+            if (!$this->db->table_exists('ps_program_prioritas') && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                $this->db->query("CREATE OR REPLACE VIEW ps_program_prioritas AS SELECT * FROM rkp_ps_program_prioritas");
             }
 
             // Ambil data Program Prioritas dari ps_program_prioritas berdasarkan _IdPN

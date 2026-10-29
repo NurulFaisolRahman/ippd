@@ -312,40 +312,36 @@ function calcMisiRows($mi) {
                     
                     <!-- Filter Wilayah (Khusus jika belum login / belum memilih wilayah) -->
                     <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                        <div class="form-example-wrap" style="margin-bottom: 20px; background: #fff; padding: 18px 22px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); border-left: 4px solid #5dade2;">
-                            <div class="form-example-int form-horizental">
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <div class="row filter-row" style="align-items: flex-end;">
-                                        <div class="col-lg-4 col-md-5 col-sm-12">
-                                            <label for="Provinsi" style="font-weight: 700; color: #334155; margin-bottom: 6px;">Pilih Provinsi</label>
-                                            <select class="form-control" id="Provinsi" style="height: 40px; border-radius: 6px;">
-                                                <option value="">-- Pilih Provinsi --</option>
-                                                <?php foreach ($Provinsi as $prov) { ?>
-                                                    <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                        <?= html_escape($prov['Nama']) ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-4 col-md-5 col-sm-12">
-                                            <label for="KabKota" style="font-weight: 700; color: #334155; margin-bottom: 6px;">Pilih Kabupaten / Kota</label>
-                                            <select class="form-control" id="KabKota" style="height: 40px; border-radius: 6px;">
-                                                <option value="">-- Pilih Kabupaten / Kota --</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-lg-2 col-md-2 col-sm-12">
-                                            <button class="btn btn-primary notika-btn-primary btn-block" id="Filter" style="height: 40px; font-weight: 700; border-radius: 6px;">
-                                                <i class="fa fa-filter"></i> Filter
-                                            </button>
-                                        </div>
-                                    </div>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                <div style="flex: 1 1 250px; min-width: 200px;">
+                                    <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                        <option value="">Pilih Provinsi</option>
+                                        <?php foreach ($Provinsi as $prov) { ?>
+                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                <?= html_escape($prov['Nama']) ?>
+                                            </option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+                                <div style="flex: 1 1 250px; min-width: 200px;">
+                                    <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                        <option value="">Pilih Kab/Kota</option>
+                                    </select>
+                                </div>
+                                <div style="flex: 0 0 auto;">
+                                    <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                                        Filter
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         <?php if (!empty($KodeWilayah)) { ?>
-                            <div class="alert alert-info" style="border-radius: 6px; font-size: 13.5px; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
-                                <i class="fa fa-info-circle"></i> <strong>Wilayah Terpilih:</strong> <?= html_escape($NamaWilayah) ?> (Kode: <?= html_escape($KodeWilayah) ?>)
+                            <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px;">
+                                <strong>Wilayah:</strong> <?= html_escape($NamaWilayah ?? '') ?> (Kode: <?= html_escape($KodeWilayah) ?>)
                             </div>
                         <?php } ?>
                     <?php } ?>
@@ -1041,6 +1037,8 @@ function calcMisiRows($mi) {
 
 <script>
 var BaseURL = "<?= base_url() ?>";
+var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
 
 // Master list program nomenklatur dalam javascript
 var MASTER_PROGRAM = <?= json_encode($ProgramNomenklatur) ?>;
@@ -1496,30 +1494,93 @@ $(document).ready(function() {
     // ============================================================
     // FILTER PROVINSI & KAB/KOTA (UNTUK SEBELUM LOGIN)
     // ============================================================
-    $('#Provinsi').on('change', function() {
-        var idProv = $(this).val();
-        if (idProv) {
-            $.post(BaseURL + "Home/GetKabKota", { Id: idProv }).done(function(res) {
-                var data = JSON.parse(res);
-                var options = '<option value="">-- Pilih Kabupaten / Kota --</option>';
-                for (var i = 0; i < data.length; i++) {
-                    options += '<option value="' + data[i].Kode + '">' + data[i].Nama + '</option>';
-                }
-                $('#KabKota').html(options);
-            });
-        } else {
-            $('#KabKota').html('<option value="">-- Pilih Kabupaten / Kota --</option>');
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+    $("#Provinsi").change(function() {
+        if ($(this).val() === "") {
+            $("#KabKota").html('<option value="">Pilih Kab/Kota</option>');
+            return;
         }
+        $.ajax({
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { Kode: $(this).val(), [CSRF_NAME]: CSRF_TOKEN },
+            beforeSend: function() { 
+                $("#KabKota").prop('disabled', true);
+                $("#KabKota").html('<option value="">Memuat...</option>');
+            },
+            success: function(Respon) {
+                var Data = JSON.parse(Respon);
+                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                if (Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+                    }
+                }
+                $("#KabKota").html(KabKota).prop('disabled', false);
+            },
+            error: function() {
+                $("#KabKota").html('<option value="">Gagal memuat data</option>').prop('disabled', false);
+            }
+        });
     });
 
-    $('#Filter').on('click', function() {
-        var kodeWilayah = $('#KabKota').val() || $('#Provinsi').val();
-        if (kodeWilayah) {
-            window.location.href = BaseURL + "Daerah/ProgramPrioritasRPJMD?KodeWilayah=" + kodeWilayah;
-        } else {
-            alert('Silakan pilih Provinsi dan Kabupaten/Kota terlebih dahulu!');
+    $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") {
+            alert("Mohon Pilih Provinsi");
+            return;
         }
+        if ($("#KabKota").val() === "") {
+            alert("Mohon Pilih Kab/Kota");
+            return;
+        }
+        
+        var kodeWilayah = $("#KabKota").val();
+        $("#Filter").prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status"></span> Memuat...');
+        
+        $.ajax({
+            url: BaseURL + "Daerah/SetTempKodeWilayah",
+            type: "POST",
+            data: { 
+                KodeWilayah: kodeWilayah, 
+                [CSRF_NAME]: CSRF_TOKEN 
+            },
+            success: function(Respon) {
+                if (Respon.trim() === '1' || Respon.trim() === 'success') {
+                    window.location.href = BaseURL + "Daerah/ProgramPrioritasRPJMD";
+                } else {
+                    alert(Respon || "Gagal menyimpan filter wilayah!");
+                    $("#Filter").prop('disabled', false).html('Filter');
+                }
+            },
+            error: function() {
+                alert("Gagal menghubungi server!");
+                $("#Filter").prop('disabled', false).html('Filter');
+            }
+        });
     });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+        $.ajax({
+            url: BaseURL + "Daerah/GetListKabKota",
+            type: "POST",
+            data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+            success: function(Respon) {
+                var Data = JSON.parse(Respon);
+                var KabKota = '<option value="">Pilih Kab/Kota</option>';
+                if (Data.length > 0) {
+                    for (let i = 0; i < Data.length; i++) {
+                        var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                        KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+                    }
+                }
+                $("#KabKota").html(KabKota);
+            }
+        });
+    <?php } ?>
+    <?php } ?>
 
 });
 </script>

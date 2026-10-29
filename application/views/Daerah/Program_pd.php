@@ -485,41 +485,33 @@
 
                         <!-- FILTER WILAYAH -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>><?= html_escape($prov['Nama']) ?></option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter"><b>Filter</b></button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                        <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>><?= html_escape($prov['Nama']) ?></option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                        <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 0 0 auto;">
+                                        <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                                            Filter
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                             <?php if (!empty($KodeWilayah)) { ?>
                                 <?php $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array(); ?>
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
+                                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px;">
                                     <strong>Wilayah terpilih:</strong> <?= html_escape($wilayah['Nama'] ?? 'Wilayah Tidak Ditemukan') ?>
                                 </div>
                             <?php } ?>
@@ -529,7 +521,7 @@
                         <div class="basic-tb-hd">
                             <div class="button-icon-btn sm-res-mg-t-30">
                                 <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                                <button type="button" class="btn btn-primary notika-btn-primary" id="BtnTambahUrusan">
+                                <button type="button" class="btn btn-success notika-btn-success" id="BtnTambahUrusan" style="height: 38px; padding: 0 20px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
                                     <i class="notika-icon bi-plus-lg"></i> <b>Tambah Urusan</b>
                                 </button>
                                 <?php } ?>
@@ -1206,8 +1198,18 @@ $("#Filter").click(function() {
         type: "POST",
         data: { KodeWilayah: kodeWilayah, [CSRF_NAME]: CSRF_TOKEN },
         beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
-        success: function(res) { window.location.reload(); },
-        error: function() { window.location.reload(); }
+        success: function(res) {
+            if (res === '1' || res.trim() === '1') {
+                window.location.href = BaseURL + "Daerah/ProgramPD";
+            } else {
+                alert(res || "Gagal menyimpan filter wilayah!");
+                $("#Filter").prop('disabled', false).text('Filter');
+            }
+        },
+        error: function() { 
+            alert("Gagal menghubungi server!");
+            $("#Filter").prop('disabled', false).text('Filter');
+        }
     });
 });
 
