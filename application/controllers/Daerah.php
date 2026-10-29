@@ -21213,10 +21213,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $dinasMap[$d['id']] = $d['nama'];
                 }
                 
-                // Ambil data Pagu Urusan per tahun yang dipilih
-                $paguList = $this->db
-                    ->where('kode_wilayah', $kodeWilayah)
-                    ->where('tahun', $selectedTahun)
+                // Ambil data Pagu Urusan (sesuaikan dengan ketersediaan kolom tahun di database)
+                $paguQuery = $this->db
+                    ->where('kode_wilayah', $kodeWilayah);
+                
+                if ($this->db->field_exists('tahun', 'pagu_urusan')) {
+                    $paguQuery->where('tahun', $selectedTahun);
+                }
+                
+                $paguList = $paguQuery
                     ->where('deleted_at IS NULL')
                     ->order_by('id', 'ASC')
                     ->get('pagu_urusan')
@@ -21292,13 +21297,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 $data = [
                     'kode_wilayah' => $kodeWilayah,
-                    'tahun' => $tahun,
                     'kode_urusan' => null,
                     'urusan' => $namaDinas,
                     'pagu' => $paguClean,
                     'instansi_id' => (string)$instansiId,
                     'created_at' => date('Y-m-d H:i:s')
                 ];
+                if ($this->db->field_exists('tahun', 'pagu_urusan')) {
+                    $data['tahun'] = $tahun;
+                }
                 
                 $this->db->insert('pagu_urusan', $data);
                 
@@ -21389,7 +21396,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
 
-                if (!empty($tahun)) {
+                if (!empty($tahun) && $this->db->field_exists('tahun', 'pagu_urusan')) {
                     $data['tahun'] = $tahun;
                 }
                 
@@ -26256,13 +26263,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->result_array();
                 
                 // ==============================================================
-                // AMBIL DATA DARI TABEL pagu_urusan_rankhir
+                // AMBIL DATA DARI TABEL pagu_urusan_rankhir (Kompatibel dengan DB lokal & hosting)
                 // ==============================================================
                 $this->db->select('r.*')
                     ->from('pagu_urusan_rankhir r')
-                    ->where('r.kode_wilayah', $KodeWilayah)
-                    ->where('r.tahun', $selectedTahun)
-                    ->where('r.deleted_at IS NULL', null, false);
+                    ->where('r.kode_wilayah', $KodeWilayah);
+                
+                if ($this->db->field_exists('tahun', 'pagu_urusan_rankhir')) {
+                    $this->db->where('r.tahun', $selectedTahun);
+                }
+                
+                $this->db->where('r.deleted_at IS NULL', null, false);
                 
                 // Filter instansi jika ada
                 if (!empty($filterInstansiId)) {
@@ -26554,9 +26565,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             $this->db->select('r.*')
                 ->from('pagu_urusan_rankhir r')
-                ->where('r.kode_wilayah', $kodeWilayah)
-                ->where('r.tahun', $selectedTahun)
-                ->where('r.deleted_at IS NULL', null, false);
+                ->where('r.kode_wilayah', $kodeWilayah);
+            
+            if ($this->db->field_exists('tahun', 'pagu_urusan_rankhir')) {
+                $this->db->where('r.tahun', $selectedTahun);
+            }
+            
+            $this->db->where('r.deleted_at IS NULL', null, false);
             
             if (!empty($filterInstansiId)) {
                 $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
@@ -26866,10 +26881,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $tahun = trim($this->input->post('tahun', TRUE) ?: $this->input->get('tahun', TRUE)) ?: '2026';
                 
                 try {
-                    // Ambil semua data dari pagu_urusan yang aktif untuk tahun ini
-                    $sourceData = $this->db
-                        ->where('kode_wilayah', $kodeWilayah)
-                        ->where('tahun', $tahun)
+                    $hasTahunSource = $this->db->field_exists('tahun', 'pagu_urusan');
+                    $hasTahunRankhir = $this->db->field_exists('tahun', 'pagu_urusan_rankhir');
+                    
+                    // Ambil semua data dari pagu_urusan yang aktif
+                    $sourceQuery = $this->db
+                        ->where('kode_wilayah', $kodeWilayah);
+                    
+                    if ($hasTahunSource) {
+                        $sourceQuery->where('tahun', $tahun);
+                    }
+                    
+                    $sourceData = $sourceQuery
                         ->where('deleted_at IS NULL', null, false)
                         ->order_by('id', 'ASC')
                         ->get('pagu_urusan')
@@ -26880,21 +26903,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $totalSkip = 0;
                     
                     foreach ($sourceData as $row) {
-                        // Cek apakah sudah ada di rankhir berdasarkan source_id dan tahun
-                        $exists = $this->db
+                        // Cek apakah sudah ada di rankhir berdasarkan source_id
+                        $existsQuery = $this->db
                             ->where('source_id', $row['id'])
-                            ->where('kode_wilayah', $kodeWilayah)
-                            ->where('tahun', $tahun)
+                            ->where('kode_wilayah', $kodeWilayah);
+                        
+                        if ($hasTahunRankhir) {
+                            $existsQuery->where('tahun', $tahun);
+                        }
+                        
+                        $exists = $existsQuery
                             ->where('deleted_at IS NULL', null, false)
                             ->get('pagu_urusan_rankhir')
                             ->num_rows();
                         
                         if ($exists > 0) {
                             // Update jika belum diedit oleh daerah
-                            $rankhirRow = $this->db
+                            $rankhirQuery = $this->db
                                 ->where('source_id', $row['id'])
-                                ->where('kode_wilayah', $kodeWilayah)
-                                ->where('tahun', $tahun)
+                                ->where('kode_wilayah', $kodeWilayah);
+                            
+                            if ($hasTahunRankhir) {
+                                $rankhirQuery->where('tahun', $tahun);
+                            }
+                            
+                            $rankhirRow = $rankhirQuery
                                 ->where('deleted_at IS NULL', null, false)
                                 ->get('pagu_urusan_rankhir')
                                 ->row_array();
@@ -26907,27 +26940,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             }
                             
                             // Update data rankhir dengan data asli terbaru
+                            $updatePayload = [
+                                'kode_urusan' => $row['kode_urusan'],
+                                'urusan' => $row['urusan'],
+                                'pagu' => $row['pagu'],
+                                'instansi_id' => $row['instansi_id'] ?? null,
+                                'source_kode_urusan' => $row['kode_urusan'],
+                                'source_urusan' => $row['urusan'],
+                                'source_pagu' => $row['pagu'],
+                                'source_instansi_id' => $row['instansi_id'] ?? null,
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ];
+                            if ($hasTahunRankhir) {
+                                $updatePayload['tahun'] = $tahun;
+                            }
+                            
                             $this->db
                                 ->where('id', $rankhirRow['id'])
                                 ->where('kode_wilayah', $kodeWilayah)
-                                ->update('pagu_urusan_rankhir', [
-                                    'kode_urusan' => $row['kode_urusan'],
-                                    'urusan' => $row['urusan'],
-                                    'pagu' => $row['pagu'],
-                                    'instansi_id' => $row['instansi_id'] ?? null,
-                                    'source_kode_urusan' => $row['kode_urusan'],
-                                    'source_urusan' => $row['urusan'],
-                                    'source_pagu' => $row['pagu'],
-                                    'source_instansi_id' => $row['instansi_id'] ?? null,
-                                    'tahun' => $tahun,
-                                    'updated_at' => date('Y-m-d H:i:s')
-                                ]);
+                                ->update('pagu_urusan_rankhir', $updatePayload);
                             $totalUpdate += $this->db->affected_rows();
                         } else {
                             // Insert baru
-                            $this->db->insert('pagu_urusan_rankhir', [
+                            $insertPayload = [
                                 'kode_wilayah' => $kodeWilayah,
-                                'tahun' => $tahun,
                                 'kode_urusan' => $row['kode_urusan'],
                                 'urusan' => $row['urusan'],
                                 'pagu' => $row['pagu'],
@@ -26938,8 +26974,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 'source_pagu' => $row['pagu'],
                                 'source_instansi_id' => $row['instansi_id'] ?? null,
                                 'created_at' => date('Y-m-d H:i:s'),
-                                'edited_by_daerah' => 0
-                            ]);
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ];
+                            if ($hasTahunRankhir) {
+                                $insertPayload['tahun'] = $tahun;
+                            }
+                            
+                            $this->db->insert('pagu_urusan_rankhir', $insertPayload);
                             $totalInsert += $this->db->affected_rows();
                         }
                     }
