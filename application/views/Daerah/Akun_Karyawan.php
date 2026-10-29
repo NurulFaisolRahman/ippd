@@ -7,68 +7,58 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    <div class="data-table-list">
+                    <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
 
                         <!-- NOTIFIKASI FLASH DATA -->
                         <?php if ($this->session->flashdata('success')) { ?>
-                            <div class="alert alert-success alert-dismissible fade in" role="alert">
+                            <div class="alert alert-success alert-dismissible fade in" role="alert" style="border-radius: 8px; font-weight: 500;">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <i class="fa fa-check-circle"></i> <?= $this->session->flashdata('success') ?>
+                                <i class="fa fa-check-circle" style="margin-right: 6px;"></i> <?= $this->session->flashdata('success') ?>
                             </div>
                         <?php } ?>
 
                         <?php if ($this->session->flashdata('error')) { ?>
-                            <div class="alert alert-danger alert-dismissible fade in" role="alert">
+                            <div class="alert alert-danger alert-dismissible fade in" role="alert" style="border-radius: 8px; font-weight: 500;">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <i class="fa fa-exclamation-circle"></i> <?= $this->session->flashdata('error') ?>
+                                <i class="fa fa-exclamation-circle" style="margin-right: 6px;"></i> <?= $this->session->flashdata('error') ?>
                             </div>
                         <?php } ?>
 
                         <?php if ($this->session->flashdata('warning')) { ?>
-                            <div class="alert alert-warning alert-dismissible fade in" role="alert">
+                            <div class="alert alert-warning alert-dismissible fade in" role="alert" style="border-radius: 8px; font-weight: 500;">
                                 <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <i class="fa fa-warning"></i> <?= $this->session->flashdata('warning') ?>
+                                <i class="fa fa-warning" style="margin-right: 6px;"></i> <?= $this->session->flashdata('warning') ?>
                             </div>
                         <?php } ?>
 
                         <!-- FILTER PROVINSI & KAB/KOTA -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 15px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>"
-                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                        <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>"
+                                                    <?= (!empty($KodeWilayah) && substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
 
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                        <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                        </select>
+                                    </div>
 
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="FilterWilayah">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                                    <div style="flex: 0 0 auto;">
+                                        <button class="btn btn-primary notika-btn-primary" id="FilterWilayah" style="border-radius: 8px; height: 40px; padding: 0 20px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(59,130,246,0.25);">
+                                            <i class="fa fa-filter"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -78,19 +68,33 @@
                                 $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                                 $nama_wil = $wil ? html_escape($wil['Nama']) : 'Wilayah Tidak Ditemukan';
                                 ?>
-                                <div class="alert alert-info" style="margin-bottom: 15px;">
-                                    <strong>Wilayah terpilih:</strong> <?= $nama_wil ?>
+                                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1;">
+                                    <i class="fa fa-map-marker" style="margin-right: 6px;"></i> <strong>Wilayah Terpilih:</strong> <?= $nama_wil ?>
                                 </div>
                             <?php } ?>
                         <?php } ?>
 
-                        <div class="basic-tb-hd">
-                            <div class="button-icon-btn sm-res-mg-t-30">
-                                <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
-                                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKaryawan">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Pegawai</b>
-                                    </button>
-                                <?php } ?>
+                        <!-- HEADER MENU -->
+                        <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+                            <div class="row align-items-center">
+                                <div class="col-md-7 col-sm-6">
+                                    <h3 style="font-weight: 800; color: #1f2937; margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px;">
+                                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 18px;">
+                                            <i class="fa fa-users"></i>
+                                        </span>
+                                        DAFTAR PEGAWAI (KARYAWAN)
+                                    </h3>
+                                    <div style="color: #64748b; font-size: 13px;">
+                                        Kelola akun pegawai, aparatur perangkat daerah, jabatan, eselon, dan dinas penugasan.
+                                    </div>
+                                </div>
+                                <div class="col-md-5 col-sm-6 text-right" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                    <?php if (isset($_SESSION['Level']) && in_array($_SESSION['Level'], [3, 4])) { ?>
+                                        <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputKaryawan" style="border-radius: 8px; padding: 9px 20px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                                            <i class="fa fa-user-plus"></i> Tambah Pegawai
+                                        </button>
+                                    <?php } ?>
+                                </div>
                             </div>
                         </div>
 
@@ -175,170 +179,135 @@
     <!-- MODAL INPUT KARYAWAN -->
     <!-- ============================================================ -->
     <div class="modal fade" id="ModalInputKaryawan" role="dialog">
-        <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title"><b>Tambah Data Karyawan</b></h4>
+        <div class="modal-dialog modal-lg" style="max-width: 760px; width: 92%;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+                
+                <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+                    <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #e6fcf5; color: #0ca678;">
+                            <i class="fa fa-user-plus"></i>
+                        </span>
+                        Tambah Data Pegawai (Karyawan)
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div class="form-example-wrap">
-                        <!-- NIP -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>NIP</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="NIP" placeholder="Masukkan NIP">
-                                    </div>
-                                </div>
+
+                <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="NIP" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    NIP <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="NIP" placeholder="Masukkan NIP" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Nama -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Nama</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="Nama" placeholder="Masukkan Nama Lengkap">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="Nama" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Nama Pegawai <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="Nama" placeholder="Masukkan Nama Lengkap" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="Eselon" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Eselon
+                                </label>
+                                <input type="text" class="form-control" id="Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Eselon - INPUT MANUAL -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Eselon</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="Jabatan" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Jabatan <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="Jabatan" placeholder="Masukkan Jabatan" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="SatuanUnitKerja" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Satuan Unit Kerja
+                                </label>
+                                <input type="text" class="form-control" id="SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Jabatan -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Jabatan</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="Jabatan" placeholder="Masukkan Jabatan">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="BidangSubKoordinator" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Bidang / Sub / Kegiatan
+                                </label>
+                                <input type="text" class="form-control" id="BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dinas Terkait -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                            Dinas Terkait <span class="text-danger">*</span>
+                        </label>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+                            <div id="dinasContainerAdd"></div>
+                            <button type="button" class="btn btn-info btn-sm" id="addDinasRowAdd" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                                <i class="fa fa-plus"></i> Tambah Dinas
+                            </button>
+                            <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                                * Wajib pilih minimal 1 dinas
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label for="Password" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Password <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="Password" placeholder="Masukkan Password" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Satuan Unit Kerja -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Satuan Unit Kerja</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
-                                    </div>
-                                </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label for="TahunMulai" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Tahun Mulai <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="TahunMulai" placeholder="Contoh: 2020" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Bidang / Sub Kegiatan -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Bidang / Sub Kegiatan</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Password</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="Password" placeholder="Masukkan Password">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dinas Terkait -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Dinas Terkait</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <div id="dinasContainerAdd"></div>
-                                        <button type="button" class="btn btn-info btn-sm" id="addDinasRowAdd">
-                                            + Tambah Dinas
-                                        </button>
-                                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                                            * Wajib pilih minimal 1 dinas
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tahun Mulai -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Contoh: 2020">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tahun Akhir -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Contoh: 2025">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-example-int">
-                            <div class="row">
-                                <div class="col-lg-3"></div>
-                                <div class="col-lg-8">
-                                    <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
-                                </div>
+                        <div class="col-md-4">
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label for="TahunAkhir" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Tahun Akhir <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="TahunAkhir" placeholder="Contoh: 2025" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+                        Batal
+                    </button>
+                    <button class="btn btn-success notika-btn-success" id="Input" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                        <i class="fa fa-save"></i> <b>Simpan</b>
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -347,172 +316,137 @@
     <!-- MODAL EDIT KARYAWAN -->
     <!-- ============================================================ -->
     <div class="modal fade" id="ModalEditKaryawan" role="dialog">
-        <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title"><b>Edit Data Karyawan</b></h4>
+        <div class="modal-dialog modal-lg" style="max-width: 760px; width: 92%;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+                
+                <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+                    <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+                        <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #fef3c7; color: #d97706;">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </span>
+                        Edit Data Pegawai (Karyawan)
+                    </h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div class="form-example-wrap">
-                        <input type="hidden" id="Id">
 
-                        <!-- NIP -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>NIP</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_NIP" placeholder="Masukkan NIP">
-                                    </div>
-                                </div>
+                <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+                    <input type="hidden" id="Id">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_NIP" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    NIP <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="_NIP" placeholder="Masukkan NIP" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Nama -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Nama</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_Nama" placeholder="Masukkan Nama Lengkap">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_Nama" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Nama Pegawai <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="_Nama" placeholder="Masukkan Nama Lengkap" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_Eselon" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Eselon
+                                </label>
+                                <input type="text" class="form-control" id="_Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Eselon - INPUT MANUAL -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Eselon</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_Eselon" placeholder="Contoh: Eselon II, Eselon III, Non Eselon">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_Jabatan" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Jabatan <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="_Jabatan" placeholder="Masukkan Jabatan" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_SatuanUnitKerja" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Satuan Unit Kerja
+                                </label>
+                                <input type="text" class="form-control" id="_SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Jabatan -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Jabatan</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_Jabatan" placeholder="Masukkan Jabatan">
-                                    </div>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label for="_BidangSubKoordinator" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Bidang / Sub / Kegiatan
+                                </label>
+                                <input type="text" class="form-control" id="_BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password Baru -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label for="_Password" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                            Password Baru
+                        </label>
+                        <input type="text" class="form-control" id="_Password" placeholder="Kosongkan jika password tidak diubah" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                        <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11.5px;">Kosongkan jika tidak ingin mengubah password akun ini</small>
+                    </div>
+
+                    <!-- Dinas Terkait -->
+                    <div class="form-group" style="margin-bottom: 18px;">
+                        <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                            Dinas Terkait <span class="text-danger">*</span>
+                        </label>
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+                            <div id="dinasContainerEdit"></div>
+                            <button type="button" class="btn btn-info btn-sm" id="addDinasRowEdit" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                                <i class="fa fa-plus"></i> Tambah Dinas
+                            </button>
+                            <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                                * Wajib pilih minimal 1 dinas
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label for="_TahunMulai" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Tahun Mulai <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="_TahunMulai" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
 
-                        <!-- Satuan Unit Kerja -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Satuan Unit Kerja</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_SatuanUnitKerja" placeholder="Contoh: Sub Bagian Perencanaan">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Bidang / Sub Kegiatan -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Bidang / Sub Kegiatan</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_BidangSubKoordinator" placeholder="Contoh: Bidang Pendidikan Dasar">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Password</b></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_Password" placeholder="Kosongkan jika tidak diubah">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Dinas Terkait -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Dinas Terkait</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <div id="dinasContainerEdit"></div>
-                                        <button type="button" class="btn btn-info btn-sm" id="addDinasRowEdit">
-                                            + Tambah Dinas
-                                        </button>
-                                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                                            * Wajib pilih minimal 1 dinas
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tahun Mulai -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_TahunMulai">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Tahun Akhir -->
-                        <div class="form-example-int form-horizental">
-                            <div class="form-group">
-                                <div class="row">
-                                    <div class="col-lg-3">
-                                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span style="color:red;">*</span></label>
-                                    </div>
-                                    <div class="col-lg-8">
-                                        <input type="text" class="form-control input-sm" id="_TahunAkhir">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-example-int">
-                            <div class="row">
-                                <div class="col-lg-3"></div>
-                                <div class="col-lg-8">
-                                    <button class="btn btn-success notika-btn-success" id="Edit"><b>UPDATE</b></button>
-                                </div>
+                        <div class="col-md-6">
+                            <div class="form-group" style="margin-bottom: 8px;">
+                                <label for="_TahunAkhir" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                                    Tahun Akhir <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="_TahunAkhir" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+                        Batal
+                    </button>
+                    <button class="btn btn-success notika-btn-success" id="Edit" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                        <i class="fa fa-save"></i> <b>Update</b>
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -522,70 +456,181 @@
 <!-- STYLE CUSTOM -->
 <!-- ============================================================ -->
 <style>
-    .filter-row {
-        display: flex;
-        align-items: flex-end;
-        flex-wrap: wrap;
-        gap: 10px;
+    /* Modal Header styling - Tombol silang pojok kanan, judul pojok kiri */
+    .modal-header {
+        position: relative !important;
+        padding: 16px 24px !important;
     }
-    .filter-group {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+    .modal-header:before,
+    .modal-header:after {
+        display: none !important;
     }
-    .filter-group label {
-        font-size: 14px;
-        margin-bottom: 5px;
+    .modal-header .close {
+        position: absolute !important;
+        right: 20px !important;
+        top: 16px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-size: 24px !important;
+        opacity: 0.6 !important;
+        line-height: 1 !important;
+        cursor: pointer !important;
+        border: none !important;
+        background: transparent !important;
+        z-index: 10 !important;
+        transition: opacity 0.2s;
     }
-    .filter-select {
-        width: 260px;
-        font-size: 14px;
-        padding: 5px 8px;
+    .modal-header .close:hover {
+        opacity: 1 !important;
     }
+    .modal-header .modal-title {
+        text-align: left !important;
+        margin: 0 !important;
+        padding-right: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    /* Styling Tabel Sesuai Tema Notika / Menu Lain */
+    #data-table-basic {
+        border-collapse: collapse;
+        width: 100% !important;
+    }
+    #data-table-basic thead th {
+        background-color: #f1f5f9 !important;
+        color: #334155 !important;
+        font-weight: 700 !important;
+        border: 1px solid #cbd5e1 !important;
+        font-size: 11.5px !important;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        padding: 10px 8px !important;
+        vertical-align: middle !important;
+    }
+    #data-table-basic tbody td {
+        border: 1px solid #e2e8f0;
+        vertical-align: middle !important;
+        font-size: 12px;
+    }
+    #data-table-basic tbody tr:hover {
+        background-color: #f8fafc;
+    }
+
+    /* ==============================================
+       UNIFIED BUTTON STYLING
+       ============================================== */
+    .btn {
+        border-radius: 8px !important;
+        transition: all 0.2s ease !important;
+        font-weight: 600 !important;
+    }
+    .btn-sm, .btn-xs {
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+    }
+    .btn.Edit, .btn.EditSasaran, .btn.EditPeriodeMisi, .btn-amber {
+        background-color: #f59e0b !important;
+        border-color: #f59e0b !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 5px 9px !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .btn.Edit:hover, .btn.EditSasaran:hover, .btn.EditPeriodeMisi:hover, .btn-amber:hover {
+        background-color: #d97706 !important;
+        border-color: #d97706 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 6px rgba(245, 158, 11, 0.35) !important;
+    }
+    .btn.Hapus, .btn.HapusSasaran, .btn.HapusPeriodeMisi, .btn-danger {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 5px 9px !important;
+        font-size: 12px !important;
+        line-height: 1.4 !important;
+        box-shadow: 0 1px 3px rgba(239, 68, 68, 0.25) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+    .btn.Hapus:hover, .btn.HapusSasaran:hover, .btn.HapusPeriodeMisi:hover, .btn-danger:hover {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 3px 6px rgba(239, 68, 68, 0.35) !important;
+    }
+    .button-icon-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 5px !important;
+        margin: 0 !important;
+    }
+    .button-icon-btn .btn-reco-mg,
+    .button-icon-btn .btn-button-mg {
+        margin: 0 !important;
+    }
+
     .dinas-row {
         display: flex;
         gap: 8px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         align-items: center;
     }
     .dinas-row select {
         flex: 1;
+        border-radius: 6px;
+        height: 34px;
+        border: 1px solid #cbd5e1;
     }
-    @media (max-width:768px) {
-        .filter-row {
-            flex-direction: column;
-            gap: 15px;
-        }
-        .filter-select {
-            width: 100%;
-        }
+    .dinas-row button {
+        border-radius: 6px;
     }
+
     /* Alert styling */
     .alert {
         margin-bottom: 15px;
-        border-radius: 4px;
+        border-radius: 8px;
         padding: 12px 20px;
     }
     .alert-success {
-        background-color: #dff0d8;
-        border-color: #d6e9c6;
-        color: #3c763d;
+        background-color: #dcfce7;
+        border-color: #bbf7d0;
+        color: #15803d;
     }
     .alert-danger {
-        background-color: #f2dede;
-        border-color: #ebccd1;
-        color: #a94442;
+        background-color: #fee2e2;
+        border-color: #fecaca;
+        color: #b91c1c;
     }
     .alert-warning {
-        background-color: #fcf8e3;
-        border-color: #faebcc;
-        color: #8a6d3b;
+        background-color: #fef3c7;
+        border-color: #fde68a;
+        color: #b45309;
     }
     .alert i {
         margin-right: 8px;
     }
     .fade.in {
         opacity: 1;
+    }
+
+    /* DataTable State Save - Mempertahankan posisi */
+    .dataTables_wrapper .dataTables_info {
+        font-size: 12px;
+    }
+    .dataTables_wrapper .dataTables_paginate {
+        font-size: 12px;
     }
 </style>
 

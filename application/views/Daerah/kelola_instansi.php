@@ -7,47 +7,36 @@
     <div class="container-fluid">
       <div class="row">
         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-          <div class="data-table-list">
+          <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
 
             <!-- FILTER PROVINSI & KAB/KOTA -->
             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-              <div class="form-example-wrap" style="margin-bottom: 15px;">
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row filter-row">
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="Provinsi"><b>Provinsi</b></label>
-                          <select class="form-control filter-select" id="Provinsi">
-                            <option value="">Pilih Provinsi</option>
-                            <?php foreach ($Provinsi as $prov) { ?>
-                              <option value="<?= html_escape($prov['Kode']) ?>"
-                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                <?= html_escape($prov['Nama']) ?>
-                              </option>
-                            <?php } ?>
-                          </select>
-                        </div>
-                      </div>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                  <div style="flex: 1 1 250px; min-width: 200px;">
+                    <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Provinsi</option>
+                      <?php foreach ($Provinsi as $prov) { ?>
+                        <option value="<?= html_escape($prov['Kode']) ?>"
+                          <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                          <?= html_escape($prov['Nama']) ?>
+                        </option>
+                      <?php } ?>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-3 col-md-6">
-                        <div class="filter-group">
-                          <label for="KabKota"><b>Kab/Kota</b></label>
-                          <select class="form-control filter-select" id="KabKota">
-                            <option value="">Pilih Kab/Kota</option>
-                          </select>
-                        </div>
-                      </div>
+                  <div style="flex: 1 1 250px; min-width: 200px;">
+                    <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Kab/Kota</option>
+                    </select>
+                  </div>
 
-                      <div class="col-lg-2 col-md-6">
-                        <div class="filter-group" style="margin-top: 28px;">
-                          <button class="btn btn-primary notika-btn-primary btn-block" id="FilterWilayah">
-                            <b>Filter</b>
-                          </button>
-                        </div>
-                      </div>
-
-                    </div>
+                  <div style="flex: 0 0 auto;">
+                    <button class="btn btn-primary notika-btn-primary" id="FilterWilayah" style="border-radius: 8px; height: 40px; padding: 0 20px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 4px rgba(59,130,246,0.25);">
+                      <i class="fa fa-filter"></i> Filter
+                    </button>
                   </div>
                 </div>
               </div>
@@ -57,20 +46,34 @@
                   $wil = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                   $nama_wil = $wil ? html_escape($wil['Nama']) : 'Wilayah Tidak Ditemukan';
                 ?>
-                <div class="alert alert-info" style="margin-bottom: 15px;">
-                  <strong>Wilayah terpilih:</strong> <?= $nama_wil ?>
+                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px; background: #f0f9ff; border: 1px solid #bae6fd; color: #0369a1;">
+                  <i class="fa fa-map-marker" style="margin-right: 6px;"></i> <strong>Wilayah Terpilih:</strong> <?= $nama_wil ?>
                 </div>
               <?php } ?>
             <?php } ?>
             <!-- END FILTER WILAYAH -->
 
-            <div class="basic-tb-hd">
-              <div class="button-icon-btn sm-res-mg-t-30">
-                <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
-                  <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputInstansi">
-                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Instansi</b>
-                  </button>
-                <?php } ?>
+            <!-- HEADER MENU -->
+            <div class="basic-tb-hd" style="margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e2e8f0;">
+              <div class="row align-items-center">
+                <div class="col-md-7 col-sm-6">
+                  <h3 style="font-weight: 800; color: #1f2937; margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 18px;">
+                      <i class="fa fa-building-o"></i>
+                    </span>
+                    DAFTAR INSTANSI (PERANGKAT DAERAH)
+                  </h3>
+                  <div style="color: #64748b; font-size: 13px;">
+                    Kelola akun instansi Perangkat Daerah, pemetaan Urusan, Induk Kementerian, dan struktur Sub Unit.
+                  </div>
+                </div>
+                <div class="col-md-5 col-sm-6 text-right" style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <?php if (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) { ?>
+                    <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputInstansi" style="border-radius: 8px; padding: 9px 20px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+                      <i class="fa fa-plus-circle"></i> Tambah Instansi
+                    </button>
+                  <?php } ?>
+                </div>
               </div>
             </div>
 
@@ -278,151 +281,110 @@
   <!-- MODAL INPUT INSTANSI -->
   <!-- ================================================================ -->
   <div class="modal fade" id="ModalInputInstansi" role="dialog">
-    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Tambah Instansi</h4>
+    <div class="modal-dialog modal-lg" style="max-width: 740px; width: 92%;">
+      <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+        
+        <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+          <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #e6fcf5; color: #0ca678;">
+              <i class="fa fa-building-o"></i>
+            </span>
+            Tambah Instansi (Perangkat Daerah)
+          </h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
           <div class="row">
-            <div class="col-lg-12">
-              <div class="form-example-wrap" style="padding:5px;">
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="KodeInstansi" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Kode Instansi <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="KodeInstansi" placeholder="Contoh: DIN-PEND-001" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11.5px;">Kode unik untuk instansi ini</small>
+              </div>
+            </div>
 
-                <!-- KODE INSTANSI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Kode Instansi</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="KodeInstansi" placeholder="Contoh: DIN-PEND-001">
-                          <small class="text-muted">Kode unik untuk instansi ini</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- NAMA INSTANSI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Nama Instansi</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="Username" placeholder="Contoh: Dinas Pendidikan">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- PASSWORD -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Password</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="Password" placeholder="Isi password">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- INDUK KEMENTERIAN -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Induk Kementerian</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div id="kementerianContainerAdd"></div>
-                        <button type="button" class="btn btn-info btn-sm" id="addKementerianRowAdd" style="margin-top:8px;">
-                          + Tambah Induk Kementerian
-                        </button>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Boleh pilih lebih dari 1
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Bidang Urusan</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div id="urusanContainerAdd"></div>
-                        <button type="button" class="btn btn-info btn-sm" id="addUrusanRowAdd" style="margin-top:8px;">
-                          + Tambah Bidang Urusan
-                        </button>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TAHUN MULAI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="TahunMulai" placeholder="Contoh: 2024">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TAHUN AKHIR -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="TahunAkhir" placeholder="Contoh: 2029">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int">
-                  <div class="row">
-                    <div class="col-lg-3"></div>
-                    <div class="col-lg-8">
-                      <button class="btn btn-success notika-btn-success" id="Input"><b>SIMPAN</b></button>
-                    </div>
-                  </div>
-                </div>
-
-              </div><!-- /.form-example-wrap -->
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="Password" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Password <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="Password" placeholder="Isi password untuk login" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
             </div>
           </div>
-        </div><!-- /.modal-body -->
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label for="Username" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Nama Instansi / Perangkat Daerah <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="Username" placeholder="Contoh: Dinas Pendidikan" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+          </div>
+
+          <!-- INDUK KEMENTERIAN -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Induk Kementerian
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+              <div id="kementerianContainerAdd"></div>
+              <button type="button" class="btn btn-info btn-sm" id="addKementerianRowAdd" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                <i class="fa fa-plus"></i> Tambah Induk Kementerian
+              </button>
+              <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                * Boleh pilih lebih dari 1 kementerian
+              </div>
+            </div>
+          </div>
+
+          <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Bidang Urusan (Nomenklatur Provinsi)
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+              <div id="urusanContainerAdd"></div>
+              <button type="button" class="btn btn-info btn-sm" id="addUrusanRowAdd" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                <i class="fa fa-plus"></i> Tambah Bidang Urusan
+              </button>
+              <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="TahunMulai" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Tahun Mulai <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="TahunMulai" placeholder="Contoh: 2024" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="TahunAkhir" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Tahun Akhir <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="TahunAkhir" placeholder="Contoh: 2029" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+            Batal
+          </button>
+          <button class="btn btn-success notika-btn-success" id="Input" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+            <i class="fa fa-save"></i> <b>Simpan</b>
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -431,154 +393,113 @@
   <!-- MODAL EDIT INSTANSI -->
   <!-- ================================================================ -->
   <div class="modal fade" id="ModalEditInstansi" role="dialog">
-    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">Edit Instansi</h4>
+    <div class="modal-dialog modal-lg" style="max-width: 740px; width: 92%;">
+      <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+        
+        <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+          <h4 class="modal-title" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #fef3c7; color: #d97706;">
+              <i class="fa fa-pencil-square-o"></i>
+            </span>
+            Edit Instansi (Perangkat Daerah)
+          </h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+          <input type="hidden" id="Id">
+
           <div class="row">
-            <div class="col-lg-12">
-              <div class="form-example-wrap" style="padding:5px;">
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="_KodeInstansi" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Kode Instansi <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="_KodeInstansi" placeholder="Contoh: DIN-PEND-001" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11.5px;">Kode unik untuk instansi ini</small>
+              </div>
+            </div>
 
-                <input type="hidden" id="Id">
-
-                <!-- KODE INSTANSI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Kode Instansi</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="_KodeInstansi" placeholder="Contoh: DIN-PEND-001">
-                          <small class="text-muted">Kode unik untuk instansi ini</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- NAMA INSTANSI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Nama Instansi</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="_Username">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- PASSWORD -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Password</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="_Password" placeholder="Isi Jika Ganti Password">
-                          <small class="text-muted">Kosongkan jika tidak ingin mengubah password</small>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- INDUK KEMENTERIAN -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Induk Kementerian</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div id="kementerianContainerEdit"></div>
-                        <button type="button" class="btn btn-info btn-sm" id="addKementerianRowEdit" style="margin-top:8px;">
-                          + Tambah Induk Kementerian
-                        </button>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Boleh pilih lebih dari 1
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Bidang Urusan</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div id="urusanContainerEdit"></div>
-                        <button type="button" class="btn btn-info btn-sm" id="addUrusanRowEdit" style="margin-top:8px;">
-                          + Tambah Bidang Urusan
-                        </button>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TAHUN MULAI -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Tahun Mulai</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="_TahunMulai">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- TAHUN AKHIR -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Tahun Akhir</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="_TahunAkhir">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="form-example-int">
-                  <div class="row">
-                    <div class="col-lg-3"></div>
-                    <div class="col-lg-8">
-                      <button class="btn btn-success notika-btn-success" id="Edit"><b>SIMPAN</b></button>
-                    </div>
-                  </div>
-                </div>
-
-              </div><!-- /.form-example-wrap -->
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="_Password" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Password Baru
+                </label>
+                <input type="text" class="form-control" id="_Password" placeholder="Isi Jika Ingin Mengganti Password" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+                <small class="text-muted" style="display: block; margin-top: 4px; font-size: 11.5px;">Kosongkan bila password tidak diganti</small>
+              </div>
             </div>
           </div>
-        </div><!-- /.modal-body -->
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label for="_Username" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Nama Instansi / Perangkat Daerah <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="_Username" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+          </div>
+
+          <!-- INDUK KEMENTERIAN -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Induk Kementerian
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+              <div id="kementerianContainerEdit"></div>
+              <button type="button" class="btn btn-info btn-sm" id="addKementerianRowEdit" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                <i class="fa fa-plus"></i> Tambah Induk Kementerian
+              </button>
+              <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                * Boleh pilih lebih dari 1 kementerian
+              </div>
+            </div>
+          </div>
+
+          <!-- BIDANG URUSAN (NOMENKLATUR PROVINSI) -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Bidang Urusan (Nomenklatur Provinsi)
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+              <div id="urusanContainerEdit"></div>
+              <button type="button" class="btn btn-info btn-sm" id="addUrusanRowEdit" style="margin-top: 8px; border-radius: 6px; font-weight: 600;">
+                <i class="fa fa-plus"></i> Tambah Bidang Urusan
+              </button>
+              <div style="margin-top: 6px; font-size: 11.5px; color: #64748b;">
+                * Pilih Urusan pada dropdown kiri, lalu pilih Bidang Urusan pada dropdown kanan
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="_TahunMulai" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Tahun Mulai <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="_TahunMulai" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 8px;">
+                <label for="_TahunAkhir" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Tahun Akhir <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="_TahunAkhir" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+            Batal
+          </button>
+          <button class="btn btn-success notika-btn-success" id="Edit" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+            <i class="fa fa-save"></i> <b>Update</b>
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -587,139 +508,109 @@
   <!-- MODAL SUB UNIT -->
   <!-- ================================================================ -->
   <div class="modal fade" id="ModalSubUnit" role="dialog">
-    <div class="modal-dialog modal-md" style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title" id="ModalSubUnitTitle">Tambah Sub Unit</h4>
+    <div class="modal-dialog modal-lg" style="max-width: 740px; width: 92%;">
+      <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.18); border: none;">
+        
+        <div class="modal-header" style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-bottom: 1px solid #e2e8f0; padding: 16px 24px; position: relative;">
+          <h4 class="modal-title" id="ModalSubUnitTitle" style="font-weight: 700; color: #1e293b; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 16px; text-align: left; padding-right: 40px;">
+            <span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; background: #e0f2fe; color: #0284c7;">
+              <i class="fa fa-sitemap"></i>
+            </span>
+            Tambah Sub Unit
+          </h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="position: absolute; right: 20px; top: 16px; font-size: 24px; opacity: 0.6; line-height: 1; cursor: pointer; border: none; background: transparent; padding: 0; margin: 0; z-index: 10;">&times;</button>
         </div>
-        <div class="modal-body">
-          <div class="row">
-            <div class="col-lg-12">
-              <div class="form-example-wrap" style="padding:5px;">
-                <input type="hidden" id="sub_unit_id">
-                <input type="hidden" id="sub_unit_instansi_id">
-                <input type="hidden" id="sub_unit_parent_id">
-                
-                <!-- Informasi Parent -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Parent</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <span class="label label-info" id="sub_unit_parent_display" style="font-size:14px; padding:8px 15px;">
-                            <i class="fa fa-database"></i> (Root)
-                          </span>
-                          <button type="button" class="btn btn-xs btn-link" id="toggleParentDropdown" style="padding:0 5px;">
-                            <i class="fa fa-edit"></i> Ubah Parent
-                          </button>
-                          <select class="form-control input-sm" id="sub_unit_parent_dropdown" style="margin-top:5px; display:none;">
-                            <option value="0">-- Pilih Parent --</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- KODE SUB UNIT -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Kode Sub Unit</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="sub_unit_kode" placeholder="Contoh: 1">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- NAMA SUB UNIT -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Nama Sub Unit</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="sub_unit_nama" placeholder="Contoh: Sekretariat">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- LEVEL - OTOMATIS 4 (HIDDEN) -->
-                <input type="hidden" id="sub_unit_level" value="4">
-                
-                <!-- PASSWORD -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Password</b> <span class="text-danger">*</span></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div class="nk-int-st">
-                          <input type="text" class="form-control input-sm" id="sub_unit_password" placeholder="Isi password">
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <!-- BIDANG URUSAN -->
-                <div class="form-example-int form-horizental">
-                  <div class="form-group">
-                    <div class="row">
-                      <div class="col-lg-3">
-                        <label class="hrzn-fm"><b>Bidang Urusan / Bidang Unsur</b></label>
-                      </div>
-                      <div class="col-lg-8">
-                        <div id="bidangUrusanContainerSub">
-                          <div class="bidang-urusan-row" style="display:flex; gap:8px; margin-bottom:6px;">
-                            <select class="form-control input-sm urusan-select-sub" style="flex:1;" data-level="1">
-                              <option value="">-- Pilih Urusan --</option>
-                            </select>
-                            <select class="form-control input-sm bidang-select-sub" style="flex:1;" data-level="2" disabled>
-                              <option value="">-- Pilih Bidang Urusan / Unsur --</option>
-                            </select>
-                            <button type="button" class="btn btn-danger btn-sm remove-bidang-urusan-sub">Hapus</button>
-                          </div>
-                        </div>
-                        <button type="button" class="btn btn-info btn-sm" id="addBidangUrusanRowSub" style="margin-top:8px;">
-                          + Tambah Bidang Urusan / Unsur
-                        </button>
-                        <div style="margin-top:6px; font-size:12px; color:#888;">
-                          * Boleh pilih lebih dari 1 bidang urusan/unsur
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="form-example-int">
-                  <div class="row">
-                    <div class="col-lg-3"></div>
-                    <div class="col-lg-8">
-                      <button class="btn btn-success notika-btn-success" id="SimpanSubUnit"><b>SIMPAN</b></button>
-                      <button class="btn btn-danger" id="HapusSubUnit" style="display:none;"><b>HAPUS</b></button>
-                    </div>
-                  </div>
-                </div>
-                
-              </div><!-- /.form-example-wrap -->
+
+        <div class="modal-body" style="padding: 24px 26px; max-height: calc(85vh - 140px); overflow-y: auto;">
+          <input type="hidden" id="sub_unit_id">
+          <input type="hidden" id="sub_unit_instansi_id">
+          <input type="hidden" id="sub_unit_parent_id">
+          <input type="hidden" id="sub_unit_level" value="4">
+
+          <!-- Informasi Parent -->
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Induk / Parent Sub Unit
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <span class="label label-info" id="sub_unit_parent_display" style="font-size: 13px; padding: 6px 12px; border-radius: 4px;">
+                <i class="fa fa-database"></i> (Root)
+              </span>
+              <button type="button" class="btn btn-xs btn-link" id="toggleParentDropdown" style="padding: 0; font-weight: 600; text-decoration: none;">
+                <i class="fa fa-edit"></i> Ubah Parent
+              </button>
+              <select class="form-control input-sm" id="sub_unit_parent_dropdown" style="margin-top: 5px; display: none; max-width: 300px; border-radius: 6px;">
+                <option value="0">-- Pilih Parent --</option>
+              </select>
             </div>
           </div>
-        </div><!-- /.modal-body -->
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="sub_unit_kode" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Kode Sub Unit <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="sub_unit_kode" placeholder="Contoh: 1" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+
+            <div class="col-md-6">
+              <div class="form-group" style="margin-bottom: 18px;">
+                <label for="sub_unit_password" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+                  Password <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="sub_unit_password" placeholder="Isi password untuk login" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 18px;">
+            <label for="sub_unit_nama" style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Nama Sub Unit <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control" id="sub_unit_nama" placeholder="Contoh: Sekretariat" style="height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; font-size: 13px;">
+          </div>
+
+          <!-- BIDANG URUSAN -->
+          <div class="form-group" style="margin-bottom: 8px;">
+            <label style="font-weight: 700; font-size: 13px; color: #374151; margin-bottom: 6px; display: block;">
+              Bidang Urusan / Bidang Unsur
+            </label>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+              <div id="bidangUrusanContainerSub">
+                <div class="bidang-urusan-row" style="display:flex; gap:8px; margin-bottom:6px;">
+                  <select class="form-control input-sm urusan-select-sub" style="flex:1;" data-level="1">
+                    <option value="">-- Pilih Urusan --</option>
+                  </select>
+                  <select class="form-control input-sm bidang-select-sub" style="flex:1;" data-level="2" disabled>
+                    <option value="">-- Pilih Bidang Urusan / Unsur --</option>
+                  </select>
+                  <button type="button" class="btn btn-danger btn-sm remove-bidang-urusan-sub">Hapus</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-info btn-sm" id="addBidangUrusanRowSub" style="margin-top:8px; border-radius:6px; font-weight:600;">
+                <i class="fa fa-plus"></i> Tambah Bidang Urusan / Unsur
+              </button>
+              <div style="margin-top:6px; font-size:11.5px; color:#64748b;">
+                * Boleh pilih lebih dari 1 bidang urusan/unsur
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px; display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 18px; color: #64748b; border: 1px solid #cbd5e1; background: #fff;">
+            Batal
+          </button>
+          <button class="btn btn-danger" id="HapusSubUnit" style="display:none; border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 20px; box-shadow: 0 2px 6px rgba(239,68,68,0.3);">
+            <i class="fa fa-trash"></i> <b>Hapus</b>
+          </button>
+          <button class="btn btn-success notika-btn-success" id="SimpanSubUnit" style="border-radius: 8px; font-weight: 600; font-size: 13px; padding: 8px 22px; box-shadow: 0 2px 6px rgba(16,185,129,0.3);">
+            <i class="fa fa-save"></i> <b>Simpan</b>
+          </button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -727,31 +618,80 @@
 </div><!-- /.main-content -->
 
 <style>
-  .filter-row { display:flex; align-items:flex-end; flex-wrap:wrap; gap:10px; }
-  .filter-group { display:flex; flex-direction:column; align-items:flex-start; }
-  .filter-group label { font-size:14px; margin-bottom:5px; }
-  .filter-select { width:260px; font-size:14px; padding:5px 8px; }
-  @media (max-width:768px){
-    .filter-row{ flex-direction:column; gap:15px; }
-    .filter-select{ width:100%; }
+  /* Modal Header styling - Tombol silang pojok kanan, judul pojok kiri */
+  .modal-header {
+    position: relative !important;
+    padding: 16px 24px !important;
+  }
+  .modal-header:before,
+  .modal-header:after {
+    display: none !important;
+  }
+  .modal-header .close {
+    position: absolute !important;
+    right: 20px !important;
+    top: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 24px !important;
+    opacity: 0.6 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    border: none !important;
+    background: transparent !important;
+    z-index: 10 !important;
+    transition: opacity 0.2s;
+  }
+  .modal-header .close:hover {
+    opacity: 1 !important;
+  }
+  .modal-header .modal-title {
+    text-align: left !important;
+    margin: 0 !important;
+    padding-right: 40px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  /* Styling Tabel Sesuai Tema Notika / Menu Lain */
+  #data-table-basic {
+    border-collapse: collapse;
+    width: 100% !important;
+  }
+  #data-table-basic thead th {
+    background-color: #f1f5f9 !important;
+    color: #334155 !important;
+    font-weight: 700 !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 11.5px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 10px 8px !important;
+    vertical-align: middle !important;
+  }
+  #data-table-basic tbody td {
+    border: 1px solid #e2e8f0;
+    vertical-align: middle !important;
+    font-size: 12px;
   }
   
   /* Styling untuk Header Row */
   .header-row {
-    background-color: #f8f9fa !important;
+    background-color: #f8fafc !important;
     font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.15s ease;
   }
   .header-row:hover {
-    background-color: #e9ecef !important;
+    background-color: #f1f5f9 !important;
   }
   .header-row.status-normal {
-    border-left: 4px solid #28a745;
+    border-left: 4px solid #10b981 !important;
   }
   .header-row .no-column {
     font-weight: 700;
-    color: #495057;
+    color: #475569;
   }
   .header-clickable {
     cursor: pointer;
@@ -760,96 +700,196 @@
   /* Styling untuk Detail Row */
   .detail-row {
     background-color: #ffffff;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.15s ease;
   }
   .detail-row:hover {
-    background-color: #f5f5f5;
+    background-color: #fafbfc;
   }
   .detail-row.detail-hidden {
     display: none !important;
   }
   .detail-container {
-    padding: 5px 5px 5px 30px;
+    padding: 10px 15px 12px 35px;
+    background: #f8fafc;
+    border-left: 3px solid #0284c7;
     overflow-x: auto;
   }
   .detail-container .table {
     min-width: 850px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    margin-bottom: 0;
+  }
+  .detail-container .table thead th {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    font-weight: 700 !important;
+    border: 1px solid #cbd5e1 !important;
+    font-size: 11px !important;
   }
   
   /* Badge */
   .badge-detail {
-    background-color: #17a2b8;
-    color: white;
-    padding: 2px 8px;
+    background-color: #e0f2fe;
+    color: #0369a1;
+    border: 1px solid #bae6fd;
+    font-weight: 700;
+    padding: 3px 8px;
     border-radius: 12px;
     font-size: 11px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
   }
   
-  /* Tombol */
-  .btn-aksi { padding: 3px 6px; font-size: 0.8rem; margin: 0 1px; }
+  /* ==============================================
+     UNIFIED BUTTON STYLING
+     ============================================== */
+  .btn {
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+    font-weight: 600 !important;
+  }
+  .btn-sm, .btn-xs {
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+  }
+  .btn.Edit, .btn.EditSasaran, .btn.EditPeriodeMisi, .btn-amber {
+    background-color: #f59e0b !important;
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 1px 3px rgba(245, 158, 11, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .btn.Edit:hover, .btn.EditSasaran:hover, .btn.EditPeriodeMisi:hover, .btn-amber:hover {
+    background-color: #d97706 !important;
+    border-color: #d97706 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(245, 158, 11, 0.35) !important;
+  }
+  .btn.Hapus, .btn.HapusSasaran, .btn.HapusPeriodeMisi, .btn-danger {
+    background-color: #ef4444 !important;
+    border-color: #ef4444 !important;
+    color: #ffffff !important;
+    border-radius: 6px !important;
+    padding: 5px 9px !important;
+    font-size: 12px !important;
+    line-height: 1.4 !important;
+    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.25) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .btn.Hapus:hover, .btn.HapusSasaran:hover, .btn.HapusPeriodeMisi:hover, .btn-danger:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 3px 6px rgba(239, 68, 68, 0.35) !important;
+  }
+  .button-icon-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    margin: 0 !important;
+  }
+  .button-icon-btn .btn-reco-mg,
+  .button-icon-btn .btn-button-mg {
+    margin: 0 !important;
+  }
+  .btn-aksi { padding: 3px 6px; font-size: 0.8rem; margin: 0 1px; border-radius: 6px !important; }
   .btn-group-aksi {
     display: flex;
     justify-content: center;
-    gap: 3px;
+    gap: 4px;
     flex-wrap: wrap;
   }
   .no-data {
-    padding: 30px 0;
-    color: #999;
-  }
-  
-  /* Modal */
-  .modal-body {
-    max-height: 70vh;
-    overflow-y: auto;
-    padding: 15px 20px;
-  }
-  .modal-content {
-    max-height: 95vh;
-    overflow: hidden;
+    padding: 35px 0;
+    color: #64748b;
   }
   
   /* Bidang Urusan Row */
   .bidang-urusan-row {
     display: flex;
     gap: 8px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
   }
   .bidang-urusan-row select {
     flex: 1;
+    border-radius: 6px;
+    height: 34px;
+    border: 1px solid #cbd5e1;
+  }
+  
+  /* Kementerian Row */
+  .kementerian-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .kementerian-row select {
+    flex: 1;
+    border-radius: 6px;
+    height: 34px;
+    border: 1px solid #cbd5e1;
+  }
+  
+  /* Urusan Row */
+  .urusan-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .urusan-row select {
+    border-radius: 6px;
+    height: 34px;
+    border: 1px solid #cbd5e1;
   }
   
   /* Parent display di modal */
   #sub_unit_parent_display {
-    font-size: 14px;
-    padding: 8px 15px;
+    font-size: 13px;
+    padding: 6px 14px;
     display: inline-block;
+    border-radius: 6px;
   }
   #sub_unit_parent_display .fa-database {
-    color: #5bc0de;
+    color: #0284c7;
   }
   #sub_unit_parent_display .fa-level-up {
-    color: #f0ad4e;
+    color: #f59e0b;
   }
   #sub_unit_parent_dropdown {
     max-width: 300px;
+    border-radius: 6px;
   }
   #toggleParentDropdown {
-    color: #337ab7;
+    color: #0284c7;
     text-decoration: none;
     font-size: 12px;
   }
   
   /* Label untuk bidang urusan di detail */
   .label-default {
-    background: #f0f0f0;
-    color: #333;
+    background: #f1f5f9;
+    color: #334155;
     display: inline-block;
-    margin: 1px;
-    padding: 2px 8px;
-    border: 1px solid #ddd;
-    border-radius: 3px;
-    font-size: 10px;
+    margin: 2px;
+    padding: 3px 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    font-size: 10.5px;
+    font-weight: 500;
   }
   
   /* Responsive */
@@ -863,10 +903,6 @@
     .btn-aksi {
       font-size: 0.7rem;
       padding: 2px 4px;
-    }
-    .modal-body {
-      max-height: 60vh;
-      padding: 10px 15px;
     }
   }
   
