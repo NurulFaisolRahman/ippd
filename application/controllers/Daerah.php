@@ -21217,14 +21217,38 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $dinasMap[$d['id']] = $d['nama'];
                 }
                 
-                // Ambil data Pagu Urusan per tahun yang dipilih
-                $paguList = $this->db
-                    ->where('kode_wilayah', $kodeWilayah)
-                    ->where('tahun', $selectedTahun)
-                    ->where('deleted_at IS NULL')
-                    ->order_by('id', 'ASC')
-                    ->get('pagu_urusan')
-                    ->result_array();
+                // Pastikan kolom tahun ada di tabel pagu_urusan (auto-migrasi aman untuk hosting)
+                if (!$this->db->field_exists('tahun', 'pagu_urusan')) {
+                    @$this->db->query("ALTER TABLE `pagu_urusan` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                    @$this->db->query("UPDATE `pagu_urusan` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                }
+
+                $hasTahunColumn = $this->db->field_exists('tahun', 'pagu_urusan');
+
+                // Ambil data real dari database sesuai filter tahun yang dipilih
+                if ($hasTahunColumn) {
+                    $paguList = $this->db
+                        ->where('kode_wilayah', $kodeWilayah)
+                        ->where('tahun', $selectedTahun)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id', 'ASC')
+                        ->get('pagu_urusan')
+                        ->result_array();
+                } else {
+                    // Jika kolom tahun belum tersedia di database hosting:
+                    // Data eksisting hanya milik baseline tahun 2026.
+                    // Jika filter tahun yang dipilih bukan 2026, wajib kosongkan agar tidak menampilkan data tahun lain!
+                    if ($selectedTahun === '2026') {
+                        $paguList = $this->db
+                            ->where('kode_wilayah', $kodeWilayah)
+                            ->where('deleted_at IS NULL')
+                            ->order_by('id', 'ASC')
+                            ->get('pagu_urusan')
+                            ->result_array();
+                    } else {
+                        $paguList = [];
+                    }
+                }
 
                 foreach ($paguList as &$row) {
                     $row['nama_dinas'] = '- Belum dipilih -';
@@ -21296,13 +21320,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                 $data = [
                     'kode_wilayah' => $kodeWilayah,
-                    'tahun' => $tahun,
                     'kode_urusan' => null,
                     'urusan' => $namaDinas,
                     'pagu' => $paguClean,
                     'instansi_id' => (string)$instansiId,
                     'created_at' => date('Y-m-d H:i:s')
                 ];
+                // Pastikan kolom tahun ada di tabel pagu_urusan
+                if (!$this->db->field_exists('tahun', 'pagu_urusan')) {
+                    @$this->db->query("ALTER TABLE `pagu_urusan` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                    @$this->db->query("UPDATE `pagu_urusan` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                }
+                if ($this->db->field_exists('tahun', 'pagu_urusan')) {
+                    $data['tahun'] = $tahun;
+                }
                 
                 $this->db->insert('pagu_urusan', $data);
                 
@@ -21393,7 +21424,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
 
-                if (!empty($tahun)) {
+                // Pastikan kolom tahun ada di tabel pagu_urusan
+                if (!$this->db->field_exists('tahun', 'pagu_urusan')) {
+                    @$this->db->query("ALTER TABLE `pagu_urusan` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                    @$this->db->query("UPDATE `pagu_urusan` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                }
+                if (!empty($tahun) && $this->db->field_exists('tahun', 'pagu_urusan')) {
                     $data['tahun'] = $tahun;
                 }
                 
@@ -26260,30 +26296,61 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     ->result_array();
                 
                 // ==============================================================
-                // AMBIL DATA DARI TABEL pagu_urusan_rankhir
+                // AMBIL DATA DARI TABEL pagu_urusan_rankhir (Kompatibel dengan DB lokal & hosting)
                 // ==============================================================
-                $this->db->select('r.*')
-                    ->from('pagu_urusan_rankhir r')
-                    ->where('r.kode_wilayah', $KodeWilayah)
-                    ->where('r.tahun', $selectedTahun)
-                    ->where('r.deleted_at IS NULL', null, false);
-                
-                // Filter instansi jika ada
-                if (!empty($filterInstansiId)) {
-                    // Cek apakah ada kolom instansi_id di pagu_urusan
-                    $columns = $this->db->query("SHOW COLUMNS FROM pagu_urusan LIKE 'instansi_id'")->num_rows();
+                // Pastikan kolom tahun ada di tabel pagu_urusan_rankhir (auto-migrasi aman untuk hosting)
+                if (!$this->db->field_exists('tahun', 'pagu_urusan_rankhir')) {
+                    @$this->db->query("ALTER TABLE `pagu_urusan_rankhir` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                    @$this->db->query("UPDATE `pagu_urusan_rankhir` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                }
+
+                $hasTahunRankhir = $this->db->field_exists('tahun', 'pagu_urusan_rankhir');
+
+                if ($hasTahunRankhir) {
+                    $this->db->select('r.*')
+                        ->from('pagu_urusan_rankhir r')
+                        ->where('r.kode_wilayah', $KodeWilayah)
+                        ->where('r.tahun', $selectedTahun)
+                        ->where('r.deleted_at IS NULL', null, false);
                     
-                    if ($columns > 0) {
-                        // Join ke pagu_urusan untuk filter
-                        $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
-                            ->where('pu.instansi_id', $filterInstansiId);
+                    if (!empty($filterInstansiId)) {
+                        $columns = $this->db->query("SHOW COLUMNS FROM pagu_urusan LIKE 'instansi_id'")->num_rows();
+                        if ($columns > 0) {
+                            $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
+                                ->where('pu.instansi_id', $filterInstansiId);
+                        }
+                    }
+                    
+                    $Data['PaguUrusan'] = $this->db
+                        ->order_by('r.id', 'ASC')
+                        ->get()
+                        ->result_array();
+                } else {
+                    // Jika kolom tahun belum ada di database hosting:
+                    // Data eksisting hanya milik baseline tahun 2026.
+                    // Jika tahun yang dipilih bukan 2026, wajib kosongkan!
+                    if ($selectedTahun === '2026') {
+                        $this->db->select('r.*')
+                            ->from('pagu_urusan_rankhir r')
+                            ->where('r.kode_wilayah', $KodeWilayah)
+                            ->where('r.deleted_at IS NULL', null, false);
+                        
+                        if (!empty($filterInstansiId)) {
+                            $columns = $this->db->query("SHOW COLUMNS FROM pagu_urusan LIKE 'instansi_id'")->num_rows();
+                            if ($columns > 0) {
+                                $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
+                                    ->where('pu.instansi_id', $filterInstansiId);
+                            }
+                        }
+                        
+                        $Data['PaguUrusan'] = $this->db
+                            ->order_by('r.id', 'ASC')
+                            ->get()
+                            ->result_array();
+                    } else {
+                        $Data['PaguUrusan'] = [];
                     }
                 }
-                
-                $Data['PaguUrusan'] = $this->db
-                    ->order_by('r.id', 'ASC')
-                    ->get()
-                    ->result_array();
                 
                 // ==============================================================
                 // TAMBAHKAN NAMA INSTANSI KE SETIAP DATA
@@ -26555,22 +26622,51 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
             $filterInstansiId = $this->input->get('instansi_id', TRUE);
             $selectedTahun = $this->input->get('tahun', TRUE) ?: '2026';
-            
-            $this->db->select('r.*')
-                ->from('pagu_urusan_rankhir r')
-                ->where('r.kode_wilayah', $kodeWilayah)
-                ->where('r.tahun', $selectedTahun)
-                ->where('r.deleted_at IS NULL', null, false);
-            
-            if (!empty($filterInstansiId)) {
-                $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
-                    ->where('pu.instansi_id', $filterInstansiId);
+
+            // Pastikan kolom tahun ada di tabel pagu_urusan_rankhir
+            if (!$this->db->field_exists('tahun', 'pagu_urusan_rankhir')) {
+                @$this->db->query("ALTER TABLE `pagu_urusan_rankhir` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                @$this->db->query("UPDATE `pagu_urusan_rankhir` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
             }
-            
-            $data = $this->db
-                ->order_by('r.id', 'ASC')
-                ->get()
-                ->result_array();
+
+            $hasTahunRankhir = $this->db->field_exists('tahun', 'pagu_urusan_rankhir');
+
+            if ($hasTahunRankhir) {
+                $this->db->select('r.*')
+                    ->from('pagu_urusan_rankhir r')
+                    ->where('r.kode_wilayah', $kodeWilayah)
+                    ->where('r.tahun', $selectedTahun)
+                    ->where('r.deleted_at IS NULL', null, false);
+                
+                if (!empty($filterInstansiId)) {
+                    $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
+                        ->where('pu.instansi_id', $filterInstansiId);
+                }
+                
+                $data = $this->db
+                    ->order_by('r.id', 'ASC')
+                    ->get()
+                    ->result_array();
+            } else {
+                if ($selectedTahun === '2026') {
+                    $this->db->select('r.*')
+                        ->from('pagu_urusan_rankhir r')
+                        ->where('r.kode_wilayah', $kodeWilayah)
+                        ->where('r.deleted_at IS NULL', null, false);
+                    
+                    if (!empty($filterInstansiId)) {
+                        $this->db->join('pagu_urusan pu', 'pu.id = r.source_id', 'left')
+                            ->where('pu.instansi_id', $filterInstansiId);
+                    }
+                    
+                    $data = $this->db
+                        ->order_by('r.id', 'ASC')
+                        ->get()
+                        ->result_array();
+                } else {
+                    $data = [];
+                }
+            }
             
             // Tambahkan nama instansi
             foreach ($data as &$row) {
@@ -26870,35 +26966,72 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 $tahun = trim($this->input->post('tahun', TRUE) ?: $this->input->get('tahun', TRUE)) ?: '2026';
                 
                 try {
-                    // Ambil semua data dari pagu_urusan yang aktif untuk tahun ini
-                    $sourceData = $this->db
-                        ->where('kode_wilayah', $kodeWilayah)
-                        ->where('tahun', $tahun)
-                        ->where('deleted_at IS NULL', null, false)
-                        ->order_by('id', 'ASC')
-                        ->get('pagu_urusan')
-                        ->result_array();
+                    // Pastikan kolom tahun ada di pagu_urusan & pagu_urusan_rankhir
+                    if (!$this->db->field_exists('tahun', 'pagu_urusan')) {
+                        @$this->db->query("ALTER TABLE `pagu_urusan` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                        @$this->db->query("UPDATE `pagu_urusan` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                    }
+                    if (!$this->db->field_exists('tahun', 'pagu_urusan_rankhir')) {
+                        @$this->db->query("ALTER TABLE `pagu_urusan_rankhir` ADD COLUMN `tahun` VARCHAR(10) NULL DEFAULT '2026' AFTER `kode_wilayah`");
+                        @$this->db->query("UPDATE `pagu_urusan_rankhir` SET `tahun` = '2026' WHERE `tahun` IS NULL OR `tahun` = ''");
+                    }
+
+                    $hasTahunSource = $this->db->field_exists('tahun', 'pagu_urusan');
+                    $hasTahunRankhir = $this->db->field_exists('tahun', 'pagu_urusan_rankhir');
+                    
+                    // Ambil semua data dari pagu_urusan yang aktif sesuai tahun
+                    if ($hasTahunSource) {
+                        $sourceData = $this->db
+                            ->where('kode_wilayah', $kodeWilayah)
+                            ->where('tahun', $tahun)
+                            ->where('deleted_at IS NULL', null, false)
+                            ->order_by('id', 'ASC')
+                            ->get('pagu_urusan')
+                            ->result_array();
+                    } else {
+                        // Jika kolom belum ada: hanya tahun 2026 yang memiliki data default
+                        if ($tahun === '2026') {
+                            $sourceData = $this->db
+                                ->where('kode_wilayah', $kodeWilayah)
+                                ->where('deleted_at IS NULL', null, false)
+                                ->order_by('id', 'ASC')
+                                ->get('pagu_urusan')
+                                ->result_array();
+                        } else {
+                            $sourceData = [];
+                        }
+                    }
                     
                     $totalInsert = 0;
                     $totalUpdate = 0;
                     $totalSkip = 0;
                     
                     foreach ($sourceData as $row) {
-                        // Cek apakah sudah ada di rankhir berdasarkan source_id dan tahun
-                        $exists = $this->db
+                        // Cek apakah sudah ada di rankhir berdasarkan source_id
+                        $existsQuery = $this->db
                             ->where('source_id', $row['id'])
-                            ->where('kode_wilayah', $kodeWilayah)
-                            ->where('tahun', $tahun)
+                            ->where('kode_wilayah', $kodeWilayah);
+                        
+                        if ($hasTahunRankhir) {
+                            $existsQuery->where('tahun', $tahun);
+                        }
+                        
+                        $exists = $existsQuery
                             ->where('deleted_at IS NULL', null, false)
                             ->get('pagu_urusan_rankhir')
                             ->num_rows();
                         
                         if ($exists > 0) {
                             // Update jika belum diedit oleh daerah
-                            $rankhirRow = $this->db
+                            $rankhirQuery = $this->db
                                 ->where('source_id', $row['id'])
-                                ->where('kode_wilayah', $kodeWilayah)
-                                ->where('tahun', $tahun)
+                                ->where('kode_wilayah', $kodeWilayah);
+                            
+                            if ($hasTahunRankhir) {
+                                $rankhirQuery->where('tahun', $tahun);
+                            }
+                            
+                            $rankhirRow = $rankhirQuery
                                 ->where('deleted_at IS NULL', null, false)
                                 ->get('pagu_urusan_rankhir')
                                 ->row_array();
@@ -26911,27 +27044,30 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             }
                             
                             // Update data rankhir dengan data asli terbaru
+                            $updatePayload = [
+                                'kode_urusan' => $row['kode_urusan'],
+                                'urusan' => $row['urusan'],
+                                'pagu' => $row['pagu'],
+                                'instansi_id' => $row['instansi_id'] ?? null,
+                                'source_kode_urusan' => $row['kode_urusan'],
+                                'source_urusan' => $row['urusan'],
+                                'source_pagu' => $row['pagu'],
+                                'source_instansi_id' => $row['instansi_id'] ?? null,
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ];
+                            if ($hasTahunRankhir) {
+                                $updatePayload['tahun'] = $tahun;
+                            }
+                            
                             $this->db
                                 ->where('id', $rankhirRow['id'])
                                 ->where('kode_wilayah', $kodeWilayah)
-                                ->update('pagu_urusan_rankhir', [
-                                    'kode_urusan' => $row['kode_urusan'],
-                                    'urusan' => $row['urusan'],
-                                    'pagu' => $row['pagu'],
-                                    'instansi_id' => $row['instansi_id'] ?? null,
-                                    'source_kode_urusan' => $row['kode_urusan'],
-                                    'source_urusan' => $row['urusan'],
-                                    'source_pagu' => $row['pagu'],
-                                    'source_instansi_id' => $row['instansi_id'] ?? null,
-                                    'tahun' => $tahun,
-                                    'updated_at' => date('Y-m-d H:i:s')
-                                ]);
+                                ->update('pagu_urusan_rankhir', $updatePayload);
                             $totalUpdate += $this->db->affected_rows();
                         } else {
                             // Insert baru
-                            $this->db->insert('pagu_urusan_rankhir', [
+                            $insertPayload = [
                                 'kode_wilayah' => $kodeWilayah,
-                                'tahun' => $tahun,
                                 'kode_urusan' => $row['kode_urusan'],
                                 'urusan' => $row['urusan'],
                                 'pagu' => $row['pagu'],
@@ -26942,8 +27078,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                 'source_pagu' => $row['pagu'],
                                 'source_instansi_id' => $row['instansi_id'] ?? null,
                                 'created_at' => date('Y-m-d H:i:s'),
-                                'edited_by_daerah' => 0
-                            ]);
+                                'updated_at' => date('Y-m-d H:i:s')
+                            ];
+                            if ($hasTahunRankhir) {
+                                $insertPayload['tahun'] = $tahun;
+                            }
+                            
+                            $this->db->insert('pagu_urusan_rankhir', $insertPayload);
                             $totalInsert += $this->db->affected_rows();
                         }
                     }

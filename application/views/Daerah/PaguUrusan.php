@@ -177,7 +177,7 @@
                                     <?php if (empty($PaguUrusan)) { ?>
                                     <tr>
                                         <td colspan="<?= (isset($_SESSION['Level']) && $_SESSION['Level'] == 3) ? '4' : '3' ?>" class="text-center text-muted" style="padding: 30px 0;">
-                                            <i class="fa fa-info-circle"></i> Belum ada data Pagu Anggaran Perangkat Daerah
+                                            <i class="fa fa-info-circle"></i> Belum ada data Pagu Anggaran Perangkat Daerah untuk Tahun <?= html_escape($SelectedTahun) ?>
                                         </td>
                                     </tr>
                                     <?php } else { ?>
