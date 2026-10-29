@@ -21770,7 +21770,23 @@ public function updateStatusPerjanjianKinerja() {
     public function Pendapatan() {
         $Header['Halaman'] = 'Pendapatan';
 
-        $KodeWilayah = $this->get_kode_wilayah();
+        $is_logged_in = $this->is_logged_in();
+        $HasFiltered = false;
+        if ($is_logged_in) {
+            $KodeWilayah = $this->get_kode_wilayah();
+            $HasFiltered = true;
+        } else {
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            if (!empty($paramKw)) {
+                $KodeWilayah = $paramKw;
+                $HasFiltered = true;
+            } else {
+                $KodeWilayah = '';
+                $HasFiltered = false;
+            }
+        }
+        $Data['HasFiltered'] = $HasFiltered;
+
         $instansi_id = $this->get_instansi_id();
         $is_role_4 = $this->is_role_4();
         $tahun = $this->input->get('tahun', TRUE);
@@ -21884,7 +21900,23 @@ public function updateStatusPerjanjianKinerja() {
     public function Pembiayaan($subtipe = 'all') {
         $Header['Halaman'] = 'Pembiayaan';
 
-        $KodeWilayah = $this->get_kode_wilayah();
+        $is_logged_in = $this->is_logged_in();
+        $HasFiltered = false;
+        if ($is_logged_in) {
+            $KodeWilayah = $this->get_kode_wilayah();
+            $HasFiltered = true;
+        } else {
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            if (!empty($paramKw)) {
+                $KodeWilayah = $paramKw;
+                $HasFiltered = true;
+            } else {
+                $KodeWilayah = '';
+                $HasFiltered = false;
+            }
+        }
+        $Data['HasFiltered'] = $HasFiltered;
+
         $instansi_id = $this->get_instansi_id();
         $is_role_4 = $this->is_role_4();
         $tahun = $this->input->get('tahun', TRUE);
@@ -33267,7 +33299,23 @@ public function updateStatusPerjanjianKinerja() {
     public function TabelIPPD() {
         $Header['Halaman'] = 'Tabel Indeks Perencanaan Pembangunan Daerah (IPPD)';
 
-        $KodeWilayah = $this->get_kode_wilayah();
+        $is_logged_in = $this->is_logged_in();
+        $HasFiltered = false;
+        if ($is_logged_in) {
+            $KodeWilayah = $this->get_kode_wilayah();
+            $HasFiltered = true;
+        } else {
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            if (!empty($paramKw)) {
+                $KodeWilayah = $paramKw;
+                $HasFiltered = true;
+            } else {
+                $KodeWilayah = '';
+                $HasFiltered = false;
+            }
+        }
+        $Data['HasFiltered'] = $HasFiltered;
+
         $instansi_id = $this->get_instansi_id();
         $is_role_4 = $this->is_role_4();
         $tahun = (int)($this->input->get('tahun', TRUE) ?: 2026);
@@ -33279,11 +33327,17 @@ public function updateStatusPerjanjianKinerja() {
         }
 
         // Filter list instansi strictly by kode wilayah akun
-        $this->db->select('id, nama, kodewilayah')->from('akun_instansi')->where('deleted_at IS NULL');
+        $Data['ListInstansi'] = [];
         if (!empty($KodeWilayah)) {
-            $this->db->where('kodewilayah', $KodeWilayah);
+            $Data['ListInstansi'] = $this->db
+                ->select('id, nama, kodewilayah')
+                ->from('akun_instansi')
+                ->where('deleted_at IS NULL')
+                ->where('kodewilayah', $KodeWilayah)
+                ->order_by('nama', 'ASC')
+                ->get()
+                ->result_array();
         }
-        $Data['ListInstansi'] = $this->db->order_by('nama', 'ASC')->get()->result_array();
         
         if (!$filter_instansi && !empty($Data['ListInstansi'])) {
             $filter_instansi = (int)$Data['ListInstansi'][0]['id'];
@@ -33291,16 +33345,15 @@ public function updateStatusPerjanjianKinerja() {
         $inst_id_clean = $filter_instansi ? (int)$filter_instansi : 0;
 
         // Resolve KodeWilayah from selected instansi jika valid
-        if ($inst_id_clean > 0) {
+        if ($inst_id_clean > 0 && !empty($KodeWilayah)) {
             $inst = $this->db->select('kodewilayah')->where('id', $inst_id_clean)->get('akun_instansi')->row_array();
             if (!empty($inst['kodewilayah'])) {
                 $KodeWilayah = $inst['kodewilayah'];
             }
         }
-        if (empty($KodeWilayah)) {
-            $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
-        }
 
+        $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
+        $Data['IsLoggedIn'] = $this->is_logged_in();
         $Data['KodeWilayah'] = $KodeWilayah;
         $Data['NamaWilayah'] = '';
         $is_verifikator = (

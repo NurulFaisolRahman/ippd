@@ -236,6 +236,53 @@
               </div>
             </div>
 
+            <!-- FILTER WILAYAH (Provinsi & Kab/Kota) - SEBELUM LOGIN -->
+            <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+              <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                  <div style="flex: 1 1 250px; min-width: 200px;">
+                    <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                    <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Provinsi</option>
+                      <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                        <option value="<?= html_escape($prov['Kode']) ?>"
+                          <?= (!empty($HasFiltered) && !empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                          <?= html_escape($prov['Nama']) ?>
+                        </option>
+                      <?php } } ?>
+                    </select>
+                  </div>
+
+                  <div style="flex: 1 1 250px; min-width: 200px;">
+                    <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                    <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                      <option value="">Pilih Kab/Kota</option>
+                    </select>
+                  </div>
+
+                  <div style="flex: 0 0 auto;">
+                    <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                      Filter
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <?php if (!empty($KodeWilayah) && !empty($HasFiltered)) { ?>
+                <div class="alert alert-info" style="margin-bottom: 20px;">
+                  <strong>Wilayah terpilih:</strong> <?= html_escape($NamaWilayah ?? '') ?>
+                </div>
+              <?php } ?>
+            <?php } ?>
+
+            <?php if (empty($KodeWilayah)) { ?>
+              <div class="alert alert-info text-center" style="padding: 30px 20px; margin: 20px 0; border-radius: 8px; background-color: #f0f9ff; border: 1px solid #bae6fd;">
+                <i class="fa fa-info-circle fa-2x" style="color: #0284c7; margin-bottom: 10px; display: block;"></i>
+                <h4 style="font-weight: 700; color: #0369a1; margin-bottom: 6px;">Wilayah Belum Dipilih</h4>
+                <p style="color: #475569; margin: 0; font-size: 13.5px;">Silakan pilih <b>Provinsi</b> dan <b>Kab/Kota</b> di atas, kemudian klik tombol <b>Filter</b> untuk menampilkan data.</p>
+              </div>
+            <?php } else { ?>
+
             <!-- Stats Card (Hanya Kartu Penerimaan) -->
             <div class="row" style="margin-bottom: 15px;">
               <div class="col-md-5 col-sm-12">
@@ -341,6 +388,8 @@
               </table>
             </div>
 
+            <?php } ?>
+
           </div>
 
         </div>
@@ -421,8 +470,83 @@
   const baseURL = "<?= base_url() ?>";
   const activeInstansiId = "<?= $ActiveInstansiId ?>";
   const activeTahun = "<?= $TahunAktif ?>";
+  const CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
+  const CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
+  const CURRENT_FILTER_INSTANSI = "<?= !empty($ActiveInstansiId) ? $ActiveInstansiId : '' ?>";
 
   $(document).ready(function() {
+    <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
+      $("#Provinsi").change(function() {
+        var provinsiKode = $(this).val();
+        if (provinsiKode === "") {
+          $("#KabKota").html('<option value="">Pilih Kab/Kota</option>').prop('disabled', true);
+          return;
+        }
+
+        $.ajax({
+          url: baseURL + "Instansi/GetListKabKota",
+          type: "POST",
+          data: { Kode: provinsiKode, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          beforeSend: function() { 
+            $("#KabKota").prop('disabled', true).html('<option value="">Memuat...</option>');
+          },
+          success: function(Data) {
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                KabKota += '<option value="' + Data[i].Kode + '">' + Data[i].Nama + '</option>';
+              }
+            } else {
+              KabKota = '<option value="">Tidak ada data untuk provinsi ini</option>';
+            }
+            $("#KabKota").html(KabKota).prop('disabled', false);
+          },
+          error: function() {
+            $("#KabKota").html('<option value="">Error memuat data</option>').prop('disabled', false);
+          }
+        });
+      });
+
+      $("#Filter").click(function() {
+        if ($("#Provinsi").val() === "") {
+          alert("Mohon Pilih Provinsi");
+          return;
+        }
+        if ($("#KabKota").val() === "") {
+          alert("Mohon Pilih Kab/Kota");
+          return;
+        }
+
+        var kodeWilayah = $("#KabKota").val();
+        var th = $("#filterTahun").val() || activeTahun;
+        window.location.href = baseURL + "Instansi/PembiayaanPenerimaan?tahun=" + th + "&kodewilayah=" + kodeWilayah;
+      });
+
+      <?php if (!empty($HasFiltered) && !empty($KodeWilayah)) { ?>
+        var kodeProv = "<?= substr($KodeWilayah, 0, 2) ?>";
+        var kodeKab  = "<?= $KodeWilayah ?>";
+        $("#Provinsi").val(kodeProv);
+        
+        $.ajax({
+          url: baseURL + "Instansi/GetListKabKota",
+          type: "POST",
+          data: { Kode: kodeProv, [CSRF_NAME]: CSRF_TOKEN },
+          dataType: 'json',
+          success: function(Data) {
+            var KabKota = '<option value="">Pilih Kab/Kota</option>';
+            if (Data && Data.length > 0) {
+              for (let i = 0; i < Data.length; i++) {
+                var selected = (Data[i].Kode === kodeKab) ? 'selected' : '';
+                KabKota += '<option value="' + Data[i].Kode + '" ' + selected + '>' + Data[i].Nama + '</option>';
+              }
+            }
+            $("#KabKota").html(KabKota).prop('disabled', false);
+          }
+        });
+      <?php } ?>
+    <?php } ?>
+
     // Inisialisasi Select2 AJAX untuk Rekening Penerimaan (Awalan 6.1)
     $('#selectRekening').select2({
       dropdownParent: $('#modalPenerimaan'),
@@ -465,6 +589,9 @@
     if (instEl) {
       url += '&instansi_id=' + instEl.value;
     }
+    <?php if (!empty($KodeWilayah)) { ?>
+      url += '&kodewilayah=<?= htmlspecialchars($KodeWilayah) ?>';
+    <?php } ?>
     window.location.href = url;
   }
 

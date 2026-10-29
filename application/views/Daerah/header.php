@@ -352,9 +352,9 @@ $isVerifikator = (
         ->row_array();
       $NamaDaerah = $rowWilayahInst['Nama'] ?? '';
     }
-  } elseif (!empty($_SESSION['NamaInstansi'])) {
+  } elseif (isset($_SESSION['Level']) && !empty($_SESSION['NamaInstansi'])) {
     $LoginInfo = $_SESSION['NamaInstansi'];
-  } elseif (!empty($_SESSION['Username'])) {
+  } elseif (isset($_SESSION['Level']) && !empty($_SESSION['Username'])) {
     $LoginInfo = $_SESSION['Username'];
   }
 
@@ -372,25 +372,23 @@ $isVerifikator = (
       <button id="sidebarToggle" class="sidebar-header-btn" type="button" aria-label="Toggle sidebar">
         <i class="fas fa-bars"></i>
       </button>
-
       <?php 
         $headerDaerah = !empty($NamaDaerah) ? $NamaDaerah : ($_SESSION['NamaDaerah'] ?? ($_SESSION['NamaWilayah'] ?? ''));
         $headerUser = !empty($LoginInfo) ? $LoginInfo : (!empty($_SESSION['NamaInstansi']) ? $_SESSION['NamaInstansi'] : (!empty($_SESSION['IsVerifikator']) ? 'Verifikator' : ($_SESSION['Username'] ?? '')));
       ?>
-      <?php if (isset($_SESSION['Level']) && (int)$_SESSION['Level'] === 4) { ?>
+      <?php if (isset($_SESSION['Level'])) { ?>
         <?php if (!empty($headerDaerah)) { ?>
           <span class="login-badge daerah-badge" title="Daerah: <?= html_escape($headerDaerah) ?>">
             <i class="fas fa-map-marker-alt"></i>
             <?= html_escape($headerDaerah) ?>
           </span>
         <?php } ?>
-      <?php } ?>
-
-      <?php if (!empty($headerUser)) { ?>
-        <span class="login-badge" title="<?= html_escape($headerUser) ?>">
-          <i class="fas fa-user-shield"></i>
-          <?= html_escape($headerUser) ?>
-        </span>
+        <?php if (!empty($headerUser)) { ?>
+          <span class="login-badge" title="<?= html_escape($headerUser) ?>">
+            <i class="fas fa-user-shield"></i>
+            <?= html_escape($headerUser) ?>
+          </span>
+        <?php } ?>
       <?php } ?>
     </div>
 
