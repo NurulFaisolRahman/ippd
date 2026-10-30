@@ -248,43 +248,44 @@ if (!empty($KeterkaitanList)) {
         margin: 0;
     }
 
-    /* Tabel Keterkaitan Indikator Sesuai Desain */
+    /* Tabel Keterkaitan Indikator - Serasi dengan Menu RKPD Lain */
     .table-keterkaitan {
         width: 100%;
-        border-collapse: collapse !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
         font-size: 13px;
         margin-bottom: 0;
-        border: 1.5px solid #1b4f72 !important;
+        border: 1px solid #b7d7b0 !important;
     }
     .table-keterkaitan thead th {
-        background: #1b4f72 !important;
-        color: #ffffff !important;
+        background: #d9ead3 !important;
+        color: #1b4d21 !important;
         text-align: center;
         vertical-align: middle !important;
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12.5px;
         padding: 12px 10px !important;
-        border: 1px solid #2874a6 !important;
-        line-height: 1.35;
+        border: 1px solid #b7d7b0 !important;
+        line-height: 1.4;
     }
     .table-keterkaitan tbody td {
         vertical-align: top !important;
         padding: 10px 12px !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #e2e8f0 !important;
         line-height: 1.5;
         color: #1e293b;
         background-color: #ffffff;
     }
     .table-keterkaitan tbody tr.subgroup-header td {
-        background: #e9ecef !important;
+        background: #f1f8f3 !important;
         font-weight: 700;
-        color: #0f172a;
+        color: #14532d;
         padding: 11px 14px !important;
-        border-top: 2px solid #1b4f72 !important;
-        border-bottom: 2px solid #94a3b8 !important;
+        border-top: 2px solid #2d6a4f !important;
+        border-bottom: 1.5px solid #b7d7b0 !important;
     }
     .table-keterkaitan tbody tr:not(.subgroup-header):hover td {
-        background-color: #f8fafc;
+        background-color: #fbfdfb;
     }
 
     .action-group {
@@ -711,8 +712,8 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                 <div class="row">
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
-                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <div class="panel panel-default" style="border-left: 4px solid #2d6a4f; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f8f3; font-weight: bold; color: #2d6a4f; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                                 <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
                                 <?php if ($SelectedTahun == '2026') { ?>
                                     <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
@@ -870,8 +871,8 @@ MODAL EDIT KETERKAITAN INDIKATOR
                 <div class="row">
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
-                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <div class="panel panel-default" style="border-left: 4px solid #2d6a4f; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f8f3; font-weight: bold; color: #2d6a4f; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                                 <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
                                 <?php if ($SelectedTahun == '2026') { ?>
                                     <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
@@ -1105,7 +1106,7 @@ $(document).ready(function() {
             }
 
             html += '<div style="flex: 1;">' +
-                        '<b style="color: #1b4f72; font-size: 13px;">' + kd + '. ' + item.sasaran + '</b>' +
+                        '<b style="color: #2d6a4f; font-size: 13px;">' + kd + '. ' + item.sasaran + '</b>' +
                     '</div>' +
                 '</div>' +
                 '<div class="panel-body ' + (isEdit ? 'edit-sas-nas-body' : 'sas-nas-body') + '" style="padding: 12px 14px; background: #ffffff;' + (!isSasChecked ? ' opacity: 0.5;' : '') + '">' +

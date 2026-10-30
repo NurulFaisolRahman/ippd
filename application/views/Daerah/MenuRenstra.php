@@ -284,7 +284,7 @@
                             <div class="basic-tb-hd">
                                 <div class="button-icon-btn sm-res-mg-t-30">
                                     <button class="btn btn-success" data-toggle="modal" data-target="#ModalInput">
-                                        <i class="notika-icon bi-plus-lg"></i> <b>Tambah Data</b>
+                                        <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i> <b>Tambah Data</b>
                                     </button>
                                 </div>
                             </div>

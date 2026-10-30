@@ -95,38 +95,38 @@ $can_edit = isset($_SESSION['Level']) && $_SESSION['Level'] == 3;
         margin: 0;
     }
 
-    /* Tabel Sasaran Pembangunan Daerah Sesuai Gambar User */
+    /* Tabel Sasaran Pembangunan Daerah - Serasi dengan Menu RKPD Lain */
     .table-sasaran-daerah {
         width: 100%;
-        border-collapse: collapse !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
         font-size: 13px;
         margin-bottom: 0;
-        border: 1px solid #1b4f72 !important;
+        border: 1px solid #b7d7b0 !important;
     }
     .table-sasaran-daerah thead th {
-        background: #1b4f72 !important;
-        color: #ffffff !important;
+        background: #d9ead3 !important;
+        color: #1b4d21 !important;
         text-align: center;
         vertical-align: middle !important;
         font-weight: 700;
         font-size: 12.5px;
-        padding: 10px 8px !important;
-        border: 1px solid #2874a6 !important;
-        line-height: 1.35;
+        padding: 12px 10px !important;
+        border: 1px solid #b7d7b0 !important;
+        line-height: 1.4;
     }
     .table-sasaran-daerah tbody td {
         vertical-align: top !important;
         padding: 10px 12px !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #e2e8f0 !important;
         line-height: 1.5;
         color: #1e293b;
         background-color: #ffffff;
     }
     .table-sasaran-daerah tbody tr:hover td {
-        background-color: #f8fafc;
+        background-color: #fbfdfb;
     }
 
-    .action-group {
     .action-group {
         display: inline-flex;
         gap: 5px;

@@ -105,7 +105,7 @@
                   data-toggle="modal"
                   data-target="#ModalInputData"
                   style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,194,146,0.25);">
-                  <i class="notika-icon bi bi-plus-lg" style="font-size: 15px;"></i>
+                  <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i>
                   <span>Tambah Kegiatan/Sub</span>
                 </button>
               </div>
@@ -113,8 +113,9 @@
 
 
             <!-- ================= TABLE ================= -->
-            <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+            <div class="table-ikk-wrapper">
+              <div class="table-responsive">
+                <table id="data-table-basic" class="table table-striped table-ikk-custom">
                 <thead>
                   <tr>
                     <th class="text-center" style="width:70px;">No</th>
@@ -181,6 +182,7 @@
                 </tbody>
               </table>
             </div>
+          </div>
 
           </div><!-- /.data-table-list -->
         </div>

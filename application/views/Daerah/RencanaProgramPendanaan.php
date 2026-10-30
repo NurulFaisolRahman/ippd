@@ -101,15 +101,16 @@
             <?php if ($IsRole4) { ?>
               <div class="basic-tb-hd" style="margin-bottom: 20px;">
                 <button class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalTambah" style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,194,146,0.25);">
-                  <i class="notika-icon bi bi-plus-lg" style="font-size: 15px;"></i> <span>Tambah Data</span>
+                  <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i> <span>Tambah Data</span>
                 </button>
               </div>
             <?php } ?>
 
 
             <!-- ================= TABLE ================= -->
-            <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+            <div class="table-ikk-wrapper">
+              <div class="table-responsive">
+                <table id="data-table-basic" class="table table-striped table-ikk-custom">
                 <thead>
                   <tr>
                     <th rowspan="3">BIDANG URUSAN PROGRAM/OUTCOME <br>KEGIATAN SUB KEGIATAN</th>
@@ -204,6 +205,7 @@
                 </tbody>
               </table>
             </div>
+          </div>
 
           </div>
         </div>

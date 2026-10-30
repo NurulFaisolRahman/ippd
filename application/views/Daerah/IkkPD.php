@@ -422,18 +422,29 @@ if (!function_exists('format_target_koma')) {
     height: 34px !important;
 }
 .dataTables_wrapper .dataTables_filter {
-    float: right;
-    margin-bottom: 16px;
-    position: relative;
+    float: right !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin-bottom: 14px !important;
+    margin-right: 0 !important;
+    padding-right: 0 !important;
+    position: relative !important;
+    text-align: right !important;
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
 }
 .dataTables_wrapper .dataTables_filter label {
-    font-size: 13px;
-    color: #64748b;
-    font-weight: normal;
-    margin: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 13px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 8px !important;
 }
 .dataTables_wrapper .dataTables_filter input {
     height: 36px !important;
@@ -449,6 +460,7 @@ if (!function_exists('format_target_koma')) {
     width: 220px !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
     margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 .dataTables_wrapper .dataTables_filter input:focus {
     width: 260px !important;
@@ -461,6 +473,34 @@ if (!function_exists('format_target_koma')) {
 .dataTables_filter label::after {
     display: none !important;
     content: none !important;
+}
+
+/* Perjelas Icon + & Icon Tombol Aksi */
+.notika-icon.bi-plus-lg,
+.notika-icon.bi-plus,
+.notika-icon[class*="bi-"] {
+    font-family: 'bootstrap-icons' !important;
+    font-style: normal !important;
+    font-weight: 900 !important;
+}
+.btn-success .notika-icon,
+.btn-success i,
+.notika-btn-success i,
+.notika-btn-success .notika-icon,
+.btn-primary i,
+.button-icon-btn i,
+.btn i.fa,
+.btn i.fa-plus,
+.btn i.bi,
+.btn i.bi-plus-lg,
+.btn i.bi-plus,
+.btn .notika-icon {
+    color: #ffffff !important;
+    opacity: 1 !important;
+    font-size: 14px !important;
+    font-weight: 900 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
 }
 
 /* Pagination & Info */

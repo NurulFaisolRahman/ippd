@@ -468,7 +468,7 @@ sub {
                   data-toggle="modal"
                   data-target="#ModalInputIKU"
                   style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,194,146,0.25);">
-                  <i class="notika-icon bi bi-plus-lg" style="font-size: 15px;"></i>
+                  <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i>
                   <span>Tambah IKU PD</span>
                 </button>
               </div>
@@ -476,8 +476,9 @@ sub {
 
 
             <!-- ================= TABLE ================= -->
-            <div class="table-responsive">
-              <table id="data-table-basic" class="table table-striped">
+            <div class="table-ikk-wrapper">
+              <div class="table-responsive">
+                <table id="data-table-basic" class="table table-striped table-ikk-custom">
                 <thead>
                   <tr class="text-center">
                     <th rowspan="2" style="width:40px;">No</th>
@@ -486,13 +487,13 @@ sub {
                     <th rowspan="2" style="min-width:180px;">Definisi Operasional</th>
                     <th class="text-center" rowspan="2" style="width:80px;">Satuan</th>
                     <th class="text-center" rowspan="2" style="width:90px;">Baseline<br>2024</th>
-                    <th class="text-center" colspan="6">Target Tahun</th>
+                    <th class="text-center th-target-group" colspan="6">Target Tahun</th>
                     <th rowspan="2">Keterangan</th>
                     <?php if ($IsRole4) { ?>
                     <th class="text-center" rowspan="2" style="width:130px;">Aksi</th>
                     <?php } ?>
                   </tr>
-                  <tr class="text-center">
+                  <tr class="text-center th-years-sub">
                     <th class="text-center">2025</th>
                     <th class="text-center">2026</th>
                     <th class="text-center">2027</th>
@@ -537,14 +538,14 @@ if (!function_exists('format_target_koma')) {
     }
 }
 ?>
-                        <td class="text-center"><?= html_escape($row['satuan']) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['baseline_2024'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2025'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2026'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2027'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2028'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2029'] ?? null) ?></td>
-                        <td class="text-center"><?= format_target_koma($row['t_2030'] ?? null) ?></td>
+                        <td class="text-center"><span class="badge-satuan"><?= html_escape($row['satuan']) ?></span></td>
+                        <td class="text-center td-baseline-val"><?= format_target_koma($row['baseline_2024'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2025'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2026'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2027'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2028'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2029'] ?? null) ?></td>
+                        <td class="text-center td-target-val"><?= format_target_koma($row['t_2030'] ?? null) ?></td>
                         <td><?= html_escape($row['keterangan']) ?></td>
                         <?php if ($IsRole4) { ?>
                           <td class="text-center" style="vertical-align: middle;">
@@ -582,6 +583,7 @@ if (!function_exists('format_target_koma')) {
                 </tbody>
               </table>
             </div>
+          </div>
 
           </div>
         </div>

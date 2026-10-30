@@ -1,24 +1,7 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
-<style>
-/* ========== UKURAN FONT TABEL SAJA ========== */
-/* Judul tabel (th) - ukuran 12px dan BOLD */
-#data-table-arah th {
-    font-size: 12px;
-    font-weight: bold;
-}
 
-/* Isi tabel (td) - ukuran 12px, normal (tidak bold) */
-#data-table-arah td {
-    font-size: 12px;
-    font-weight: normal;
-}
-
-#data-table-arah {
-    font-size: 12px;
-}
-</style>
 
 
 <div class="main-content">
@@ -121,14 +104,15 @@
             <?php if ($IsRole4) { ?>
               <div class="basic-tb-hd" style="margin-bottom: 20px;">
                 <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInput" style="height: 38px; padding: 0 20px; border-radius: 6px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 2px 5px rgba(0,194,146,0.25);">
-                  <i class="notika-icon bi bi-plus-lg" style="font-size: 15px;"></i> <span>Tambah Arah Kebijakan</span>
+                  <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i> <span>Tambah Arah Kebijakan</span>
                 </button>
               </div>
             <?php } ?>
 
             <!-- ================= TABLE ================= -->
-            <div class="table-responsive">
-              <table id="data-table-arah" class="table table-striped">
+            <div class="table-ikk-wrapper">
+              <div class="table-responsive">
+                <table id="data-table-arah" class="table table-striped table-ikk-custom">
                 <thead>
                   <tr>
                     <th style="width:60px;">NO</th>
@@ -195,6 +179,7 @@
                 </tbody>
               </table>
             </div>
+          </div>
 
           </div>
         </div>

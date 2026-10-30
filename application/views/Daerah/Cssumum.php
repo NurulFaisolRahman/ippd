@@ -123,19 +123,277 @@
             color: #334155 !important;
         }
 
-        #data-table-basic {
-        font-size: 12px;
+        /* ================= TABEL MODERN RENSTRA (SERUPA IKK PD) ================= */
+        .table-ikk-wrapper {
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            overflow: hidden !important;
+            background: #ffffff !important;
+            margin-bottom: 12px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+        }
+        .table-ikk-wrapper .table-responsive {
+            margin-bottom: 0 !important;
+            border: none !important;
         }
 
-        #data-table-basic thead th {
-        font-size: 12px;
-        font-weight: bold;
-        padding: 6px;
+        .table-ikk-custom {
+            width: 100% !important;
+            border-collapse: separate !important;
+            border-spacing: 0 !important;
+            font-size: 12.5px !important;
+            margin-bottom: 0 !important;
+            background: #ffffff !important;
         }
 
-        #data-table-basic tbody td {
-        font-size: 12px;
-        padding: 6px;
+        .table-ikk-custom thead tr th {
+            background: #f8fafc !important;
+            color: #334155 !important;
+            font-weight: 700 !important;
+            font-size: 12px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.3px !important;
+            padding: 12px 10px !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-bottom: 2px solid #cbd5e1 !important;
+            border-right: 1px solid #e2e8f0 !important;
+            vertical-align: middle !important;
+            text-align: center;
+        }
+        .table-ikk-custom thead tr th:last-child {
+            border-right: none !important;
+        }
+        .table-ikk-custom thead tr th.th-target-group {
+            background: #f1f5f9 !important;
+            color: #0f172a !important;
+            font-weight: 800 !important;
+            border-bottom: 1.5px solid #cbd5e1 !important;
+        }
+        .table-ikk-custom thead tr.th-years-sub th {
+            background: #f8fafc !important;
+            font-size: 11.5px !important;
+            color: #0369a1 !important;
+            font-weight: 700 !important;
+            padding: 9px 6px !important;
+        }
+
+        .table-ikk-custom tbody td {
+            padding: 11px 10px !important;
+            border-top: 1px solid #f1f5f9 !important;
+            border-right: 1px solid #f1f5f9 !important;
+            border-bottom: none !important;
+            border-left: none !important;
+            vertical-align: middle !important;
+            color: #1e293b !important;
+            font-size: 12.5px !important;
+            line-height: 1.45 !important;
+        }
+        .table-ikk-custom tbody td:last-child {
+            border-right: none !important;
+        }
+        .table-ikk-custom tbody tr:hover td {
+            background-color: #f8fafc !important;
+        }
+        .table-ikk-custom tbody tr:nth-of-type(odd) td {
+            background-color: #ffffff;
+        }
+        .table-ikk-custom tbody tr:nth-of-type(even) td {
+            background-color: #fafbfc;
+        }
+
+        /* Kolom Nilai Baseline & Target */
+        .table-ikk-custom .td-baseline-val {
+            background-color: #f8fafc !important;
+            font-weight: 700 !important;
+            color: #334155 !important;
+            font-family: 'Consolas', 'Roboto Mono', monospace !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            border-right: 1.5px solid #cbd5e1 !important;
+            min-width: 65px;
+        }
+        .table-ikk-custom .td-target-val {
+            background-color: #ffffff !important;
+            font-weight: 600 !important;
+            color: #0369a1 !important;
+            font-family: 'Consolas', 'Roboto Mono', monospace !important;
+            font-size: 12px !important;
+            text-align: center !important;
+            border-right: 1px dashed #e2e8f0 !important;
+            min-width: 60px;
+        }
+
+        /* Card Modern Curve Renstra */
+        .data-table-list {
+            border-radius: 14px !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid #e2e8f0 !important;
+            background: #ffffff !important;
+            padding: 24px 26px !important;
+        }
+
+        /* DataTables Controls & Wrapper Styling - Konsep IKK PD */
+        .dataTables_wrapper {
+            padding-top: 8px !important;
+        }
+        .table-ikk-wrapper .dataTables_wrapper {
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+            padding-top: 8px !important;
+        }
+        .dataTables_wrapper .dataTables_length {
+            float: left !important;
+            margin-bottom: 14px !important;
+            font-size: 13px !important;
+            color: #64748b !important;
+        }
+        .dataTables_wrapper .dataTables_length select {
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 6px !important;
+            padding: 4px 8px !important;
+            margin: 0 6px !important;
+            outline: none !important;
+            background: #ffffff !important;
+            font-size: 13px !important;
+            color: #334155 !important;
+            height: 34px !important;
+        }
+        .dataTables_wrapper .dataTables_filter {
+            float: right !important;
+            width: auto !important;
+            max-width: 100% !important;
+            margin-bottom: 14px !important;
+            margin-right: 0 !important;
+            padding-right: 0 !important;
+            position: relative !important;
+            text-align: right !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+            align-items: center !important;
+        }
+        .dataTables_wrapper .dataTables_filter label {
+            font-size: 13px !important;
+            color: #64748b !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: auto !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: flex-end !important;
+            gap: 8px !important;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            height: 36px !important;
+            padding: 6px 14px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 20px !important;
+            font-size: 13px !important;
+            color: #1e293b !important;
+            background-color: #ffffff !important;
+            background-image: none !important;
+            outline: none !important;
+            transition: all 0.2s ease !important;
+            width: 220px !important;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        .dataTables_wrapper .dataTables_filter input:focus {
+            width: 260px !important;
+            border-color: #0ea5e9 !important;
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15) !important;
+        }
+        .dataTables_wrapper .dataTables_filter label:after,
+        .dataTables_wrapper .dataTables_filter label::after,
+        .dataTables_filter label:after,
+        .dataTables_filter label::after {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Perjelas Icon + & Icon Tombol Aksi */
+        .notika-icon.bi-plus-lg,
+        .notika-icon.bi-plus,
+        .notika-icon[class*="bi-"] {
+            font-family: 'bootstrap-icons' !important;
+            font-style: normal !important;
+            font-weight: 900 !important;
+        }
+        .btn-success .notika-icon,
+        .btn-success i,
+        .notika-btn-success i,
+        .notika-btn-success .notika-icon,
+        .btn-primary i,
+        .button-icon-btn i,
+        .btn i.fa,
+        .btn i.fa-plus,
+        .btn i.bi,
+        .btn i.bi-plus-lg,
+        .btn i.bi-plus,
+        .btn .notika-icon {
+            color: #ffffff !important;
+            opacity: 1 !important;
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+        }
+
+        .dataTables_wrapper .dataTables_info {
+            float: left;
+            margin-top: 18px;
+            font-size: 12.5px;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .dataTables_wrapper .dataTables_paginate {
+            float: right;
+            margin-top: 18px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.previous:before,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.next:before {
+            display: none !important;
+            content: "" !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            min-width: 32px !important;
+            height: 32px !important;
+            line-height: 30px !important;
+            padding: 0 8px !important;
+            text-align: center !important;
+            font-size: 12px !important;
+            border-radius: 6px !important;
+            background: #ffffff !important;
+            color: #475569 !important;
+            border: 1px solid #e2e8f0 !important;
+            margin: 0 3px !important;
+            display: inline-block !important;
+            vertical-align: middle !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
+            box-sizing: border-box !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #f1f5f9 !important;
+            border-color: #cbd5e1 !important;
+            color: #0f172a !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: #00c292 !important;
+            border-color: #00c292 !important;
+            color: #ffffff !important;
+            font-weight: 700 !important;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+            opacity: 0.4 !important;
+            cursor: not-allowed !important;
+            background: #f8fafc !important;
+            border-color: #e2e8f0 !important;
+            color: #94a3b8 !important;
         }
 
         /* ================= AKSI BUTTON DALAM TABEL ================= */

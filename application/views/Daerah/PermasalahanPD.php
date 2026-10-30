@@ -1,31 +1,7 @@
 <?php $this->load->view('Daerah/sidebar'); ?>
 <?php $this->load->view('Daerah/Cssumum'); ?>
 
-<style>
-/* Tambahan CSS untuk mengatur ukuran font tabel */
-#data-table-permasalahan,
-#data-table-permasalahan th,
-#data-table-permasalahan td {
-    font-size: 12px;
-}
 
-/* Judul tabel tetap BOLD dengan ukuran 12px */
-.data-table-list .table th {
-    font-size: 12px;
-    font-weight: bold;  /* atau font-weight: 700; */
-}
-
-/* Isi tabel ukuran 12px (tidak bold) */
-.data-table-list .table td {
-    font-size: 12px;
-    font-weight: normal;
-}
-
-/* Untuk memastikan semua elemen dalam tabel berukuran 12px */
-.data-table-list .table {
-    font-size: 12px;
-}
-</style>
 
 
 <div class="main-content">
@@ -128,15 +104,16 @@
               <div class="basic-tb-hd">
                 <div class="button-icon-btn sm-res-mg-t-30">
                   <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputPermasalahanPD" style="height: 38px; padding: 0 20px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
-                    <i class="notika-icon bi-plus-lg"></i> <b>Tambah Permasalahan</b>
+                    <i class="fa fa-plus" style="font-size: 14px; font-weight: 900; color: #ffffff !important;"></i> <b>Tambah Permasalahan</b>
                   </button>
                 </div>
               </div>
               <br>
             <?php } ?>
 
-            <div class="table-responsive">
-              <table id="data-table-permasalahan" class="table table-striped">
+            <div class="table-ikk-wrapper">
+              <div class="table-responsive">
+                <table id="data-table-permasalahan" class="table table-striped table-ikk-custom">
                 <thead>
                   <tr>
                     <th class="text-center" style="width:50px;">No</th>
@@ -206,6 +183,7 @@
                 </tbody>
               </table>
             </div>
+          </div>
 
           </div>
         </div>

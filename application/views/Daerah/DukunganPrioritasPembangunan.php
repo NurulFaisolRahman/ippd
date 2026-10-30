@@ -89,49 +89,52 @@ if (!empty($DukunganList)) {
         margin: 0;
     }
 
-    /* Tabel Sesuai Gambar Referensi */
+    /* Tabel Dukungan Prioritas Pembangunan - Serasi dengan Menu RKPD Lain */
     .table-dukungan {
         width: 100%;
-        border-collapse: collapse !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
         font-size: 13px;
         margin-bottom: 0;
-        border: 1.5px solid #1b4f72 !important;
+        border: 1px solid #b7d7b0 !important;
     }
     .table-dukungan thead th {
-        background: #1b4f72 !important;
-        color: #ffffff !important;
+        background: #d9ead3 !important;
+        color: #1b4d21 !important;
         text-align: center;
         vertical-align: middle !important;
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12.5px;
         padding: 10px 8px !important;
-        border: 1px solid #2874a6 !important;
+        border: 1px solid #b7d7b0 !important;
         line-height: 1.35;
     }
     .table-dukungan thead th.th-number {
-        background: #154360 !important;
+        background: #cbe3c3 !important;
+        color: #1b4d21 !important;
+        border: 1px solid #b7d7b0 !important;
         font-size: 12px;
         padding: 4px 6px !important;
     }
     .table-dukungan tbody td {
         vertical-align: top !important;
         padding: 8px 10px !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #e2e8f0 !important;
         line-height: 1.45;
         color: #1e293b;
         background-color: #ffffff;
     }
     .table-dukungan tbody tr.subgroup-header td {
-        background: #f1f5f9 !important;
+        background: #f1f8f3 !important;
         font-weight: 700;
-        color: #0f172a;
+        color: #14532d;
         padding: 10px 14px !important;
-        border-top: 2px solid #1b4f72 !important;
-        border-bottom: 1.5px solid #94a3b8 !important;
+        border-top: 2px solid #2d6a4f !important;
+        border-bottom: 1.5px solid #b7d7b0 !important;
         font-size: 13.5px;
     }
     .table-dukungan tbody tr:not(.subgroup-header):hover td {
-        background-color: #f8fafc;
+        background-color: #fbfdfb;
     }
 
     .kegiatan-item-block {
@@ -540,7 +543,7 @@ if (!empty($DukunganList)) {
 <div class="modal fade" id="ModalInputDukungan" role="dialog" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog modal-lg" style="width: 90%; max-width: 950px;">
         <div class="modal-content">
-            <div class="modal-header" style="background: #1b4f72; color: #ffffff;">
+            <div class="modal-header" style="background: #2d6a4f; color: #ffffff;">
                 <button type="button" class="close" data-dismiss="modal" style="color: #ffffff; opacity: 0.8;">&times;</button>
                 <h4 class="modal-title" style="color: #ffffff; font-weight: 700; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
                     <span><i class="fa fa-plus-circle"></i> Tambah Dukungan Prioritas Pembangunan</span>
