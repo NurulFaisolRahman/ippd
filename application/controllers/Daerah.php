@@ -16,8 +16,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         redirect(base_url('Instansi/TabelIPPD'));
                         exit;
                     }
-                }
             }
+        }
+
+        public function index() {
+            redirect(base_url('Daerah/VisiRPJPD'));
+        }
 
         public function SetTempKodeWilayah() {
             // Ambil KodeWilayah dari POST

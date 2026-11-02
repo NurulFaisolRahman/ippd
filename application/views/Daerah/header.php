@@ -393,7 +393,7 @@ $isVerifikator = (
     </div>
 
     <div class="navbar-center">
-      <a href="<?= $isVerifikator ? base_url('Instansi/TabelIPPD') : base_url('Daerah/UrusanPD'); ?>" class="navbar-brand">
+      <a href="<?= $isVerifikator ? base_url('Instansi/TabelIPPD') : base_url('Daerah/VisiRPJPD'); ?>" class="navbar-brand">
         <i class="fas fa-chart-line"></i>
         <?= $isVerifikator ? 'Sistem Penyelarasan & Verifikasi IPPD' : 'Sistem Perencanaan Daerah' ?>
       </a>
