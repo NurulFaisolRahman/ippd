@@ -8392,6 +8392,7 @@ function renderWs_2_a_1_a(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -8453,13 +8454,27 @@ function renderWs_2_a_1_a(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.1.a', 6.0, pctMatched, score, crit, [
-    { code: 'A', text: '<= 25%', score: 1.2 },
-    { code: 'B', text: '> 25% s/d <= 50%', score: 2.4 },
-    { code: 'C', text: '> 50% s/d <= 75%', score: 3.6 },
-    { code: 'D', text: '> 75% s/d <= 99%', score: 4.8 },
-    { code: 'E', text: '100% berdasarkan hasil evaluasi', score: 6.0 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.1.a',
+    safeId: 'ws2a1a',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.1.a',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
+    colTitle: 'Kriteria Keterkaitan Permasalahan Daerah dengan Hasil Evaluasi',
+    rows: [
+      { crit: 'A', text: 'Kebutuhan daerah sama dengan atau kurang dari 25% hasil evaluasi', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Kebutuhan daerah lebih dari 25% dan sama dengan atau kurang dari 50% hasil evaluasi', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Kebutuhan daerah lebih dari 50% dan sama dengan atau kurang dari 75% hasil evaluasi', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Kebutuhan daerah lebih dari 75% dan sama dengan atau kurang dari 99% hasil evaluasi', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Kebutuhan daerah 100% berdasarkan hasil evaluasi', val: '6,00', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Evaluasi Kebutuhan Daerah',
+    infoRows: [
+      { label: 'Total Permasalahan:', id: 'ws2a1aTotalRows', value: totalRows + ' Permasalahan' },
+      { label: 'Permasalahan Terkait Evaluasi:', id: 'ws2a1aPctMatched', value: info.matchedCount + ' Permasalahan (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a1aCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -8492,15 +8507,18 @@ function updateScore_2_a_1_a(maxBobot) {
   var elFootTerb = document.getElementById('ws2a1aFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.1.a', pct, terbAvg, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(terbAvg);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Permasalahan daerah dirumuskan berdasarkan hasil evaluasi capaian kinerja (' + matchedCount + '/' + totalRows + ' selaras, rata-rata keselarasan ' + pct.toFixed(2) + '%)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Permasalahan daerah dirumuskan berdasarkan hasil evaluasi capaian kinerja (' + matchedCount + '/' + totalRows + ' selaras, rata-rata keselarasan ' + pct.toFixed(2) + '%)';
+  if (excelFxContent) excelFxContent.textContent = 'Permasalahan Daerah vs Hasil Evaluasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
+
+  updateStandardCriteriaHighlight('ws2a1a', crit, terbAvg, {
+    'ws2a1aTotalRows': totalRows + ' Permasalahan',
+    'ws2a1aPctMatched': matchedCount + ' Permasalahan (' + numFmt(pct) + '%)',
+    'ws2a1aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D', 'E']);
+
   return terbAvg;
 }
 
@@ -8552,6 +8570,7 @@ function renderWs_2_a_1_b(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -8623,13 +8642,27 @@ function renderWs_2_a_1_b(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.1.b', 6.0, pctMatched, score, crit, [
-    { code: 'A', text: 'Kesesuaian <= 25%', score: 1.2 },
-    { code: 'B', text: 'Kesesuaian > 25% s/d <= 50%', score: 2.4 },
-    { code: 'C', text: 'Kesesuaian > 50% s/d <= 75%', score: 3.6 },
-    { code: 'D', text: 'Kesesuaian > 75% s/d <= 99%', score: 4.8 },
-    { code: 'E', text: 'Kesesuaian 100%', score: 6.0 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.1.b',
+    safeId: 'ws2a1b',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.1.b',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
+    colTitle: 'Kriteria Keterkaitan Prioritas Pembangunan Daerah dengan Permasalahan Daerah',
+    rows: [
+      { crit: 'A', text: 'Prioritas pembangunan daerah menjawab sama dengan atau kurang dari 25% permasalahan daerah', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Prioritas pembangunan daerah menjawab lebih dari 25% dan sama dengan atau kurang dari 50% permasalahan daerah', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Prioritas pembangunan daerah menjawab lebih dari 50% dan sama dengan atau kurang dari 75% permasalahan daerah', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Prioritas pembangunan daerah menjawab lebih dari 75% dan sama dengan atau kurang dari 99% permasalahan daerah', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Prioritas pembangunan daerah 100% menjawab permasalahan daerah', val: '6,00', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Keterkaitan Prioritas dengan Permasalahan',
+    infoRows: [
+      { label: 'Total Permasalahan:', id: 'ws2a1bTotalRows', value: totalRows + ' Permasalahan' },
+      { label: 'Permasalahan Terjawab:', id: 'ws2a1bPctMatched', value: info.matchedCount + ' Permasalahan (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a1bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -8662,15 +8695,18 @@ function updateScore_2_a_1_b(maxBobot) {
   var elFootTerb = document.getElementById('ws2a1bFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.1.b', pct, terbAvg, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(terbAvg);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian 100%)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian 100%)';
+  if (excelFxContent) excelFxContent.textContent = 'Prioritas vs Permasalahan: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
+
+  updateStandardCriteriaHighlight('ws2a1b', crit, terbAvg, {
+    'ws2a1bTotalRows': totalRows + ' Permasalahan',
+    'ws2a1bPctMatched': matchedCount + ' Permasalahan (' + numFmt(pct) + '%)',
+    'ws2a1bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D', 'E']);
+
   return terbAvg;
 }
 
@@ -8722,6 +8758,7 @@ function renderWs_2_a_1_c(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -8791,13 +8828,27 @@ function renderWs_2_a_1_c(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.1.c', 6.0, pctMatched, score, crit, [
-    { code: 'A', text: 'Penyusunan <= 25%', score: 1.2 },
-    { code: 'B', text: 'Penyusunan > 25% s/d <= 50%', score: 2.4 },
-    { code: 'C', text: 'Penyusunan > 50% s/d <= 75%', score: 3.6 },
-    { code: 'D', text: 'Penyusunan > 75% s/d <= 99%', score: 4.8 },
-    { code: 'E', text: 'Penyusunan 100% berdasarkan isu strategis', score: 6.0 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.1.c',
+    safeId: 'ws2a1c',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.1.c',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
+    colTitle: 'Kriteria Penyusunan Prioritas Pembangunan Daerah Berdasarkan Isu Strategis',
+    rows: [
+      { crit: 'A', text: 'Penyusunan prioritas pembangunan daerah sama dengan atau kurang dari 25% isu strategis daerah', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Penyusunan prioritas pembangunan daerah lebih dari 25% dan sama dengan atau kurang dari 50% isu strategis daerah', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Penyusunan prioritas pembangunan daerah lebih dari 50% dan sama dengan atau kurang dari 75% isu strategis daerah', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Penyusunan prioritas pembangunan daerah lebih dari 75% dan sama dengan atau kurang dari 99% isu strategis daerah', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Penyusunan prioritas pembangunan daerah 100% berdasarkan isu strategis yang telah diidentifikasi', val: '6,00', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Penyusunan Prioritas Berdasarkan Isu Strategis',
+    infoRows: [
+      { label: 'Total Isu Strategis:', id: 'ws2a1cTotalRows', value: totalRows + ' Isu Strategis' },
+      { label: 'Isu Terakomodir Prioritas:', id: 'ws2a1cPctMatched', value: info.matchedCount + ' Isu (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a1cCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -8830,15 +8881,18 @@ function updateScore_2_a_1_c(maxBobot) {
   var elFootTerb = document.getElementById('ws2a1cFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.1.c', pct, terbAvg, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(terbAvg);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Prioritas pembangunan daerah disusun berdasarkan isu strategis (' + matchedCount + '/' + totalRows + ' relasi isu strategis selaras, penyusunan 100%)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Prioritas pembangunan daerah disusun berdasarkan isu strategis (' + matchedCount + '/' + totalRows + ' relasi isu strategis selaras, penyusunan 100%)';
+  if (excelFxContent) excelFxContent.textContent = 'Isu Strategis vs Prioritas: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
+
+  updateStandardCriteriaHighlight('ws2a1c', crit, terbAvg, {
+    'ws2a1cTotalRows': totalRows + ' Isu Strategis',
+    'ws2a1cPctMatched': matchedCount + ' Isu (' + numFmt(pct) + '%)',
+    'ws2a1cCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D', 'E']);
+
   return terbAvg;
 }
 
@@ -8902,6 +8956,8 @@ function renderWs_2_a_2_a(d, maxBobot) {
   var rows = info.rows;
   var score = info.score;
   var isAda = (score > 0);
+  var crit = info.kriteria || (isAda ? 'B' : 'A');
+  var critText = info.aksi || info.opsi_aksi || (isAda ? 'Ada' : 'Tidak ada');
 
   var html =
     '<div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">' +
@@ -8959,10 +9015,24 @@ function renderWs_2_a_2_a(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.2.a', 6.0, isAda ? 100 : 0, score, isAda ? 'B' : 'A', [
-    { code: 'A', text: 'Tidak ada', score: 0.0 },
-    { code: 'B', text: 'Ada', score: 6.0 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.2.a',
+    safeId: 'ws2a2a',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.2.a',
+    badgeText: 'A: Tidak ada | B: Ada',
+    colTitle: 'Kriteria Ketersediaan Indikator Sasaran pada Prioritas/Isu Strategis Terkait',
+    rows: [
+      { crit: 'A', text: 'Tidak ada', val: '0,00', color: '#dc2626' },
+      { crit: 'B', text: 'Ada', val: '6,00', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Pemeriksaan Ketersediaan Indikator Sasaran',
+    infoRows: [
+      { label: 'Status Indikator Sasaran:', id: 'ws2a2aStatusText', value: isAda ? 'Ada (Tersedia)' : 'Tidak ada' },
+      { label: 'Jumlah Indikator Teridentifikasi:', id: 'ws2a2aTotalRows', value: rows.length + ' Indikator Sasaran' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a2aCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -8977,15 +9047,18 @@ function updateScore_2_a_2_a(maxBobot) {
 
   var elBadge = document.getElementById('ws2a2aBadgeScore');
   if (elBadge) elBadge.textContent = numFmt(score);
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.2.a', isAda ? 100 : 0, score, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(score);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText;
+
+  if (modalBobotInput) modalBobotInput.value = numFmt(score);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText;
+  if (excelFxContent) excelFxContent.textContent = 'Ketersediaan Indikator Sasaran: ' + critText + ' -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
+
+  updateStandardCriteriaHighlight('ws2a2a', crit, score, {
+    'ws2a2aStatusText': isAda ? 'Ada (Tersedia)' : 'Tidak ada',
+    'ws2a2aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B']);
+
   return score;
 }
 
@@ -9031,6 +9104,7 @@ function renderWs_2_a_2_b(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -9095,12 +9169,26 @@ function renderWs_2_a_2_b(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.2.b', 8.0, pctMatched, score, crit, [
-    { code: 'A', text: '=< 25%', score: 2.0 },
-    { code: 'B', text: '25% - 50%', score: 4.0 },
-    { code: 'C', text: '50% - 75%', score: 6.0 },
-    { code: 'D', text: '=> 75%', score: 8.0 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.2.b',
+    safeId: 'ws2a2b',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.2.b',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
+    colTitle: 'Kriteria Kesesuaian Rumusan Indikator Sasaran terhadap Prioritas/Isu Strategis',
+    rows: [
+      { crit: 'A', text: '=< 25%', val: '2,00', color: '#dc2626' },
+      { crit: 'B', text: '25% - 50%', val: '4,00', color: '#d97706' },
+      { crit: 'C', text: '50% - 75%', val: '6,00', color: '#2563eb' },
+      { crit: 'D', text: '=> 75%', val: '8,00', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Penilaian Kesesuaian Rumusan Indikator Sasaran',
+    infoRows: [
+      { label: 'Total Indikator Sasaran:', id: 'ws2a2bTotalRows', value: totalRows + ' Indikator' },
+      { label: 'Indikator Selaras:', id: 'ws2a2bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a2bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -9132,15 +9220,18 @@ function updateScore_2_a_2_b(maxBobot) {
   var elFootTerb = document.getElementById('ws2a2bFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.2.b', pct, terbAvg, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(terbAvg);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Tingkat kesesuaian rumusan indikator sasaran terhadap prioritas/isu strategis (' + matchedCount + '/' + totalRows + ' indikator selaras, kesesuaian ' + pct.toFixed(2) + '%)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Tingkat kesesuaian rumusan indikator sasaran terhadap prioritas/isu strategis (' + matchedCount + '/' + totalRows + ' indikator selaras, kesesuaian ' + pct.toFixed(2) + '%)';
+  if (excelFxContent) excelFxContent.textContent = 'Kesesuaian Indikator Sasaran: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
+
+  updateStandardCriteriaHighlight('ws2a2b', crit, terbAvg, {
+    'ws2a2bTotalRows': totalRows + ' Indikator',
+    'ws2a2bPctMatched': matchedCount + ' Indikator (' + numFmt(pct) + '%)',
+    'ws2a2bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D']);
+
   return terbAvg;
 }
 
@@ -9197,6 +9288,7 @@ function renderWs_2_a_3_a(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -9268,13 +9360,28 @@ function renderWs_2_a_3_a(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.3.a', 8.5, pctMatched, score, crit, [
-    { code: 'A', text: 'Dijabarkan <= 25%', score: 2.125 },
-    { code: 'B', text: 'Dijabarkan > 25% s/d <= 50%', score: 4.25 },
-    { code: 'C', text: 'Dijabarkan > 50% s/d <= 75%', score: 6.375 },
-    { code: 'D', text: 'Dijabarkan => 75%', score: 8.5 },
-    { code: 'E', text: '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas', score: 8.5 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.3.a',
+    safeId: 'ws2a3a',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.3.a',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75% | E: 100%',
+    colTitle: 'Kriteria Penjabaran Prioritas Pembangunan Daerah ke Program Prioritas',
+    rows: [
+      { crit: 'A', text: 'Dijabarkan <= 25%', val: '2,125', color: '#dc2626' },
+      { crit: 'B', text: 'Dijabarkan > 25% s/d <= 50%', val: '4,250', color: '#d97706' },
+      { crit: 'C', text: 'Dijabarkan > 50% s/d <= 75%', val: '6,375', color: '#2563eb' },
+      { crit: 'D', text: 'Dijabarkan => 75%', val: '8,500', color: '#0891b2' },
+      { crit: 'E', text: '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas Daerah', val: '8,500', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Penjabaran Prioritas ke Program Prioritas',
+    infoRows: [
+      { label: 'Total Prioritas Daerah:', id: 'ws2a3aTotalPrioritas', value: totalPrioritas + ' Prioritas' },
+      { label: 'Prioritas Terjabarkan:', id: 'ws2a3aPctMatched', value: info.terjabarkanPrioritas + ' Prioritas (' + numFmt(pctMatched) + '%)' },
+      { label: 'Jumlah Program Terkait:', id: 'ws2a3aTotalRows', value: info.matchedCount + ' Program Prioritas' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a3aCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -9302,7 +9409,7 @@ function updateScore_2_a_3_a(maxBobot) {
   var score = 8.50;
   var crit = 'D';
   var critText = '=> 75%';
-  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas'; }
+  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas Daerah'; }
   else if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
   else if (pct > 50.0) { crit = 'C'; score = 6.375; critText = '> 50% s/d <= 75%'; }
   else if (pct > 25.0) { crit = 'B'; score = 4.25; critText = '> 25% s/d <= 50%'; }
@@ -9313,15 +9420,19 @@ function updateScore_2_a_3_a(maxBobot) {
   var elFootTerb = document.getElementById('ws2a3aFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(score);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.3.a', pct, score, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(score);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + activeGroups + '/' + totalGroups + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(score);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + activeGroups + '/' + totalGroups + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)';
+  if (excelFxContent) excelFxContent.textContent = 'Penjabaran Prioritas Daerah: ' + activeGroups + '/' + totalGroups + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
+
+  updateStandardCriteriaHighlight('ws2a3a', crit, score, {
+    'ws2a3aTotalPrioritas': totalGroups + ' Prioritas',
+    'ws2a3aPctMatched': activeGroups + ' Prioritas (' + numFmt(pct) + '%)',
+    'ws2a3aTotalRows': matchedCount + ' Program Prioritas',
+    'ws2a3aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D', 'E']);
+
   return score;
 }
 
@@ -9382,6 +9493,7 @@ function renderWs_2_a_3_b(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -9452,12 +9564,26 @@ function renderWs_2_a_3_b(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.a.3.b', 8.5, pctMatched, score, crit, [
-    { code: 'A', text: '=< 25%', score: 2.125 },
-    { code: 'B', text: '25% - 50%', score: 4.25 },
-    { code: 'C', text: '50% - 75%', score: 6.375 },
-    { code: 'D', text: '=> 75%', score: 8.5 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.a.3.b',
+    safeId: 'ws2a3b',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.a.3.b',
+    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
+    colTitle: 'Kriteria Kesesuaian Rumusan Indikator Sasaran terhadap Indikator Kinerja Program Prioritas',
+    rows: [
+      { crit: 'A', text: '=< 25%', val: '2,125', color: '#dc2626' },
+      { crit: 'B', text: '25% - 50%', val: '4,250', color: '#d97706' },
+      { crit: 'C', text: '50% - 75%', val: '6,375', color: '#2563eb' },
+      { crit: 'D', text: '=> 75%', val: '8,500', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Penyelarasan Indikator Program Prioritas',
+    infoRows: [
+      { label: 'Total Indikator Program:', id: 'ws2a3bTotalItems', value: totalItems + ' Indikator' },
+      { label: 'Indikator Selaras:', id: 'ws2a3bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2a3bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -9488,15 +9614,18 @@ function updateScore_2_a_3_b(maxBobot) {
   var elFootTerb = document.getElementById('ws2a3bFootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(score);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.a.3.b', pct, score, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(score);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalRows + ' indikator program selaras, ' + pct.toFixed(2) + '%)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(score);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalRows + ' indikator program selaras, ' + pct.toFixed(2) + '%)';
+  if (excelFxContent) excelFxContent.textContent = 'Indikator Sasaran vs Indikator Program: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
+
+  updateStandardCriteriaHighlight('ws2a3b', crit, score, {
+    'ws2a3bTotalItems': totalRows + ' Indikator',
+    'ws2a3bPctMatched': matchedCount + ' Indikator (' + numFmt(pct) + '%)',
+    'ws2a3bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
+  }, ['A', 'B', 'C', 'D']);
+
   return score;
 }
 
@@ -9543,6 +9672,7 @@ function renderWs_2_b_1(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -9612,10 +9742,24 @@ function renderWs_2_b_1(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.b.1', 4.5, pctMatched, score, crit, [
-    { code: 'A', text: 'A. Lemah (< 50%)', score: 1.0 },
-    { code: 'B', text: 'B. Kuat (>= 50%)', score: 4.5 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.b.1',
+    safeId: 'ws2b1',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.b.1',
+    badgeText: 'A: Lemah (< 50%) | B: Kuat (>= 50%)',
+    colTitle: 'Kriteria Keterkaitan Permasalahan Daerah dengan Inovasi Daerah',
+    rows: [
+      { crit: 'A', text: 'A. Lemah (Nilai keselarasan dibawah 50%)', val: '1,00', color: '#dc2626' },
+      { crit: 'B', text: 'B. Kuat (Nilai keselarasan diatas atau sama dengan 50%)', val: '4,50', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Keterkaitan Inovasi dengan Permasalahan',
+    infoRows: [
+      { label: 'Total Inovasi Daerah:', id: 'ws2b1TotalRows', value: totalRows + ' Inovasi' },
+      { label: 'Inovasi Terkait Permasalahan:', id: 'ws2b1PctMatched', value: info.matchedCount + ' Inovasi (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2b1CritText', value: '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -9643,15 +9787,18 @@ function updateScore_2_b_1(maxBobot) {
   var elFootTerb = document.getElementById('ws2b1FootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(score);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.b.1', pct, score, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(score);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(score);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  if (excelFxContent) excelFxContent.textContent = 'Permasalahan Daerah vs Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> ' + critText + ' -> Nilai Capaian = ' + numFmt(score);
+
+  updateStandardCriteriaHighlight('ws2b1', crit, score, {
+    'ws2b1TotalRows': totalRows + ' Inovasi',
+    'ws2b1PctMatched': matchedCount + ' Inovasi (' + numFmt(pct) + '%)',
+    'ws2b1CritText': '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>'
+  }, ['A', 'B']);
+
   return score;
 }
 
@@ -9694,6 +9841,7 @@ function renderWs_2_b_2(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
@@ -9758,10 +9906,24 @@ function renderWs_2_b_2(d, maxBobot) {
     '</table>' +
     '</div>';
 
-  html += renderStandardCriteriaCard('2.b.2', 4.5, pctMatched, score, crit, [
-    { code: 'A', text: 'A. Lemah (< 50%)', score: 1.0 },
-    { code: 'B', text: 'B. Kuat (>= 50%)', score: 4.5 }
-  ]);
+  html += renderStandardCriteriaCard({
+    code: '2.b.2',
+    safeId: 'ws2b2',
+    title: 'Keterangan & Kriteria Penilaian Poin 2.b.2',
+    badgeText: 'A: Lemah (< 50%) | B: Kuat (>= 50%)',
+    colTitle: 'Kriteria Keterkaitan Output dengan Outcome Inovasi Daerah',
+    rows: [
+      { crit: 'A', text: 'A. Lemah (Nilai keselarasan dibawah 50%)', val: '1,00', color: '#dc2626' },
+      { crit: 'B', text: 'B. Kuat (Nilai keselarasan diatas atau sama dengan 50%)', val: '4,50', color: '#16a34a' }
+    ],
+    sourceTitle: 'Hasil Keterkaitan Output & Outcome Inovasi',
+    infoRows: [
+      { label: 'Total Inovasi Daerah:', id: 'ws2b2TotalRows', value: totalRows + ' Inovasi' },
+      { label: 'Output & Outcome Selaras:', id: 'ws2b2PctMatched', value: info.matchedCount + ' Inovasi (' + numFmt(pctMatched) + '%)' },
+      { label: 'Kriteria Terpenuhi:', id: 'ws2b2CritText', value: '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>' }
+    ],
+    initialScore: score
+  });
 
   return html;
 }
@@ -9789,15 +9951,18 @@ function updateScore_2_b_2(maxBobot) {
   var elFootTerb = document.getElementById('ws2b2FootTerb');
   if (elFootTerb) elFootTerb.textContent = numFmt(score);
 
-  if (typeof updateStandardCriteriaCardUI === 'function') {
-    updateStandardCriteriaCardUI('2.b.2', pct, score, crit);
-  }
-  var elFinal = document.getElementById('modalComputedFinalScore');
-  if (elFinal) elFinal.value = numFmt(score);
-  var elAksi = document.getElementById('modalOpsiAksi');
-  if (elAksi) elAksi.value = critText;
-  var elCat = document.getElementById('modalCatatan');
-  if (elCat) elCat.value = 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  if (modalBobotInput) modalBobotInput.value = numFmt(score);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalOpsiAksi) modalOpsiAksi.value = critText;
+  if (modalCatatan) modalCatatan.value = 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  if (excelFxContent) excelFxContent.textContent = 'Output vs Outcome Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> " + critText + " -> Nilai Capaian = ' + numFmt(score);
+
+  updateStandardCriteriaHighlight('ws2b2', crit, score, {
+    'ws2b2TotalRows': totalRows + ' Inovasi',
+    'ws2b2PctMatched': matchedCount + ' Inovasi (' + numFmt(pct) + '%)',
+    'ws2b2CritText': '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>'
+  }, ['A', 'B']);
+
   return score;
 }
 
