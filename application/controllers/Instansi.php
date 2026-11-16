@@ -25969,7 +25969,7 @@ public function updateStatusPerjanjianKinerja() {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $kebijakan = trim($this->input->post('kebijakan_strategis', TRUE));
             $hukum = trim($this->input->post('dasar_hukum', TRUE));
             $tujuan = trim($this->input->post('tujuan_masalah', TRUE));
@@ -26500,7 +26500,7 @@ public function updateStatusPerjanjianKinerja() {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $urusan = trim($this->input->post('urusan', TRUE) ?: 'Semua Urusan');
             $kebijakan = trim($this->input->post('kebijakan', TRUE));
             $tipe = trim($this->input->post('tipe', TRUE) ?: 'kegiatan');
@@ -26604,7 +26604,7 @@ public function updateStatusPerjanjianKinerja() {
             $tipe = trim($this->input->post('tipe', TRUE) ?: 'kegiatan');
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $urusan = trim($this->input->post('urusan', TRUE) ?: 'Semua Urusan');
             $kebijakan = trim($this->input->post('kebijakan', TRUE));
             $uraian = trim($this->input->post('uraian', TRUE));
@@ -27054,7 +27054,7 @@ public function updateStatusPerjanjianKinerja() {
             $target_instansi_id = (int)$this->input->post('target_instansi_id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $rekomendasi = trim($this->input->post('rekomendasi', TRUE));
             $tindak_lanjut = trim($this->input->post('tindak_lanjut', TRUE));
             $tujuan_masalah = trim($this->input->post('tujuan_masalah', TRUE));
@@ -29605,7 +29605,7 @@ public function updateStatusPerjanjianKinerja() {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $dasar_penugasan = trim($this->input->post('dasar_penugasan', TRUE));
             $instansi_pemberi = trim($this->input->post('instansi_pemberi', TRUE));
@@ -38191,7 +38191,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         try {
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $item_code = trim($this->input->post('item_code', TRUE));
             $bobot_capaian = $this->input->post('bobot_capaian', TRUE);
             $opsi_aksi = trim($this->input->post('opsi_aksi', TRUE));
@@ -38280,7 +38280,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         try {
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $itemsJson = $this->input->post('items', FALSE);
             $items = json_decode($itemsJson, TRUE);
 
@@ -38353,7 +38353,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         try {
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $this->db->where([
                 'kodewilayah' => $kode_wilayah,
@@ -41175,7 +41175,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = (int)$this->input->post('nomor', TRUE);
             $kecamatan = trim($this->input->post('kecamatan', TRUE));
@@ -41370,7 +41370,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = (int)$this->input->post('nomor', TRUE);
             $tutupan_lahan = trim($this->input->post('tutupan_lahan', TRUE));
@@ -41575,7 +41575,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = (int)$this->input->post('nomor', TRUE);
             $kecamatan = trim($this->input->post('kecamatan', TRUE));
@@ -41757,7 +41757,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = (int)$this->input->post('nomor', TRUE);
             $bulan = trim($this->input->post('bulan', TRUE));
@@ -41954,7 +41954,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = (int)$this->input->post('nomor', TRUE);
             $kecamatan = trim($this->input->post('kecamatan', TRUE));
@@ -42159,7 +42159,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $nomor = (int)$this->input->post('nomor', TRUE);
             $kecamatan = trim($this->input->post('kecamatan', TRUE));
             $p24 = (int)str_replace([' ', '.'], '', trim($this->input->post('penduduk_2024', TRUE)));
@@ -42284,7 +42284,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $nomor = (int)$this->input->post('nomor', TRUE);
             $kecamatan = trim($this->input->post('kecamatan', TRUE));
             $masuk = (int)str_replace([' ', '.'], '', trim($this->input->post('migrasi_masuk', TRUE)));
@@ -42393,7 +42393,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $nomor = (int)$this->input->post('nomor', TRUE);
             $jenis_pegawai = trim($this->input->post('jenis_pegawai', TRUE));
             $laki = (int)str_replace([' ', '.'], '', trim($this->input->post('laki_laki', TRUE)));
@@ -42505,7 +42505,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $nomor = (int)$this->input->post('nomor', TRUE);
             $tingkat = trim($this->input->post('tingkat_pendidikan', TRUE));
             
@@ -42627,7 +42627,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -42792,7 +42792,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -42961,7 +42961,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -43111,7 +43111,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -43280,7 +43280,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -43449,7 +43449,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $is_header = (int)($this->input->post('is_header', TRUE) ?: 0);
@@ -43618,7 +43618,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $uraian = trim($this->input->post('uraian', TRUE));
@@ -43788,7 +43788,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $uraian = trim($this->input->post('uraian', TRUE));
             $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
             if (empty($uraian)) throw new Exception('Nama SKPD / Uraian belanja hibah wajib diisi.');
@@ -43922,7 +43922,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $uraian = trim($this->input->post('uraian', TRUE));
             $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
             if (empty($uraian)) throw new Exception('Nama SKPD / Uraian belanja bantuan sosial wajib diisi.');
@@ -44052,7 +44052,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             $nomor = trim($this->input->post('nomor', TRUE));
             $uraian = trim($this->input->post('uraian', TRUE));
@@ -44213,7 +44213,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $id = (int)$this->input->post('id', TRUE);
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
             $komponen = trim($this->input->post('komponen', TRUE));
             $urutan = (int)($this->input->post('urutan', TRUE) ?: 0);
             if (empty($komponen)) throw new Exception('Nama komponen SILPA wajib diisi.');
@@ -44322,7 +44322,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $tabel_kode = trim($this->input->post('tabel_kode', TRUE));
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
-            $kode_wilayah = $this->get_kode_wilayah() ?: '35.12';
+            $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
 
             if (empty($tabel_kode)) {
                 throw new Exception('Kode tabel tidak valid.');
