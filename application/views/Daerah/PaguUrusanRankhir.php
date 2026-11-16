@@ -197,77 +197,71 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <!-- FILTER WILAYAH (Sebelum Login / Role != 3)                   -->
                         <!-- ============================================================ -->
                         <?php if (!isset($_SESSION['KodeWilayah']) || (isset($_SESSION['Level']) && $_SESSION['Level'] != 3)) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>"
-                                                                <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                        <?php if (!empty($KodeWilayah)) { 
-                                                            $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                                        ?>
-                                                            <option value="<?= html_escape($KodeWilayah) ?>" selected>
-                                                                <?= html_escape($selected_kab['Nama'] ?? $KodeWilayah) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:18px 24px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); border:1px solid #cbd5e1;">
+                                <div class="filter-header-title" style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa fa-filter" style="color:#2d6a4f;"></i> Filter Wilayah
+                                </div>
+                                <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Provinsi</label>
+                                        <select class="form-control filter-select-custom" id="Provinsi" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>"
+                                                    <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Kabupaten / Kota</label>
+                                        <select class="form-control filter-select-custom" id="KabKota" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                            <?php if (!empty($KodeWilayah)) { 
+                                                $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                            ?>
+                                                <option value="<?= html_escape($KodeWilayah) ?>" selected>
+                                                    <?= html_escape($selected_kab['Nama'] ?? $KodeWilayah) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="width:auto;">
+                                        <button type="button" class="btn btn-primary-custom" id="Filter" style="height:38px; padding:0 22px; font-size:13px;">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
 
-                            <?php if (!empty($KodeWilayah)) { ?>
-                                <?php
-                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                    $filter_instansi_id = $this->input->get('instansi_id', TRUE);
-                                    $filter_instansi_nama = '';
-                                    if (!empty($filter_instansi_id)) {
-                                        $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
-                                        $filter_instansi_nama = $instansi_terpilih['nama'] ?? '';
-                                    }
-                                ?>
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
-                                    <strong>Wilayah terpilih:</strong> <?= $nama_wilayah ?>
-                                    <?php if (!empty($filter_instansi_id)) { ?>
-                                        <br>
-                                        <strong><i class="fa fa-building"></i> Filter Instansi:</strong> 
-                                        <span class="filter-active-badge">
-                                            <?= htmlspecialchars($filter_instansi_nama ?: $filter_instansi_id) ?>
-                                            <a href="<?= base_url('Daerah/PaguUrusanRankhir') ?>" class="remove-filter" title="Hapus filter">
-                                                <i class="fa fa-times"></i>
-                                            </a>
-                                        </span>
-                                    <?php } ?>
-                                </div>
-                            <?php } ?>
+                                <?php if (!empty($KodeWilayah)) { ?>
+                                    <?php
+                                        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                        $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                        $filter_instansi_id = $this->input->get('instansi_id', TRUE);
+                                        $filter_instansi_nama = '';
+                                        if (!empty($filter_instansi_id)) {
+                                            $instansi_terpilih = $this->db->select('nama')->from('akun_instansi')->where('id', $filter_instansi_id)->get()->row_array();
+                                            $filter_instansi_nama = $instansi_terpilih['nama'] ?? '';
+                                        }
+                                    ?>
+                                    <div style="margin-top:14px; padding:10px 14px; background:#f2fbf5; border-left:4px solid #2d6a4f; border-radius:6px; font-size:12.5px; color:#334155;">
+                                        <strong>Wilayah Terpilih:</strong> <?= $nama_wilayah ?>
+                                        <?php if (!empty($filter_instansi_id)) { ?>
+                                            <br>
+                                            <strong><i class="fa fa-building"></i> Filter Instansi:</strong> 
+                                            <span class="filter-active-badge">
+                                                <?= htmlspecialchars($filter_instansi_nama ?: $filter_instansi_id) ?>
+                                                <a href="<?= base_url('Daerah/PaguUrusanRankhir') ?>" class="remove-filter" title="Hapus filter">
+                                                    <i class="fa fa-times"></i>
+                                                </a>
+                                            </span>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
+                            </div>
                         <?php } ?>
                         <!-- END FILTER WILAYAH -->
 
@@ -429,32 +423,33 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                                                     <?php } ?>
                                                 </td>
                                                     <td class="aksi-cell">
-                                                        <div class="btn-group-aksi">
+                                                        <div class="action-group">
                                                             <?php if (!$isDeleted) { ?>
-                                                                <button class="btn btn-warning btn-sm btn-aksi EditPaguRankhir" 
+                                                                <button class="btn-action-custom btn-action-edit EditPaguRankhir" 
                                                                         data-id="<?= $row['id'] ?>"
                                                                         data-urusan="<?= html_escape($row['urusan']) ?>"
                                                                         data-pagu="<?= html_escape($row['pagu']) ?>"
                                                                         data-kode="<?= html_escape($row['kode_urusan'] ?? '') ?>"
                                                                         title="Edit Data"
                                                                         type="button">
-                                                                    <i class="notika-icon notika-edit"></i> Edit
+                                                                    <i class="fa fa-pencil"></i>
                                                                 </button>
                                                                 
-                                                                <button class="btn btn-danger btn-sm btn-aksi HapusPaguRankhir" 
+                                                                <button class="btn-action-custom btn-action-delete HapusPaguRankhir" 
                                                                         data-id="<?= $row['id'] ?>"
                                                                         data-urusan="<?= html_escape($row['urusan']) ?>"
                                                                         title="Hapus Data"
                                                                         type="button">
-                                                                    <i class="notika-icon notika-trash"></i> Hapus
+                                                                    <i class="fa fa-trash"></i>
                                                                 </button>
                                                             <?php } else { ?>
-                                                                <button class="btn btn-success btn-sm btn-aksi RestorePaguRankhir" 
+                                                                <button class="btn-action-custom btn-action-add RestorePaguRankhir" 
                                                                         data-id="<?= $row['id'] ?>"
                                                                         data-urusan="<?= html_escape($row['urusan']) ?>"
                                                                         title="Pulihkan Data"
-                                                                        type="button">
-                                                                    <i class="fa fa-undo"></i> Pulihkan
+                                                                        type="button"
+                                                                        style="background-color: #10b981 !important; color: #fff !important;">
+                                                                    <i class="fa fa-undo"></i>
                                                                 </button>
                                                             <?php } ?>
                                                         </div>
@@ -776,12 +771,12 @@ function escapeHtml(text) {
                     window.location.href = redirectUrl;
                 } else {
                     showToast(res || "Gagal menyimpan filter wilayah!", 'error');
-                    $("#Filter").prop('disabled', false).text('Filter');
+                    $("#Filter").prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
                 }
             },
             error: function() {
                 showToast("Gagal menghubungi server!", 'error');
-                $("#Filter").prop('disabled', false).text('Filter');
+                $("#Filter").prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
             }
         });
     });

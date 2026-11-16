@@ -16,8 +16,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         redirect(base_url('Instansi/TabelIPPD'));
                         exit;
                     }
-                }
             }
+        }
+
+        public function index() {
+            redirect(base_url('Daerah/VisiRPJPD'));
+        }
 
         public function SetTempKodeWilayah() {
             // Ambil KodeWilayah dari POST
@@ -4850,13 +4854,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 KEY `idx_kegiatan` (`KegiatanId`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
-            // Pastikan kolom KodeProgram bertipe TEXT
-            $fields = $this->db->field_data('dukungan_kpu_rpjmd');
-            foreach ($fields as $f) {
-                if ($f->name === 'KodeProgram' && $f->type === 'varchar') {
-                    $this->db->query("ALTER TABLE `dukungan_kpu_rpjmd` MODIFY `KodeProgram` TEXT NOT NULL;");
-                    break;
-                }
+            // Pastikan view ps_program_prioritas & ps_kegiatan_prioritas tersedia
+            if (!$this->db->table_exists('ps_program_prioritas') && $this->db->table_exists('rkp_ps_program_prioritas')) {
+                $this->db->query("CREATE OR REPLACE VIEW ps_program_prioritas AS SELECT * FROM rkp_ps_program_prioritas");
+            }
+            if (!$this->db->table_exists('ps_kegiatan_prioritas') && $this->db->table_exists('rkp_ps_kegiatan_prioritas')) {
+                $this->db->query("CREATE OR REPLACE VIEW ps_kegiatan_prioritas AS SELECT * FROM rkp_ps_kegiatan_prioritas");
             }
 
             // Provinsi (filter untuk pengguna yang belum login)
@@ -19333,17 +19336,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // ============================================================
         public function KeterkaitanIndikatorPembangunan()
         {
-            if (!isset($_SESSION['Level']) || ($_SESSION['Level'] != 1 && $_SESSION['Level'] != 3 && $_SESSION['Level'] != 4)) {
-                redirect('Home');
-            }
-
             $Header['Title'] = 'Keterkaitan Indikator Pembangunan Daerah';
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
-                        $this->input->post('KodeWilayah', TRUE));
+                        ($this->input->get('KodeWilayah', TRUE) ?: $this->input->post('KodeWilayah', TRUE)));
 
             $isProvinsi = (strlen($KodeWilayah) == 2);
-            $Data['Provinsi'] = $this->db->where('CHAR_LENGTH(Kode)', 2)->get('kodewilayah')->result_array();
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
             if ($KodeWilayah) {
                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
@@ -20056,17 +20055,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         // ============================================================
         public function DukunganPrioritasPembangunan()
         {
-            if (!isset($_SESSION['Level']) || ($_SESSION['Level'] != 1 && $_SESSION['Level'] != 3 && $_SESSION['Level'] != 4)) {
-                redirect('Home');
-            }
-
             $Header['Title'] = 'Dukungan Prioritas Pembangunan';
             $KodeWilayah = isset($_SESSION['KodeWilayah']) ? $_SESSION['KodeWilayah'] : 
                         (isset($_SESSION['TempKodeWilayah']) ? $_SESSION['TempKodeWilayah'] : 
-                        $this->input->post('KodeWilayah', TRUE));
+                        ($this->input->get('KodeWilayah', TRUE) ?: $this->input->post('KodeWilayah', TRUE)));
 
             $isProvinsi = (strlen($KodeWilayah) == 2);
-            $Data['Provinsi'] = $this->db->where('CHAR_LENGTH(Kode)', 2)->get('kodewilayah')->result_array();
+            $Data['Provinsi'] = $this->db->where("Kode LIKE '__'")->order_by('Nama')->get('kodewilayah')->result_array();
 
             if ($KodeWilayah) {
                 $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();

@@ -353,39 +353,29 @@
 
                         <!-- Filter untuk pengguna yang belum login -->
                         <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                            <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                <div class="form-example-int form-horizental">
-                                    <div class="form-group">
-                                        <div class="row filter-row">
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="Provinsi"><b>Provinsi</b></label>
-                                                    <select class="form-control filter-select" id="Provinsi">
-                                                        <option value="">Pilih Provinsi</option>
-                                                        <?php foreach ($Provinsi as $prov) { ?>
-                                                            <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                <?= html_escape($prov['Nama']) ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-3 col-md-6">
-                                                <div class="filter-group">
-                                                    <label for="KabKota"><b>Kab/Kota</b></label>
-                                                    <select class="form-control filter-select" id="KabKota">
-                                                        <option value="">Pilih Kab/Kota</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-lg-2 col-md-6">
-                                                <div class="filter-group" style="margin-top: 28px;">
-                                                    <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                        <b>Filter</b>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                                <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                        <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 1 1 250px; min-width: 200px;">
+                                        <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                        <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                        </select>
+                                    </div>
+                                    <div style="flex: 0 0 auto;">
+                                        <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                                            Filter
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -396,7 +386,7 @@
                                     $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
                                     $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
                                 ?>
-                                <div class="alert alert-info" style="margin-bottom: 20px;">
+                                <div class="alert alert-info" style="margin-bottom: 20px; border-radius: 8px;">
                                     <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
                                 </div>
                             <?php } ?>
@@ -416,7 +406,7 @@
                                         <i class="fa fa-search" style="position: absolute; left: 12px; top: 10px; color: #94a3b8;"></i>
                                     </div>
                                     <?php if ($isDaerah) { ?>
-                                        <button type="button" class="btn btn-primary notika-btn-primary" data-toggle="modal" data-target="#ModalInputBidang" style="border-radius: 6px;">
+                                        <button type="button" class="btn btn-success notika-btn-success" data-toggle="modal" data-target="#ModalInputBidang" style="height: 36px; padding: 0 18px; font-weight: 700; border-radius: 6px; display: inline-flex; align-items: center; gap: 8px;">
                                             <i class="fa fa-folder-plus fa-plus"></i> <b>Tambah Bidang</b>
                                         </button>
                                     <?php } ?>

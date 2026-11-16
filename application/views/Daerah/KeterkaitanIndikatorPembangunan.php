@@ -248,43 +248,44 @@ if (!empty($KeterkaitanList)) {
         margin: 0;
     }
 
-    /* Tabel Keterkaitan Indikator Sesuai Desain */
+    /* Tabel Keterkaitan Indikator - Serasi dengan Menu RKPD Lain */
     .table-keterkaitan {
         width: 100%;
-        border-collapse: collapse !important;
+        border-collapse: separate !important;
+        border-spacing: 0;
         font-size: 13px;
         margin-bottom: 0;
-        border: 1.5px solid #1b4f72 !important;
+        border: 1px solid #b7d7b0 !important;
     }
     .table-keterkaitan thead th {
-        background: #1b4f72 !important;
-        color: #ffffff !important;
+        background: #d9ead3 !important;
+        color: #1b4d21 !important;
         text-align: center;
         vertical-align: middle !important;
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12.5px;
         padding: 12px 10px !important;
-        border: 1px solid #2874a6 !important;
-        line-height: 1.35;
+        border: 1px solid #b7d7b0 !important;
+        line-height: 1.4;
     }
     .table-keterkaitan tbody td {
         vertical-align: top !important;
         padding: 10px 12px !important;
-        border: 1px solid #cbd5e1 !important;
+        border: 1px solid #e2e8f0 !important;
         line-height: 1.5;
         color: #1e293b;
         background-color: #ffffff;
     }
     .table-keterkaitan tbody tr.subgroup-header td {
-        background: #e9ecef !important;
+        background: #f1f8f3 !important;
         font-weight: 700;
-        color: #0f172a;
+        color: #14532d;
         padding: 11px 14px !important;
-        border-top: 2px solid #1b4f72 !important;
-        border-bottom: 2px solid #94a3b8 !important;
+        border-top: 2px solid #2d6a4f !important;
+        border-bottom: 1.5px solid #b7d7b0 !important;
     }
     .table-keterkaitan tbody tr:not(.subgroup-header):hover td {
-        background-color: #f8fafc;
+        background-color: #fbfdfb;
     }
 
     .action-group {
@@ -385,47 +386,50 @@ if (!empty($KeterkaitanList)) {
                         <!-- Header & Filter -->
                         <div class="basic-tb-hd" style="margin-bottom: 20px;">
                             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                                <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <div class="row filter-row">
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="Provinsi"><b>Provinsi</b></label>
-                                                        <select class="form-control filter-select" id="Provinsi">
-                                                            <option value="">Pilih Provinsi</option>
-                                                            <?php foreach ($Provinsi as $prov) { ?>
-                                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                    <?= html_escape($prov['Nama']) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="KabKota"><b>Kab/Kota</b></label>
-                                                        <select class="form-control filter-select" id="KabKota">
-                                                            <option value="">Pilih Kab/Kota</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-2 col-md-6">
-                                                    <div class="filter-group" style="margin-top: 28px;">
-                                                        <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                            <b>Filter</b>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:18px 24px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); border:1px solid #cbd5e1;">
+                                <div class="filter-header-title" style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa fa-filter" style="color:#2d6a4f;"></i> Filter Wilayah
+                                </div>
+                                <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Provinsi</label>
+                                        <select class="form-control filter-select-custom" id="Provinsi" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php }} ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Kabupaten / Kota</label>
+                                        <select class="form-control filter-select-custom" id="KabKota" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                            <?php if (!empty($KodeWilayah)) { 
+                                                $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                            ?>
+                                                <option value="<?= html_escape($KodeWilayah) ?>" selected>
+                                                    <?= html_escape($selected_kab['Nama'] ?? $NamaWilayah) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="width:auto;">
+                                        <button type="button" class="btn btn-primary-custom" id="Filter" style="height:38px; padding:0 22px; font-size:13px;">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
+
                                 <?php if (!empty($KodeWilayah)) { ?>
-                                    <div class="alert alert-info" style="margin-bottom: 20px;">
-                                        <strong>Wilayah:</strong> <?= html_escape($NamaWilayah) ?>
+                                    <div style="margin-top:14px; padding:10px 14px; background:#f2fbf5; border-left:4px solid #2d6a4f; border-radius:6px; font-size:12.5px; color:#334155;">
+                                        <strong>Wilayah Terpilih:</strong> <?= html_escape($NamaWilayah) ?>
                                     </div>
                                 <?php } ?>
+                            </div>
                             <?php } ?>
 
                             <!-- Toolbar Atas -->
@@ -708,8 +712,8 @@ MODAL TAMBAH KETERKAITAN INDIKATOR
                 <div class="row">
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
-                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <div class="panel panel-default" style="border-left: 4px solid #2d6a4f; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f8f3; font-weight: bold; color: #2d6a4f; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                                 <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
                                 <?php if ($SelectedTahun == '2026') { ?>
                                     <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
@@ -867,8 +871,8 @@ MODAL EDIT KETERKAITAN INDIKATOR
                 <div class="row">
                     <!-- KOLOM KIRI: 1. KETERKAITAN PRIORITAS & SASARAN NASIONAL -->
                     <div class="col-md-6 col-xs-12">
-                        <div class="panel panel-default" style="border-left: 4px solid #1b4f72; margin-bottom: 15px;">
-                            <div class="panel-heading" style="background: #f1f5f9; font-weight: bold; color: #1b4f72; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+                        <div class="panel panel-default" style="border-left: 4px solid #2d6a4f; margin-bottom: 15px;">
+                            <div class="panel-heading" style="background: #f1f8f3; font-weight: bold; color: #2d6a4f; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
                                 <span><i class="fa fa-landmark"></i> 1. Keterkaitan Prioritas & Sasaran Nasional</span>
                                 <?php if ($SelectedTahun == '2026') { ?>
                                     <span class="label label-info" style="font-size: 11px; font-weight: normal; background-color: #0284c7;">
@@ -1102,7 +1106,7 @@ $(document).ready(function() {
             }
 
             html += '<div style="flex: 1;">' +
-                        '<b style="color: #1b4f72; font-size: 13px;">' + kd + '. ' + item.sasaran + '</b>' +
+                        '<b style="color: #2d6a4f; font-size: 13px;">' + kd + '. ' + item.sasaran + '</b>' +
                     '</div>' +
                 '</div>' +
                 '<div class="panel-body ' + (isEdit ? 'edit-sas-nas-body' : 'sas-nas-body') + '" style="padding: 12px 14px; background: #ffffff;' + (!isSasChecked ? ' opacity: 0.5;' : '') + '">' +
@@ -1859,7 +1863,7 @@ $(document).ready(function() {
         var kodeProv = $(this).val();
         if (kodeProv) {
             $.ajax({
-                url: BaseURL + 'Daerah/GetKabKota',
+                url: BaseURL + 'Daerah/GetListKabKota',
                 type: 'POST',
                 data: {
                     Kode: kodeProv,
@@ -1868,28 +1872,74 @@ $(document).ready(function() {
                 dataType: 'json',
                 success: function(res) {
                     var html = '<option value="">Pilih Kab/Kota</option>';
-                    $.each(res, function(i, item) {
-                        html += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
-                    });
-                    $('#KabKota').html(html).trigger('change.select2');
+                    if (res && res.length > 0) {
+                        $.each(res, function(i, item) {
+                            html += '<option value="' + item.Kode + '">' + item.Nama + '</option>';
+                        });
+                    }
+                    $('#KabKota').html(html);
                 }
             });
         } else {
-            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>').trigger('change.select2');
+            $('#KabKota').html('<option value="">Pilih Kab/Kota</option>');
         }
     });
 
     $('#Filter').on('click', function() {
         var prov = $('#Provinsi').val();
         var kabKota = $('#KabKota').val();
-        var kode = kabKota ? kabKota : prov;
-        if (!kode) {
-            alert('Pilih Provinsi atau Kab/Kota terlebih dahulu!');
-            return;
-        }
-        var url = new URL(window.location.href);
-        url.searchParams.set('kode_wilayah', kode);
-        window.location.href = url.toString();
+        if (!prov) { alert('Mohon Pilih Provinsi'); return; }
+        if (!kabKota) { alert('Mohon Pilih Kab/Kota'); return; }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true).text('Memuat...');
+
+        $.ajax({
+            url: BaseURL + 'Daerah/SetTempKodeWilayah',
+            type: 'POST',
+            data: {
+                KodeWilayah: kabKota,
+                [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+            },
+            success: function(res) {
+                if (res === '1' || res.trim() === '1' || res === 'success' || res.trim() === 'success') {
+                    window.location.reload();
+                } else {
+                    alert(res || 'Gagal menyimpan filter wilayah!');
+                    $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
+                }
+            },
+            error: function() {
+                alert('Gagal menghubungi server!');
+                $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
+            }
+        });
     });
+
+    <?php if (!empty($KodeWilayah)) { ?>
+        var curKodeKeterkaitan = "<?= $KodeWilayah ?>";
+        var curProvKeterkaitan = curKodeKeterkaitan.substring(0, 2);
+        if ($('#Provinsi').val() && $('#KabKota option').length <= 1) {
+            $.ajax({
+                url: BaseURL + 'Daerah/GetListKabKota',
+                type: 'POST',
+                data: {
+                    Kode: curProvKeterkaitan,
+                    [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE
+                },
+                dataType: 'json',
+                success: function(res) {
+                    var html = '<option value="">Pilih Kab/Kota</option>';
+                    if (res && res.length > 0) {
+                        $.each(res, function(i, item) {
+                            var sel = (item.Kode === curKodeKeterkaitan) ? 'selected' : '';
+                            html += '<option value="' + item.Kode + '" ' + sel + '>' + item.Nama + '</option>';
+                        });
+                    }
+                    $('#KabKota').html(html);
+                }
+            });
+        }
+    <?php } ?>
 });
 </script>

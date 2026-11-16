@@ -7,64 +7,54 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                        <div class="data-table-list">
+                        <div class="data-table-list" style="border-radius: 12px; box-shadow: 0 4px 18px rgba(0,0,0,0.06); padding: 25px 25px 30px; background: #fff; border: 1px solid #e2e8f0;">
                             <!-- Filter untuk pengguna yang belum login -->
                             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                                <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <div class="row filter-row">
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="Provinsi"><b>Provinsi</b></label>
-                                                        <select class="form-control filter-select" id="Provinsi">
-                                                            <option value="">Pilih Provinsi</option>
-                                                            <?php foreach ($Provinsi as $prov) { ?>
-                                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                    <?= html_escape($prov['Nama']) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="KabKota"><b>Kab/Kota</b></label>
-                                                        <select class="form-control filter-select" id="KabKota">
-                                                            <option value="">Pilih Kab/Kota</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-2 col-md-6">
-                                                    <div class="filter-group" style="margin-top: 28px;">
-                                                        <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                            <b>Filter</b>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px 20px; margin-bottom: 20px;">
+                                    <div style="display: flex; align-items: flex-end; gap: 15px; flex-wrap: wrap;">
+                                        <div style="flex: 1 1 250px; min-width: 200px;">
+                                            <label for="Provinsi" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Provinsi</label>
+                                            <select class="form-control" id="Provinsi" style="height: 38px; border-radius: 6px;">
+                                                <option value="">Pilih Provinsi</option>
+                                                <?php foreach ($Provinsi as $prov) { ?>
+                                                    <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
+                                                        <?= html_escape($prov['Nama']) ?>
+                                                    </option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                        <div style="flex: 1 1 250px; min-width: 200px;">
+                                            <label for="KabKota" style="font-weight: 700; margin-bottom: 6px; display: block; color: #374151;">Kab/Kota</label>
+                                            <select class="form-control" id="KabKota" style="height: 38px; border-radius: 6px;">
+                                                <option value="">Pilih Kab/Kota</option>
+                                            </select>
+                                        </div>
+                                        <div style="flex: 0 0 auto;">
+                                            <button class="btn btn-primary notika-btn-primary" id="Filter" style="height: 38px; padding: 0 25px; font-weight: 700; border-radius: 6px;">
+                                                Filter
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
                            
-                            <!-- Menampilkan Visi dan Periode setelah filter -->
-                            <?php if (!empty($KodeWilayah)) { ?>
-                                <?php 
-                                    $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
-                                    $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
-                                    if (empty($Visi)) {
-                                        $pesan_error = "Tidak ada data untuk wilayah: $nama_wilayah";
-                                    }
-                                ?>
-                                <div class="alert <?= empty($Visi) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px;">
-                                    <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
-                                    <?php if (!empty($pesan_error)) { ?>
-                                        <strong>Peringatan:</strong> <?= html_escape($pesan_error) ?>
-                                    <?php } ?>
-                                </div>
-                            <?php } ?>
+                                <!-- Menampilkan Visi dan Periode setelah filter -->
+                                <?php if (!empty($KodeWilayah)) { ?>
+                                    <?php 
+                                        $wilayah = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                        $nama_wilayah = $wilayah ? html_escape($wilayah['Nama']) : 'Wilayah Tidak Ditemukan';
+                                        if (empty($Visi)) {
+                                            $pesan_error = "Tidak ada data untuk wilayah: $nama_wilayah";
+                                        }
+                                    ?>
+                                    <div class="alert <?= empty($Visi) ? 'alert-warning' : 'alert-info' ?>" style="margin-bottom: 20px; border-radius: 8px;">
+                                        <strong>Wilayah:</strong> <?= $nama_wilayah ?><br>
+                                        <?php if (!empty($pesan_error)) { ?>
+                                            <strong>Peringatan:</strong> <?= html_escape($pesan_error) ?>
+                                        <?php } ?>
+                                    </div>
+                                <?php } ?>
 
-                        <?php } ?>
+                            <?php } ?>
 
                             <div class="basic-tb-hd">
                                 <div class="button-icon-btn sm-res-mg-t-30">

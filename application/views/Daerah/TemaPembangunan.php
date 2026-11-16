@@ -14,47 +14,50 @@
                         <div class="basic-tb-hd">
                             <!-- Filter untuk pengguna yang belum login -->
                             <?php if (!isset($_SESSION['KodeWilayah'])) { ?>
-                                <div class="form-example-wrap" style="margin-bottom: 20px;">
-                                    <div class="form-example-int form-horizental">
-                                        <div class="form-group">
-                                            <div class="row filter-row">
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="Provinsi"><b>Provinsi</b></label>
-                                                        <select class="form-control filter-select" id="Provinsi">
-                                                            <option value="">Pilih Provinsi</option>
-                                                            <?php foreach ($Provinsi as $prov) { ?>
-                                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (substr($KodeWilayah, 0, 2) == $prov['Kode']) ? 'selected' : '' ?>>
-                                                                    <?= html_escape($prov['Nama']) ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-3 col-md-6">
-                                                    <div class="filter-group">
-                                                        <label for="KabKota"><b>Kab/Kota</b></label>
-                                                        <select class="form-control filter-select" id="KabKota">
-                                                            <option value="">Pilih Kab/Kota</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-2 col-md-6">
-                                                    <div class="filter-group" style="margin-top: 28px;">
-                                                        <button class="btn btn-primary notika-btn-primary btn-block" id="Filter">
-                                                            <b>Filter</b>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                            <div class="filter-card-custom" style="background:#fff; border-radius:12px; padding:18px 24px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04); border:1px solid #cbd5e1;">
+                                <div class="filter-header-title" style="font-size:14px; font-weight:700; color:#1e293b; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fa fa-filter" style="color:#2d6a4f;"></i> Filter Wilayah
+                                </div>
+                                <div class="row" style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end;">
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Provinsi</label>
+                                        <select class="form-control filter-select-custom" id="Provinsi" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Provinsi</option>
+                                            <?php if (!empty($Provinsi)) { foreach ($Provinsi as $prov) { ?>
+                                                <option value="<?= html_escape($prov['Kode']) ?>" <?= (!empty($KodeWilayah) && substr($KodeWilayah,0,2)==$prov['Kode']) ? 'selected' : '' ?>>
+                                                    <?= html_escape($prov['Nama']) ?>
+                                                </option>
+                                            <?php }} ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="flex:1; min-width:200px;">
+                                        <label style="font-size:12px; font-weight:600; color:#475569; margin-bottom:5px; display:block;">Kabupaten / Kota</label>
+                                        <select class="form-control filter-select-custom" id="KabKota" style="width:100%; height:38px; border-radius:8px; border:1px solid #cbd5e1; font-size:13px; padding:6px 10px;">
+                                            <option value="">Pilih Kab/Kota</option>
+                                            <?php if (!empty($KodeWilayah)) { 
+                                                $selected_kab = $this->db->where('Kode', $KodeWilayah)->get('kodewilayah')->row_array();
+                                            ?>
+                                                <option value="<?= html_escape($KodeWilayah) ?>" selected>
+                                                    <?= html_escape($selected_kab['Nama'] ?? $NamaWilayah) ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-filter" style="width:auto;">
+                                        <button type="button" class="btn btn-primary-custom" id="Filter" style="height:38px; padding:0 22px; font-size:13px;">
+                                            <i class="fa fa-search"></i> Filter
+                                        </button>
                                     </div>
                                 </div>
+
                                 <?php if (!empty($KodeWilayah)) { ?>
-                                    <div class="alert alert-info" style="margin-bottom: 20px;">
-                                        <strong>Wilayah:</strong> <?= html_escape($NamaWilayah) ?>
+                                    <div style="margin-top:14px; padding:10px 14px; background:#f2fbf5; border-left:4px solid #2d6a4f; border-radius:6px; font-size:12.5px; color:#334155;">
+                                        <strong>Wilayah Terpilih:</strong> <?= html_escape($NamaWilayah) ?>
                                     </div>
                                 <?php } ?>
+                            </div>
                             <?php } ?>
 
                             <div class="basic-tb-hd" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;">
@@ -185,23 +188,21 @@
                                         <?php } ?>
                                     </div>
                                     <?php if ($can_edit) { ?>
-                                    <div style="display: flex; gap: 6px; align-items: center;">
-                                        <button type="button" class="btn btn-xs btn-warning EditTema" 
+                                    <div class="action-group" style="display: inline-flex; gap: 5px; align-items: center;">
+                                        <button type="button" class="btn btn-action-custom btn-action-edit EditTema" 
                                             data-id="<?= $tema['id'] ?>"
                                             data-tahun="<?= html_escape($tema['tahun']) ?>"
                                             data-tema_nasional="<?= html_escape($tema['tema_nasional']) ?>"
                                             data-tema_provinsi="<?= html_escape($tema['tema_provinsi']) ?>"
                                             data-tema_daerah="<?= html_escape($tema['tema_daerah']) ?>"
                                             data-tema_rkp_id="<?= $tema['tema_rkp_id'] ?? '' ?>"
-                                            title="Edit Tema"
-                                            style="padding: 4px 10px; font-size: 11px; font-weight: bold;">
-                                            <i class="fa fa-pencil"></i> Edit Tema
+                                            title="Edit Tema">
+                                            <i class="fa fa-pencil"></i>
                                         </button>
-                                        <button type="button" class="btn btn-xs btn-danger HapusTema" 
+                                        <button type="button" class="btn btn-action-custom btn-action-delete HapusTema" 
                                             data-id="<?= $tema['id'] ?>"
-                                            title="Hapus Tema"
-                                            style="padding: 4px 10px; font-size: 11px; font-weight: bold;">
-                                            <i class="fa fa-trash"></i> Hapus Tema
+                                            title="Hapus Tema">
+                                            <i class="fa fa-trash"></i>
                                         </button>
                                     </div>
                                     <?php } ?>
@@ -288,21 +289,21 @@
                                                                 <?= html_escape(ltrim(trim($pn['prioritas']), "•*- \t\n\r\0\x0B")) ?>
                                                             </div>
                                                             <?php if ($can_edit) { ?>
-                                                                <div class="item-actions-group" style="display: inline-flex; gap: 4px;">
-                                                                    <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                <div class="action-group" style="display: inline-flex; gap: 4px; margin-top: 4px;">
+                                                                    <button type="button" class="btn btn-action-custom btn-action-edit EditPrioritas" 
                                                                             data-id="<?= $pn['id'] ?>" 
                                                                             data-tema_id="<?= $tema['id'] ?>" 
                                                                             data-tahun="<?= $tema['tahun'] ?>"
                                                                             data-prioritas="<?= html_escape($pn['prioritas']) ?>" 
                                                                             data-jenis="nasional" 
                                                                             data-label="PN" 
-                                                                            title="Edit PN" style="padding: 2px 7px; font-size: 11px; font-weight: 600;">
-                                                                        <i class="fa fa-pencil"></i> Edit
+                                                                            title="Edit PN">
+                                                                        <i class="fa fa-pencil"></i>
                                                                     </button>
-                                                                    <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                    <button type="button" class="btn btn-action-custom btn-action-delete HapusPrioritas" 
                                                                             data-id="<?= $pn['id'] ?>" 
-                                                                            title="Hapus PN" style="padding: 2px 7px; font-size: 11px; font-weight: 600;">
-                                                                        <i class="fa fa-trash"></i> Hapus
+                                                                            title="Hapus PN">
+                                                                        <i class="fa fa-trash"></i>
                                                                     </button>
                                                                 </div>
                                                             <?php } ?>
@@ -321,21 +322,21 @@
                                                             <div class="prioritas-item-box" style="margin-bottom: 8px; line-height: 1.45; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
                                                                 <span class="pp-text">&bull; <?= html_escape(ltrim(trim($p['prioritas']), "•*- \t\n\r\0\x0B")) ?></span>
                                                                 <?php if ($can_edit) { ?>
-                                                                    <span class="item-actions-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
-                                                                        <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                    <span class="action-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
+                                                                        <button type="button" class="btn btn-action-custom btn-action-edit EditPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
                                                                                 data-tema_id="<?= $tema['id'] ?>" 
                                                                                 data-tahun="<?= $tema['tahun'] ?>"
                                                                                 data-prioritas="<?= html_escape($p['prioritas']) ?>" 
                                                                                 data-jenis="provinsi" 
                                                                                 data-label="PP" 
-                                                                                title="Edit PP" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
-                                                                            <i class="fa fa-pencil"></i> Edit
+                                                                                title="Edit PP">
+                                                                            <i class="fa fa-pencil"></i>
                                                                         </button>
-                                                                        <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                        <button type="button" class="btn btn-action-custom btn-action-delete HapusPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
-                                                                                title="Hapus PP" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
-                                                                            <i class="fa fa-trash"></i> Hapus
+                                                                                title="Hapus PP">
+                                                                            <i class="fa fa-trash"></i>
                                                                         </button>
                                                                     </span>
                                                                 <?php } ?>
@@ -365,21 +366,21 @@
                                                             <div class="prioritas-item-box" style="margin-bottom: 8px; line-height: 1.45; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
                                                                 <span class="pd-text">&bull; <?= html_escape(ltrim(trim($p['prioritas']), "•*- \t\n\r\0\x0B")) ?></span>
                                                                 <?php if ($can_edit) { ?>
-                                                                    <span class="item-actions-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
-                                                                        <button type="button" class="btn btn-xs btn-warning EditPrioritas" 
+                                                                    <span class="action-group" style="display: inline-flex; gap: 3px; flex-shrink: 0; margin-top: 1px;">
+                                                                        <button type="button" class="btn btn-action-custom btn-action-edit EditPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
                                                                                 data-tema_id="<?= $tema['id'] ?>" 
                                                                                 data-tahun="<?= $tema['tahun'] ?>"
                                                                                 data-prioritas="<?= html_escape($p['prioritas']) ?>" 
                                                                                 data-jenis="daerah" 
                                                                                 data-label="PD" 
-                                                                                title="Edit PD" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
-                                                                            <i class="fa fa-pencil"></i> Edit
+                                                                                title="Edit PD">
+                                                                            <i class="fa fa-pencil"></i>
                                                                         </button>
-                                                                        <button type="button" class="btn btn-xs btn-danger HapusPrioritas" 
+                                                                        <button type="button" class="btn btn-action-custom btn-action-delete HapusPrioritas" 
                                                                                 data-id="<?= $p['id'] ?>" 
-                                                                                title="Hapus PD" style="padding: 2px 6px; font-size: 10px; font-weight: 600;">
-                                                                            <i class="fa fa-trash"></i> Hapus
+                                                                                title="Hapus PD">
+                                                                            <i class="fa fa-trash"></i>
                                                                         </button>
                                                                     </span>
                                                                 <?php } ?>
@@ -1364,23 +1365,25 @@ MODAL EDIT PRIORITAS - SAMA DENGAN INPUT
     .table-tema-pembangunan .btn-add-inline {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
-        padding: 3px 9px;
+        gap: 5px;
+        height: 28px;
+        padding: 0 10px;
         font-size: 11px;
         font-weight: 600;
-        color: #0b62a4;
-        background: #f0f7fd;
-        border: 1px solid #bce8f1;
-        border-radius: 3px;
+        color: #ffffff;
+        background: #10b981;
+        border: 1px solid #059669;
+        border-radius: 4px;
         margin-top: 6px;
         text-decoration: none;
         cursor: pointer;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
         transition: all 0.15s ease-in-out;
     }
     .table-tema-pembangunan .btn-add-inline:hover {
-        background: #0b62a4;
+        background: #059669;
         color: #ffffff;
-        border-color: #0b62a4;
+        border-color: #047857;
     }
 </style>
 
@@ -1452,27 +1455,28 @@ jQuery(document).ready(function($) {
                 return;
             }
             var kodeWilayah = $("#KabKota").val();
+            var $btn = $(this);
             $.ajax({
                 url: BaseURL + "Daerah/SetTempKodeWilayah",
                 type: "POST",
                 data: { KodeWilayah: kodeWilayah, [CSRF_TOKEN_NAME]: CSRF_TOKEN_VALUE },
-                beforeSend: function() { $("#Filter").prop('disabled', true).text('Memuat...'); },
+                beforeSend: function() { $btn.prop('disabled', true).text('Memuat...'); },
                 success: function(Respon) {
                     try {
-                        if (Respon === 'success' || Respon.trim() === 'success') {
-                            window.location.href = BaseURL + "Daerah/TemaPembangunan";
+                        if (Respon === '1' || Respon.trim() === '1' || Respon === 'success' || Respon.trim() === 'success') {
+                            window.location.reload();
                         } else {
                             alert(Respon || "Gagal menyimpan filter wilayah!");
-                            $("#Filter").prop('disabled', false).text('Filter');
+                            $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
                         }
                     } catch (e) {
                         alert("Gagal memproses respons server!");
-                        $("#Filter").prop('disabled', false).text('Filter');
+                        $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
                     }
                 },
                 error: function() {
                     alert("Gagal menghubungi server!");
-                    $("#Filter").prop('disabled', false).text('Filter');
+                    $btn.prop('disabled', false).html('<i class="fa fa-search"></i> Filter');
                 }
             });
         });

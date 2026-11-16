@@ -1002,7 +1002,7 @@
                 <a href="<?= base_url('Nasional/VisiRPJPN'); ?>" class="dropdown-item">Nasional</a>
                 <a href="<?= base_url('Kementerian/Kementerian'); ?>" class="dropdown-item">Kementerian</a>
                 <a href="<?= base_url('Provinsi/VisiRPJPD'); ?>" class="dropdown-item">Provinsi</a>
-                <a href="<?= base_url('Daerah/UrusanPD'); ?>" class="dropdown-item">Daerah</a>
+                <a href="<?= base_url('Daerah/VisiRPJPD'); ?>" class="dropdown-item">Daerah</a>
               </div>
             </div>
 
@@ -1436,7 +1436,7 @@
             <li><a href="<?= base_url('Nasional/VisiRPJPN'); ?>"><i class="fas fa-chevron-right me-1" style="font-size: 0.72rem;"></i> Perencanaan Nasional</a></li>
             <li><a href="<?= base_url('Kementerian/Kementerian'); ?>"><i class="fas fa-chevron-right me-1" style="font-size: 0.72rem;"></i> Kementerian / Lembaga</a></li>
             <li><a href="<?= base_url('Provinsi/VisiRPJPD'); ?>"><i class="fas fa-chevron-right me-1" style="font-size: 0.72rem;"></i> Provinsi</a></li>
-            <li><a href="<?= base_url('Daerah/UrusanPD'); ?>"><i class="fas fa-chevron-right me-1" style="font-size: 0.72rem;"></i> Daerah & Instansi</a></li>
+            <li><a href="<?= base_url('Daerah/VisiRPJPD'); ?>"><i class="fas fa-chevron-right me-1" style="font-size: 0.72rem;"></i> Daerah & Instansi</a></li>
           </ul>
         </div>
 
@@ -1549,7 +1549,7 @@
             } else if (Respon === '2') {
               window.location = BaseURL + "Provinsi/VisiRPJPD";
             } else if (Respon === '3') {
-              window.location = BaseURL + "Daerah/UrusanPD";
+              window.location = BaseURL + "Daerah/VisiRPJPD";
             } else if (Respon === '4') {
               if (username.toLowerCase().indexOf('verif') !== -1) {
                 window.location = BaseURL + "Instansi/TabelIPPD";
