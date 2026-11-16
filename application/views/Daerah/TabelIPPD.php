@@ -2350,6 +2350,7 @@ tr.type-sub:hover td {
     <form id="formDetailIppd" autocomplete="off">
       <input type="hidden" id="modalItemCode" value="">
       <input type="hidden" id="modalBobotMaks" value="0">
+      <input type="hidden" id="modalOpsiAksi" value="">
 
       <!-- 3. Dynamic Worksheet Canvas -->
       <div class="excel-sheet-canvas" id="modalDynamicWorksheet">
@@ -2827,6 +2828,7 @@ tr.type-sub:hover td {
   var modalItemCode = document.getElementById("modalItemCode");
   var modalBobotMaks = document.getElementById("modalBobotMaks");
   var modalBobotInput = document.getElementById("modalBobotInput");
+  var modalOpsiAksi = document.getElementById("modalOpsiAksi");
   var modalDynamicWorksheet = document.getElementById("modalDynamicWorksheet");
   var modalRefDokumen = document.getElementById("modalRefDokumen");
   var modalRefHalaman = document.getElementById("modalRefHalaman");
