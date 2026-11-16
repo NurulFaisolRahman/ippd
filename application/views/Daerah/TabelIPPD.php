@@ -2695,6 +2695,10 @@ tr.type-sub:hover td {
   var AUTO_DATA_1_B_8_B = <?= isset($AutoData_1_b_8_b) ? json_encode($AutoData_1_b_8_b) : '{}' ?>;
   var AUTO_DATA_1_B_9_B = <?= isset($AutoData_1_b_9_b) ? json_encode($AutoData_1_b_9_b) : '{}' ?>;
   var AUTO_DATA_1_C_1 = <?= isset($AutoData_1_c_1) ? json_encode($AutoData_1_c_1) : '[]' ?>;
+  var AUTO_DATA_2_B_1 = <?= isset($AutoData_2_b_1) ? json_encode($AutoData_2_b_1) : '{}' ?>;
+  var AUTO_DATA_2_B_2 = <?= isset($AutoData_2_b_2) ? json_encode($AutoData_2_b_2) : '{}' ?>;
+  var AUTO_DATA_3_A_1_A = <?= isset($AutoData_3_a_1_a) ? json_encode($AutoData_3_a_1_a) : '{}' ?>;
+  var AUTO_DATA_3_A_1_B = <?= isset($AutoData_3_a_1_b) ? json_encode($AutoData_3_a_1_b) : '{}' ?>;
   var IS_ROLE_4 = <?= !empty($IsRole4) ? 'true' : 'false' ?>;
   var CSRF_NAME = '<?= $this->security->get_csrf_token_name() ?>';
   var CSRF_TOKEN = '<?= $this->security->get_csrf_hash() ?>';
@@ -2978,6 +2982,14 @@ tr.type-sub:hover td {
                   if (sub.code === '1.a.2.e' && (!SCORES_MAP['1.a.2.e'] || SCORES_MAP['1.a.2.e'].bobot_capaian === null || SCORES_MAP['1.a.2.e'].bobot_capaian === undefined)) {
                     var auto1a2e = getAutoScore_1_a_2_e();
                     subVal = auto1a2e.score;
+                  }
+                  if (sub.code === '3.a.1.a' && (!SCORES_MAP['3.a.1.a'] || SCORES_MAP['3.a.1.a'].bobot_capaian === null || SCORES_MAP['3.a.1.a'].bobot_capaian === undefined)) {
+                    var auto3a1a = getAutoScore_3_a_1_a();
+                    subVal = auto3a1a.finalScore;
+                  }
+                  if (sub.code === '3.a.1.b' && (!SCORES_MAP['3.a.1.b'] || SCORES_MAP['3.a.1.b'].bobot_capaian === null || SCORES_MAP['3.a.1.b'].bobot_capaian === undefined)) {
+                    var auto3a1b = getAutoScore_3_a_1_b();
+                    subVal = auto3a1b.finalScore;
                   }
                   indScore += subVal;
                   var subVerif = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_verifikator !== null ? Number(SCORES_MAP[sub.code].bobot_verifikator) : 0;
@@ -3272,6 +3284,24 @@ tr.type-sub:hover td {
                     savedScoreSub = {
                       bobot_capaian: auto1a2e.score,
                       opsi_aksi: auto1a2e.score >= sub.bobot ? 'Memenuhi Sepenuhnya' : (auto1a2e.score >= 0.225 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '3.a.1.a' && !hasSubScore) {
+                    var auto3a1a = getAutoScore_3_a_1_a();
+                    savedScoreSub = {
+                      bobot_capaian: auto3a1a.finalScore,
+                      opsi_aksi: auto3a1a.critText,
+                      catatan: auto3a1a.catatan
+                    };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '3.a.1.b' && !hasSubScore) {
+                    var auto3a1b = getAutoScore_3_a_1_b();
+                    savedScoreSub = {
+                      bobot_capaian: auto3a1b.finalScore,
+                      opsi_aksi: auto3a1b.critText,
+                      catatan: auto3a1b.catatan
                     };
                     hasSubScore = true;
                   }
@@ -7405,66 +7435,349 @@ tr.type-sub:hover td {
   }
 
   // 11. Sheet 3.a.1.a (OPD Penanggungjawab Program Prioritas Daerah)
-  function renderWs_3_a_1_a(d, maxBobot){
+  function getAutoScore_3_a_1_a(d) {
     d = d || {};
-    var rows = d.rows || [
-      { bidang: '1. Bidang Pekerjaan Umum dan Penataan Ruang', prog: 'Program Penyelenggaraan Jalan dan Jembatan', opd: 'Dinas Pekerjaan Umum dan Tata Ruang' },
-      { bidang: '2. Bidang Pendidikan', prog: 'Program Pengelolaan Pendidikan Dasar', opd: 'Dinas Pendidikan' },
-      { bidang: '3. Bidang Kesehatan', prog: 'Program Pemenuhan Upaya Kesehatan Masyarakat dan Perorangan', opd: 'Dinas Kesehatan' },
-      { bidang: '4. Bidang Sosial', prog: 'Program Perlindungan dan Jaminan Sosial', opd: 'Dinas Sosial' }
-    ];
+    var rawRows = [];
 
-    var html = 
-      '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_3_a_1_a" style="min-width: 900px;">' +
+    if (d.rows && Array.isArray(d.rows) && d.rows.length > 0) {
+      rawRows = d.rows;
+    } else if (typeof AUTO_DATA_3_A_1_A !== 'undefined' && AUTO_DATA_3_A_1_A.rows && Array.isArray(AUTO_DATA_3_A_1_A.rows) && AUTO_DATA_3_A_1_A.rows.length > 0) {
+      rawRows = AUTO_DATA_3_A_1_A.rows;
+    }
+
+    var savedRowMap = {};
+    if (d.rows && Array.isArray(d.rows)) {
+      d.rows.forEach(function(r) {
+        var key = ((r.bidang || '') + '___' + (r.prog || '')).trim().toLowerCase();
+        savedRowMap[key] = r;
+      });
+    }
+
+    var cleanRows = [];
+    var matchedCount = 0;
+
+    rawRows.forEach(function(r) {
+      var bName = (r.bidang || '').trim();
+      var pName = (r.prog || '').trim();
+      if (!pName) return;
+
+      var key = (bName + '___' + pName).toLowerCase();
+      var savedR = savedRowMap[key];
+
+      var opd = (savedR && savedR.opd !== undefined && String(savedR.opd).trim() !== '') ? savedR.opd : (r.opd || '-');
+      var scVal = 100.00;
+      if (savedR && savedR.nilai_keselarasan !== undefined && savedR.nilai_keselarasan !== null) {
+        scVal = parseFloat(savedR.nilai_keselarasan);
+      } else if (r.nilai_keselarasan !== undefined && r.nilai_keselarasan !== null) {
+        scVal = parseFloat(r.nilai_keselarasan);
+      }
+
+      var isMatched = scVal > 0;
+      if (isMatched) matchedCount++;
+
+      cleanRows.push({
+        bidang: bName,
+        prog: pName,
+        opd: opd,
+        nilai_keselarasan: scVal,
+        keselarasan_terbobot: isMatched ? 5.00 : 0.00
+      });
+    });
+
+    var totalRows = cleanRows.length || 104;
+    var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 0;
+
+    // Kriteria sesuai file HTML 3.a.1.a (Baris 110-111):
+    // A. Tidak Ada = 0
+    // B. Ada sebagian = 2
+    // C. Tercascade seluruhnya = 5
+    var crit = 'A', critText = 'A. Tidak Ada', finalScore = 0.00;
+    if (pctMatched >= 100.0) {
+      crit = 'C';
+      finalScore = 5.00;
+      critText = 'C. Tercascade seluruhnya';
+    } else if (pctMatched > 0.0) {
+      crit = 'B';
+      finalScore = 2.00;
+      critText = 'B. Ada sebagian';
+    } else {
+      crit = 'A';
+      finalScore = 0.00;
+      critText = 'A. Tidak Ada';
+    }
+
+    // Kelompokkan baris berdasarkan Bidang secara sekuensial
+    var groups = [];
+    var curBidang = null;
+    var curGroup = null;
+    cleanRows.forEach(function(r) {
+      if (r.bidang !== curBidang) {
+        curBidang = r.bidang;
+        curGroup = { bidang: curBidang, items: [] };
+        groups.push(curGroup);
+      }
+      curGroup.items.push(r);
+    });
+
+    var defDok = (d.dokumen) ? d.dokumen : ((typeof AUTO_DATA_3_A_1_A !== 'undefined' && AUTO_DATA_3_A_1_A.dokumen) ? AUTO_DATA_3_A_1_A.dokumen : 'RKPD Kab. Banyuwangi 2026');
+    var defHal = (d.halaman) ? d.halaman : ((typeof AUTO_DATA_3_A_1_A !== 'undefined' && AUTO_DATA_3_A_1_A.halaman) ? AUTO_DATA_3_A_1_A.halaman : 'Bab IV');
+    var defTbl = (d.tabel) ? d.tabel : ((typeof AUTO_DATA_3_A_1_A !== 'undefined' && AUTO_DATA_3_A_1_A.tabel) ? AUTO_DATA_3_A_1_A.tabel : 'Tabel Program Prioritas RKPD 2026');
+    var defCat = (d.catatan) ? d.catatan : ((typeof AUTO_DATA_3_A_1_A !== 'undefined' && AUTO_DATA_3_A_1_A.catatan) ? AUTO_DATA_3_A_1_A.catatan : ('Tersedianya penanggungjawab OPD untuk seluruh program prioritas pembangunan daerah di RKPD (' + matchedCount + '/' + totalRows + ' program terisi OPD)'));
+
+    return {
+      rows: cleanRows,
+      groups: groups,
+      totalRows: totalRows,
+      matchedCount: matchedCount,
+      pctMatched: pctMatched,
+      kriteria: crit,
+      critText: critText,
+      finalScore: finalScore,
+      dokumen: defDok,
+      halaman: defHal,
+      tabel: defTbl,
+      catatan: defCat
+    };
+  }
+
+  function collectDetailJson_3_a_1_a() {
+    var table = document.querySelector("#wsTable_3_a_1_a");
+    if (!table) return null;
+
+    var rows = [];
+    var matchedCount = 0;
+
+    var trList = table.querySelectorAll(".ws-3a1a-row");
+    trList.forEach(function(tr) {
+      var bVal = tr.getAttribute("data-bidang") || '';
+      var pVal = tr.getAttribute("data-prog") || '';
+      var opdInp = tr.querySelector(".ws-3a1a-opd-val");
+      var opdVal = opdInp ? opdInp.value.trim() : (tr.getAttribute("data-opd") || '-');
+
+      var scSel = tr.querySelector(".ws-3a1a-score-sel");
+      var scVal = scSel ? parseFloat(scSel.value) : 100.00;
+      var isMatched = scVal > 0;
+      if (isMatched) matchedCount++;
+
+      rows.push({
+        bidang: bVal,
+        prog: pVal,
+        opd: opdVal,
+        nilai_keselarasan: scVal,
+        keselarasan_terbobot: isMatched ? 5.00 : 0.00
+      });
+    });
+
+    var totalRows = rows.length || 104;
+    var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 0;
+    var crit = 'A', critText = 'A. Tidak Ada', score = 0.00;
+    if (pctMatched >= 100.0) {
+      crit = 'C';
+      score = 5.00;
+      critText = 'C. Tercascade seluruhnya';
+    } else if (pctMatched > 0.0) {
+      crit = 'B';
+      score = 2.00;
+      critText = 'B. Ada sebagian';
+    } else {
+      crit = 'A';
+      score = 0.00;
+      critText = 'A. Tidak Ada';
+    }
+
+    var refDok = table.querySelector(".ref-dok-inp") ? table.querySelector(".ref-dok-inp").value.trim() : (modalRefDokumen ? modalRefDokumen.value.trim() : 'RKPD Kab. Banyuwangi 2026');
+    var refHal = table.querySelector(".ref-hal-inp") ? table.querySelector(".ref-hal-inp").value.trim() : (modalRefHalaman ? modalRefHalaman.value.trim() : 'Bab IV');
+    var refTbl = table.querySelector(".ref-tbl-inp") ? table.querySelector(".ref-tbl-inp").value.trim() : (modalRefTabel ? modalRefTabel.value.trim() : 'Tabel Program Prioritas RKPD 2026');
+    var catVal = table.querySelector(".ws-3a1a-catatan-inp") ? table.querySelector(".ws-3a1a-catatan-inp").value.trim() : (modalCatatan ? modalCatatan.value.trim() : '');
+
+    return {
+      rows: rows,
+      total_rows: totalRows,
+      matched_count: matchedCount,
+      pct_matched: pctMatched,
+      rata_rata_keselarasan: Math.round(pctMatched) + '%',
+      keselarasan_terbobot: score,
+      kriteria: crit,
+      critText: critText,
+      aksi: critText,
+      opsi_aksi: critText,
+      score: score,
+      dokumen: refDok,
+      halaman: refHal,
+      tabel: refTbl,
+      catatan: catVal
+    };
+  }
+
+  function renderWs_3_a_1_a(d, maxBobot) {
+    d = d || {};
+    var info = getAutoScore_3_a_1_a(d);
+    var groups = info.groups;
+    var totalRows = info.totalRows || 104;
+    var matchedCount = info.matchedCount;
+    var pctMatched = info.pctMatched;
+    var crit = info.kriteria;
+    var critText = info.critText;
+    var finalScore = info.finalScore;
+    var defDok = info.dokumen;
+    var defHal = info.halaman;
+    var defTbl = info.tabel;
+    var defCat = info.catatan;
+
+    var html =
+      '<div style="overflow-x:auto; padding-bottom:12px;">' +
+      '<table class="excel-grid-table" id="wsTable_3_a_1_a" style="min-width: 1350px; font-size: 13px;">' +
         '<thead>' +
           '<tr>' +
-            '<th class="excel-row-num" style="width: 45px; text-align:center;">No</th>' +
-            '<th class="th-green" style="width: 25%;">Bidang Program Prioritas</th>' +
-            '<th class="th-amber" style="width: 35%;">Program Prioritas Daerah (RKPD)</th>' +
-            '<th class="th-blue" style="width: 25%;">OPD Penanggungjawab</th>' +
-            '<th class="th-green" style="width: 15%;">Nilai Keselarasan</th>' +
-            '<th class="th-gray" style="width: 45px;">Aksi</th>' +
+            '<th class="th-green" colspan="3" style="text-align: center; vertical-align: middle; padding: 10px 8px; font-size: 13px;">RKPD</th>' +
+            '<th class="th-green" rowspan="2" style="width: 140px; min-width: 130px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12.5px;">Nilai Keselarasan</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 80px; min-width: 75px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12.5px;">Bobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 120px; min-width: 110px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12.5px;">Keselarasan Terbobot</th>' +
+            '<th class="th-blue" rowspan="2" style="width: 130px; min-width: 120px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12.5px;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th class="th-blue" colspan="3" style="display:none;">Referensi</th>' +
+            '<th class="th-amber" rowspan="2" style="width: 220px; min-width: 180px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12.5px;">Catatan</th>' +
+          '</tr>' +
+          '<tr>' +
+            '<th class="th-green" style="width: 280px; min-width: 240px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12px;">' +
+              '<div>Bidang Program Prioritas Pembangunan Daerah</div>' +
+            '</th>' +
+            '<th class="th-green" style="width: 320px; min-width: 280px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12px;">' +
+              '<div>Program Prioritas Pembangunan Daerah</div>' +
+            '</th>' +
+            '<th class="th-green" style="width: 300px; min-width: 260px; text-align: center; vertical-align: middle; padding: 8px; font-size: 12px;">' +
+              '<div>OPD Penanggungjawab Program Prioritas Pembangunan Daerah</div>' +
+              '<div style="font-size: 11px; font-weight: 500; color: #475569; margin-top: 2px;">(jika tidak ada berikan tanda strip / -, jika lebih dari satu, berikan tanda koma sebagai pemisah)</div>' +
+            '</th>' +
+            '<th style="display:none;">Dokumen</th>' +
+            '<th style="display:none;">Halaman</th>' +
+            '<th style="display:none;">Tabel</th>' +
+          '</tr>' +
+          '<tr style="background: #efefef; font-size: 11.5px; color: #334155;">' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td style="text-align: center; font-weight: bold; padding: 6px; border: 1px solid #cbd5e1; font-family: \'Roboto Mono\', monospace; background: #efefef;">' + numFmt(maxBobot || 5.00) + '</td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
+            '<td colspan="3" style="display:none;"></td>' +
+            '<td style="border: 1px solid #cbd5e1; background: #efefef;"></td>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
-    rows.forEach(function(r, idx){
-      html += 
-        '<tr class="ws-3a1a-row">' +
-          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
-          '<td><input type="text" class="calc-inp bidang-inp" value="' + escapeHtml(r.bidang) + '" placeholder="Bidang Urusan..."></td>' +
-          '<td><input type="text" class="calc-inp prog-inp" value="' + escapeHtml(r.prog) + '" placeholder="Program Prioritas..."></td>' +
-          '<td><input type="text" class="calc-inp opd-inp" value="' + escapeHtml(r.opd) + '" placeholder="Nama Perangkat Daerah (jika tidak ada isi -)..."></td>' +
-          '<td class="cell-formula row-score" style="text-align:center; font-weight:700; color:#107c41;">100%</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1a-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
-        '</tr>';
+    var globalRowIdx = 0;
+    groups.forEach(function(g, gIdx) {
+      var groupCount = g.items.length;
+      var isFirstGroupRow = true;
+
+      g.items.forEach(function(row, rIdx) {
+        var scVal = parseFloat(row.nilai_keselarasan);
+        var isMatched = scVal > 0;
+
+        html += '<tr class="ws-3a1a-row" data-row-idx="' + globalRowIdx + '" data-group-idx="' + gIdx + '" data-bidang="' + escapeHtml(g.bidang) + '" data-prog="' + escapeHtml(row.prog) + '" data-opd="' + escapeHtml(row.opd) + '">';
+
+        // Col A: Bidang (rowspan antar program dalam bidang yang sama)
+        if (isFirstGroupRow) {
+          html +=
+            '<td rowspan="' + groupCount + '" class="ws-3a1a-group-bidang" style="vertical-align: top; padding: 10px 12px; font-size: 12px; font-weight: 700; color: #1e293b; background: #f8fafc; line-height: 1.45; border: 1px solid #cbd5e1;">' +
+              escapeHtml(g.bidang) +
+            '</td>';
+          isFirstGroupRow = false;
+        }
+
+        // Col B: Program Prioritas Daerah
+        html +=
+          '<td style="vertical-align: middle; padding: 8px 10px; font-size: 12px; font-weight: 600; color: #1e293b; background: #ffffff; border: 1px solid #cbd5e1; line-height: 1.4;">' +
+            escapeHtml(row.prog) +
+          '</td>';
+
+        // Col C: OPD Penanggungjawab (tampil hanya data yang ditarik saja, non-editable, tanpa button / keterangan tarik data)
+        html +=
+          '<td style="vertical-align: middle; padding: 8px 10px; font-size: 12px; color: #0f172a; background: #ffffff; border: 1px solid #cbd5e1; line-height: 1.4;">' +
+            '<span>' + escapeHtml(row.opd || '-') + '</span>' +
+            '<input type="hidden" class="ws-3a1a-opd-val" value="' + escapeHtml(row.opd || '') + '">' +
+          '</td>';
+
+        // Col D: Nilai Keselarasan (0% / 100%)
+        html +=
+          '<td style="vertical-align: middle; text-align: center; padding: 4px 6px; border: 1px solid #cbd5e1;">' +
+            '<select class="calc-inp ws-3a1a-score-sel form-control" data-row-idx="' + globalRowIdx + '" style="text-align: center; font-weight: 700; font-size: 12px; height: 32px; padding: 2px 4px; border-radius: 4px; background: #ffffff; cursor: pointer; width: 100%; border: 1px solid #94a3b8;">' +
+              '<option value="100.00"' + (scVal >= 100 ? ' selected' : '') + '>100.00%</option>' +
+              '<option value="0.00"' + (scVal < 100 ? ' selected' : '') + '>0.00%</option>' +
+            '</select>' +
+          '</td>';
+
+        // Col E: Bobot (kosong pada baris individual)
+        html +=
+          '<td style="vertical-align: middle; text-align: center; padding: 6px; border: 1px solid #cbd5e1; background: #f8fafc;"></td>';
+
+        // Col F: Keselarasan Terbobot
+        html +=
+          '<td class="ws-3a1a-row-terb" style="vertical-align: middle; text-align: center; padding: 6px; border: 1px solid #cbd5e1; font-weight: 700; font-size: 12.5px; font-family: \'Roboto Mono\', monospace; ' + (isMatched ? 'color: #1e40af; background: #eff6ff;' : 'color: #dc2626; background: #fef2f2;') + '">' +
+            numFmt(isMatched ? 5.00 : 0.00) +
+          '</td>';
+
+        // Col G, H, I, J, K (rowspan pada baris pertama global = 0)
+        if (globalRowIdx === 0) {
+          html +=
+            '<td rowspan="' + totalRows + '" class="ws-3a1a-avg-terb-col" style="vertical-align: middle; text-align: center; padding: 10px; background: #eff6ff; border: 1.5px solid #93c5fd; font-weight: 800; font-size: 16px; font-family: \'Roboto Mono\', monospace; color: #1e40af;">' +
+              numFmt(finalScore) +
+            '</td>';
+
+          html +=
+            '<td rowspan="' + totalRows + '" style="display:none;"><input type="text" class="ref-dok-inp" value="' + escapeHtml(defDok) + '"></td>';
+
+          html +=
+            '<td rowspan="' + totalRows + '" style="display:none;"><input type="text" class="ref-hal-inp" value="' + escapeHtml(defHal) + '"></td>';
+
+          html +=
+            '<td rowspan="' + totalRows + '" style="display:none;"><input type="text" class="ref-tbl-inp" value="' + escapeHtml(defTbl) + '"></td>';
+
+          html +=
+            '<td rowspan="' + totalRows + '" class="ws-3a1a-catatan-col" style="vertical-align: top; padding: 10px; background: #ffffff; border: 1px solid #cbd5e1;">' +
+              '<textarea class="form-control ws-3a1a-catatan-inp" rows="10" placeholder="Tuliskan catatan evaluasi..." style="width: 100%; height: 100%; min-height: 180px; resize: vertical; font-size: 12px; line-height: 1.45; padding: 8px; border: 1px solid #cbd5e1; border-radius: 4px; background: #ffffff;">' + escapeHtml(defCat) + '</textarea>' +
+            '</td>';
+        }
+
+        html += '</tr>';
+        globalRowIdx++;
+      });
     });
 
-    html += 
-        '</tbody>' +
-      '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAdd3a1aRow"><i class="fa fa-plus"></i> Tambah Program Prioritas OPD</button>' +
-      '</div>';
+    // Baris 108 HTML: Ringkasan Rata-rata Keselarasan 100%
+    html +=
+        '<tr style="background: #f8fafc; font-weight: bold; border-top: 2px solid #cbd5e1;">' +
+          '<td colspan="3" style="text-align: right; padding: 8px 12px; font-size: 12.5px; color: #334155;">Rata-rata Keselarasan:</td>' +
+          '<td class="ws-3a1a-sum-pct" style="text-align: center; padding: 8px 6px; font-size: 13.5px; font-family: \'Roboto Mono\', monospace; font-weight: 800; color: #15803d; background: #dcfce7; border: 1px solid #86efac;">' +
+            Math.round(pctMatched) + '%' +
+          '</td>' +
+          '<td colspan="3" style="border: 1px solid #cbd5e1;"></td>' +
+        '</tr>' +
+      '</tbody>' +
+    '</table>' +
+    '</div>';
 
+    // Keterangan & Kriteria Sesuai Baris 109, 111, 113 File HTML
     html += renderStandardCriteriaCard({
       code: '3.a.1.a',
       safeId: 'ws3a1a',
       title: 'Keterangan & Kriteria Penilaian Poin 3.a.1.a',
       badgeText: 'Penetapan OPD Penanggungjawab',
-      colTitle: 'Kriteria Penetapan OPD Penanggungjawab Program Prioritas Daerah',
+      colTitle: 'Kriteria Penetapan OPD Penanggungjawab Program Prioritas Daerah (RKPD)',
       rows: [
-        { crit: 'A', text: 'Tidak ada atau kurang dari 25% program prioritas daerah yang ditetapkan OPD penanggungjawab', val: '0,000', color: '#dc2626' },
-        { crit: 'B', text: 'Lebih dari 25% dan sama dengan atau kurang dari 50% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,125', color: '#d97706' },
-        { crit: 'C', text: 'Lebih dari 50% dan sama dengan atau kurang dari 75% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,250', color: '#2563eb' },
-        { crit: 'D', text: 'Lebih dari 75% dan sama dengan atau kurang dari 99% program prioritas daerah ditetapkan OPD penanggungjawab', val: '0,375', color: '#0891b2' },
-        { crit: 'E', text: '100% seluruh program prioritas daerah telah ditetapkan OPD penanggungjawab secara tepat', val: '0,500', color: '#16a34a' }
+        { crit: 'A', text: 'A. Tidak Ada', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'B. Ada sebagian', val: '2,000', color: '#d97706' },
+        { crit: 'C', text: 'C. Tercascade seluruhnya', val: '5,000', color: '#16a34a' }
       ],
-      sourceTitle: 'Hasil Penetapan OPD Penanggungjawab',
+      sourceTitle: 'Hasil Penetapan OPD Penanggungjawab RKPD',
       infoRows: [
-        { label: 'Sumber Data:', value: 'Program Prioritas Daerah & OPD Penanggungjawab' },
-        { label: 'Persentase Penetapan:', id: 'ws3a1aPctMatched', value: '-' },
-        { label: 'Kriteria Terpenuhi:', id: 'ws3a1aCritText', value: '-' }
+        { label: 'Keterangan:', value: 'Bidang urusan otomatis muncul sesuai dengan program prioritas' },
+        { label: 'Bukti Dukung:', value: 'Screenshot Penanggungjawab Program Prioritas Pembangunan Daerah di RKPD' },
+        { label: 'Sumber Data:', value: 'Program Prioritas RKPD (/Daerah/ProgramKegiatanPrioritas)' },
+        { label: 'Program Ada OPD:', id: 'ws3a1aPctMatched', value: pctMatched.toFixed(1) + '% (' + matchedCount + '/' + totalRows + ' Program)' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws3a1aCritText', value: critText },
+        { label: 'Nilai Akhir Terbobot:', id: 'ws3a1aScoreText', value: numFmt(finalScore) }
       ]
     });
 
@@ -7472,89 +7785,385 @@ tr.type-sub:hover td {
   }
 
   // 12. Sheet 3.a.1.b (Target dan Sasaran Daerah menjadi IKU OPD Renstra/Renja)
-  function renderWs_3_a_1_b(d, maxBobot){
+  function getAutoScore_3_a_1_b(d) {
     d = d || {};
-    var rows = d.rows || [
-      { ind_daerah: 'Tingkat Kemantapan Jalan Kabupaten', target_daerah: '90', unit_daerah: 'Persen', opd: 'Dinas PUTR', iku_opd: 'Persentase Panjang Jalan Kondisi Mantap', target_opd: '90', unit_opd: 'Persen', ekspektasi: 'Besar' },
-      { ind_daerah: 'Rata-rata Lama Sekolah (RLS)', target_daerah: '8.8', unit_daerah: 'Tahun', opd: 'Dinas Pendidikan', iku_opd: 'Angka Rata-rata Lama Sekolah', target_opd: '8.8', unit_opd: 'Tahun', ekspektasi: 'Besar' },
-      { ind_daerah: 'Prevalensi Stunting', target_daerah: '14', unit_daerah: 'Persen', opd: 'Dinas Kesehatan', iku_opd: 'Persentase Penurunan Prevalensi Stunting', target_opd: '14', unit_opd: 'Persen', ekspektasi: 'Kecil' }
-    ];
+    var rawRows = [];
+
+    if (d.rows && Array.isArray(d.rows) && d.rows.length > 0) {
+      rawRows = d.rows;
+    } else if (typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.rows && Array.isArray(AUTO_DATA_3_A_1_B.rows) && AUTO_DATA_3_A_1_B.rows.length > 0) {
+      rawRows = AUTO_DATA_3_A_1_B.rows;
+    }
+
+    var savedRowMap = {};
+    if (d.rows && Array.isArray(d.rows)) {
+      d.rows.forEach(function(r, idx) {
+        var key = (r.ind_daerah || '').trim().toLowerCase();
+        savedRowMap[key] = r;
+        savedRowMap['idx_' + idx] = r;
+      });
+    }
+
+    var cleanRows = [];
+    var sumTerbobot = 0;
+    var sumNilai = 0;
+    var matchedCount = 0;
+
+    rawRows.forEach(function(r, idx) {
+      var indDaerah = (r.ind_daerah || '').trim();
+      var opdPengampu = (r.opd_pengampu || '-').trim();
+      var targetDaerah = (r.target_daerah !== undefined && r.target_daerah !== null) ? String(r.target_daerah).trim() : '';
+      var unitDaerah = (r.unit_daerah || '').trim();
+
+      var key = indDaerah.toLowerCase();
+      var savedR = savedRowMap[key] || savedRowMap['idx_' + idx];
+
+      var opdRenja = (savedR && savedR.opd_renja !== undefined) ? savedR.opd_renja : (r.opd_renja || r.opd || '');
+      var ikuOpd = (savedR && savedR.iku_opd !== undefined) ? savedR.iku_opd : (r.iku_opd || '');
+      var targetOpd = (savedR && savedR.target_opd !== undefined) ? savedR.target_opd : (r.target_opd || '');
+      var unitOpd = (savedR && savedR.unit_opd !== undefined) ? savedR.unit_opd : (r.unit_opd || '');
+      var ekspektasi = (savedR && savedR.ekspektasi) ? savedR.ekspektasi : (r.ekspektasi || 'Besar');
+      var dokumen = (savedR && savedR.dokumen !== undefined) ? savedR.dokumen : (r.dokumen || '');
+      var halaman = (savedR && savedR.halaman !== undefined) ? savedR.halaman : (r.halaman || '');
+      var tabel = (savedR && savedR.tabel !== undefined) ? savedR.tabel : (r.tabel || '');
+      var catatan = (savedR && savedR.catatan !== undefined) ? savedR.catatan : (r.catatan || '');
+
+      var marginHitung = '100.00%';
+      var marginKet = '100.00%';
+      var nilaiKeselarasan = '0.00%';
+      var rowTerbobot = 0.00;
+      var scorePct = 0;
+
+      var ikuTrim = (ikuOpd || '').trim();
+      if (ikuTrim === '') {
+        marginHitung = '100.00%';
+        marginKet = '100.00%';
+        nilaiKeselarasan = '0.00%';
+        rowTerbobot = 0.00;
+        scorePct = 0;
+      } else {
+        if (!savedR && r.nilai_keselarasan !== undefined && r.keselarasan_terbobot !== undefined) {
+          marginHitung = r.margin_hitung || '0.00%';
+          marginKet = r.margin_ket || '0.00%';
+          nilaiKeselarasan = r.nilai_keselarasan;
+          scorePct = parseFloat(String(r.nilai_keselarasan).replace('%', '')) || 0;
+          rowTerbobot = parseFloat(r.keselarasan_terbobot) || 0;
+        } else {
+          var tD = parseFloat(String(targetDaerah).replace(',', '.')) || 0;
+          var tO = parseFloat(String(targetOpd).replace(',', '.')) || 0;
+
+          var marginVal = 0.0;
+          if (tD !== 0) {
+            if (ekspektasi === 'Besar') {
+              marginVal = (tO >= tD) ? 0.0 : (((tO - tD) / Math.abs(tD)) * 100.0);
+            } else {
+              marginVal = (tO <= tD) ? 0.0 : (((tO - tD) / Math.abs(tD)) * 100.0);
+            }
+          }
+          var absMargin = Math.abs(marginVal);
+          scorePct = calcMarginScore(absMargin);
+          rowTerbobot = (scorePct / 100.0) * 5.0;
+
+          marginHitung = marginVal.toFixed(2) + '%';
+          marginKet = absMargin.toFixed(2) + '%';
+          nilaiKeselarasan = scorePct.toFixed(2) + '%';
+        }
+        matchedCount++;
+      }
+
+      sumTerbobot += rowTerbobot;
+      sumNilai += scorePct;
+
+      cleanRows.push({
+        no: idx + 1,
+        ind_daerah: indDaerah,
+        opd_pengampu: opdPengampu,
+        target_daerah: targetDaerah,
+        unit_daerah: unitDaerah,
+        opd_renja: opdRenja,
+        iku_opd: ikuOpd,
+        target_opd: targetOpd,
+        unit_opd: unitOpd,
+        ekspektasi: ekspektasi,
+        margin_hitung: marginHitung,
+        margin_ket: marginKet,
+        nilai_keselarasan: nilaiKeselarasan,
+        bobot: '5.00',
+        keselarasan_terbobot: rowTerbobot.toFixed(2),
+        dokumen: dokumen,
+        halaman: halaman,
+        tabel: tabel,
+        catatan: catatan
+      });
+    });
+
+    var totalRows = cleanRows.length || 59;
+    var avgScorePct = totalRows > 0 ? (sumNilai / totalRows) : 0;
+    var avgTerbobot = totalRows > 0 ? (sumTerbobot / totalRows) : 0;
+
+    // Kriteria sesuai file HTML baris 66:
+    // A. Tidak Ada = 0
+    // B. Ada sebagian = 2
+    // C. Tercascade seluruhnya = 5
+    var crit = 'A', critText = 'A. Tidak Ada', finalScore = 0.00;
+    if (avgScorePct >= 100.0) {
+      crit = 'C';
+      finalScore = 5.00;
+      critText = 'C. Tercascade seluruhnya';
+    } else if (avgScorePct > 0.0) {
+      crit = 'B';
+      finalScore = 2.00;
+      critText = 'B. Ada sebagian';
+    } else {
+      crit = 'A';
+      finalScore = 0.00;
+      critText = 'A. Tidak Ada';
+    }
+
+    var defDok = (d.dokumen) ? d.dokumen : ((typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.dokumen) ? AUTO_DATA_3_A_1_B.dokumen : 'RPJMD / RKPD & Renja OPD Kab. Banyuwangi 2026');
+    var defHal = (d.halaman) ? d.halaman : ((typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.halaman) ? AUTO_DATA_3_A_1_B.halaman : '');
+    var defTbl = (d.tabel) ? d.tabel : ((typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.tabel) ? AUTO_DATA_3_A_1_B.tabel : '');
+    var defCat = (d.catatan) ? d.catatan : ((typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.catatan) ? AUTO_DATA_3_A_1_B.catatan : ('Otomatis ditarik dari penyelarasan IKD Tahun Berjalan dengan Renja OPD (' + matchedCount + ' dari ' + totalRows + ' IKU selaras, rata-rata keselarasan terbobot ' + avgTerbobot.toFixed(2) + ')'));
+
+    return {
+      rows: cleanRows,
+      totalRows: totalRows,
+      matchedCount: matchedCount,
+      sumTerbobot: sumTerbobot,
+      avgTerbobot: avgTerbobot,
+      pctMatched: avgScorePct,
+      kriteria: crit,
+      critText: critText,
+      finalScore: finalScore,
+      dokumen: defDok,
+      halaman: defHal,
+      tabel: defTbl,
+      catatan: defCat
+    };
+  }
+
+  function renderWs_3_a_1_b(d, maxBobot){
+    var info = getAutoScore_3_a_1_b(d);
+    var rows = info.rows;
 
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
-        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Target & Sasaran Daerah vs IKU Renstra/Renja OPD</span>' +
+        '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 3.a.1.b: Target dan Sasaran Daerah Menjadi IKU OPD Renstra/Renja</span>' +
+        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; padding:3px 8px; border-radius:4px; border:1px solid #bfdbfe;"><i class="fa fa-info-circle"></i> Catatan: Bagian Renja OPD diisi manual oleh user</span>' +
       '</div>' +
-      '<div style="overflow-x:auto;">' +
-      '<table class="excel-grid-table" id="wsTable_3_a_1_b" style="min-width: 950px;">' +
-        '<thead>' +
+      '<div style="overflow-x:auto; max-height:650px; border:1px solid #e2e8f0; border-radius:6px;">' +
+      '<table class="excel-grid-table" id="wsTable_3_a_1_b" style="min-width: 1300px; font-size:12px;">' +
+        '<thead style="position:sticky; top:0; z-index:10; background:#f8fafc;">' +
           '<tr>' +
-            '<th class="excel-row-num" rowspan="2" style="width: 45px; text-align:center;">No</th>' +
-            '<th colspan="3" class="th-amber" style="font-size:13px;">RPJMD / RKPD (Daerah)</th>' +
-            '<th colspan="4" class="th-blue" style="font-size:13px;">Renstra / Renja OPD</th>' +
-            '<th rowspan="2" class="th-gray" style="width: 110px; white-space:nowrap;">Ekspektasi</th>' +
-            '<th rowspan="2" class="th-gray" style="width: 45px;">Aksi</th>' +
+            '<th class="excel-row-num" rowspan="2" style="width: 45px; text-align:center; vertical-align:middle;">No</th>' +
+            '<th colspan="4" class="th-amber" style="text-align:center; font-weight:700; font-size:12.5px; padding:6px;">RKPD</th>' +
+            '<th colspan="4" class="th-blue" style="text-align:center; font-weight:700; font-size:12.5px; padding:6px;">Renja OPD</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 100px; text-align:center; vertical-align:middle;">Ekspektasi (Besar / Kecil)</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 105px; text-align:center; vertical-align:middle;">Cek Target (Margin Hitung)</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 105px; text-align:center; vertical-align:middle;">Cek Target (Keterangan)</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 95px; text-align:center; vertical-align:middle;">Nilai Keselarasan</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 70px; text-align:center; vertical-align:middle;">Bobot</th>' +
+            '<th rowspan="2" class="th-green" style="width: 95px; text-align:center; vertical-align:middle;">Keselarasan Terbobot</th>' +
+            '<th rowspan="2" class="th-green" style="width: 105px; text-align:center; vertical-align:middle;">Rata-rata Keselarasan Terbobot</th>' +
+            '<th rowspan="2" class="th-gray" style="width: 160px; text-align:center; vertical-align:middle;">Catatan</th>' +
           '</tr>' +
           '<tr>' +
-            '<th class="th-amber" style="width: 220px; white-space:nowrap;">Indikator Kinerja</th>' +
-            '<th class="th-amber" style="width: 70px; white-space:nowrap;">Target</th>' +
-            '<th class="th-amber" style="width: 65px; white-space:nowrap;">Satuan</th>' +
-            '<th class="th-blue" style="width: 160px; white-space:nowrap;">Nama OPD</th>' +
-            '<th class="th-blue" style="width: 220px; white-space:nowrap;">IKU OPD</th>' +
-            '<th class="th-blue" style="width: 70px; white-space:nowrap;">Target</th>' +
-            '<th class="th-blue" style="width: 65px; white-space:nowrap;">Satuan</th>' +
+            '<th class="th-amber" style="min-width: 220px; font-size:11.5px;">Indikator Kinerja / Outcome</th>' +
+            '<th class="th-amber" style="min-width: 180px; font-size:11.5px;">Nama OPD Pengampu (jika ada)</th>' +
+            '<th class="th-amber" style="width: 75px; text-align:center; font-size:11.5px;">Target</th>' +
+            '<th class="th-amber" style="width: 75px; text-align:center; font-size:11.5px;">Satuan</th>' +
+            '<th class="th-blue" style="min-width: 190px; font-size:11.5px;">Nama OPD</th>' +
+            '<th class="th-blue" style="min-width: 200px; font-size:11.5px;">IKU OPD</th>' +
+            '<th class="th-blue" style="width: 75px; text-align:center; font-size:11.5px;">Target</th>' +
+            '<th class="th-blue" style="width: 75px; text-align:center; font-size:11.5px;">Satuan</th>' +
+          '</tr>' +
+          '<tr style="background:#f1f5f9; font-weight:700; text-align:center; font-size:11px;">' +
+            '<td class="excel-row-num" style="background:#e2e8f0;"></td>' +
+            '<td colspan="4" style="background:#fef3c7;"></td>' +
+            '<td colspan="4" style="background:#e0f2fe;"></td>' +
+            '<td></td><td></td><td></td><td></td>' +
+            '<td style="color:#1d4ed8; font-weight:700; text-align:center;">5.00</td>' +
+            '<td></td><td></td>' +
+            '<td></td>' +
           '</tr>' +
         '</thead>' +
         '<tbody>';
 
     rows.forEach(function(r, idx){
       html += 
-        '<tr class="ws-3a1b-row">' +
-          '<td class="excel-row-num">' + (idx + 1) + '</td>' +
-          '<td><input type="text" class="calc-inp ind-daerah" value="' + escapeHtml(r.ind_daerah) + '" placeholder="Indikator Daerah..."></td>' +
-          '<td><input type="text" class="calc-inp tgt-daerah" value="' + escapeHtml(r.target_daerah) + '" style="text-align:center; font-weight:600;"></td>' +
-          '<td><input type="text" class="calc-inp unit-daerah" value="' + escapeHtml(r.unit_daerah) + '"></td>' +
-          '<td><input type="text" class="calc-inp opd-name" value="' + escapeHtml(r.opd) + '" placeholder="OPD..."></td>' +
-          '<td><input type="text" class="calc-inp iku-opd" value="' + escapeHtml(r.iku_opd) + '" placeholder="IKU OPD..."></td>' +
-          '<td><input type="text" class="calc-inp tgt-opd" value="' + escapeHtml(r.target_opd) + '" style="text-align:center; font-weight:600;"></td>' +
-          '<td><input type="text" class="calc-inp unit-opd" value="' + escapeHtml(r.unit_opd) + '"></td>' +
+        '<tr class="ws-3a1b-row" data-row-idx="' + idx + '" data-def-margin="' + escapeHtml(r.margin_hitung || '') + '" data-def-ket="' + escapeHtml(r.margin_ket || '') + '" data-def-score="' + escapeHtml(r.nilai_keselarasan || '') + '" data-def-terb="' + escapeHtml(r.keselarasan_terbobot || '') + '" data-def-tgt="' + escapeHtml(r.target_opd || '') + '" data-def-iku="' + escapeHtml(r.iku_opd || '') + '" data-def-eks="' + escapeHtml(r.ekspektasi || '') + '">' +
+          '<td class="excel-row-num" style="text-align:center;">' + (idx + 1) + '</td>' +
+          '<td style="background:#fffbeb;"><div class="ws-3a1b-ind-daerah" style="font-weight:600; font-size:11.5px; color:#1e293b; line-height:1.3;">' + escapeHtml(r.ind_daerah) + '</div></td>' +
+          '<td style="background:#fffbeb;"><div class="ws-3a1b-opd-pengampu" style="font-size:11px; color:#475569;">' + escapeHtml(r.opd_pengampu) + '</div></td>' +
+          '<td style="background:#fffbeb; text-align:center;"><div class="ws-3a1b-tgt-daerah" style="font-weight:700; font-size:11.5px; color:#0f172a;">' + escapeHtml(r.target_daerah) + '</div></td>' +
+          '<td style="background:#fffbeb; text-align:center;"><div class="ws-3a1b-unit-daerah" style="font-size:11px; color:#64748b;">' + escapeHtml(r.unit_daerah) + '</div></td>' +
+          '<td><input type="text" class="calc-inp ws-3a1b-opd-renja" value="' + escapeHtml(r.opd_renja) + '" placeholder="Nama OPD..." style="font-size:11.5px;"></td>' +
+          '<td><input type="text" class="calc-inp ws-3a1b-iku-opd" value="' + escapeHtml(r.iku_opd) + '" placeholder="IKU OPD..." style="font-size:11.5px;"></td>' +
+          '<td><input type="text" class="calc-inp ws-3a1b-tgt-opd" value="' + escapeHtml(r.target_opd) + '" placeholder="0" style="text-align:center; font-weight:600; font-size:11.5px;"></td>' +
+          '<td><input type="text" class="calc-inp ws-3a1b-unit-opd" value="' + escapeHtml(r.unit_opd) + '" placeholder="Satuan..." style="text-align:center; font-size:11.5px;"></td>' +
           '<td>' +
-            '<select class="calc-inp ekspektasi-sel">' +
-              '<option value="Besar"' + (r.ekspektasi === 'Besar' ? ' selected' : '') + '>Besar (Makin Besar Baik)</option>' +
-              '<option value="Kecil"' + (r.ekspektasi === 'Kecil' ? ' selected' : '') + '>Kecil (Makin Kecil Baik)</option>' +
+            '<select class="calc-inp ws-3a1b-ekspektasi" style="font-size:11px; text-align:center;">' +
+              '<option value="Besar"' + (r.ekspektasi === 'Besar' ? ' selected' : '') + '>Besar</option>' +
+              '<option value="Kecil"' + (r.ekspektasi === 'Kecil' ? ' selected' : '') + '>Kecil</option>' +
             '</select>' +
           '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1b-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>' +
+          '<td style="text-align:center;"><span class="ws-3a1b-margin-cell" style="font-weight:600; font-size:11.5px; color:#475569;">' + r.margin_hitung + '</span></td>' +
+          '<td style="text-align:center;"><span class="ws-3a1b-ket-cell" style="font-weight:600; font-size:11.5px; color:#475569;">' + r.margin_ket + '</span></td>' +
+          '<td style="text-align:center;"><span class="ws-3a1b-score-cell" style="font-weight:700; font-size:11.5px; color:#1d4ed8;">' + r.nilai_keselarasan + '</span></td>' +
+          '<td style="text-align:center; color:#94a3b8; font-size:11px;">-</td>' +
+          '<td style="text-align:center;"><span class="ws-3a1b-terbobot-cell" style="font-weight:700; font-size:11.5px; color:#16a34a;">' + r.keselarasan_terbobot + '</span></td>' +
+          '<td style="text-align:center;"><span class="ws-3a1b-avg-terbobot-cell" style="font-size:11px; color:#64748b;">' + (idx === 0 ? info.avgTerbobot.toFixed(2) : '') + '</span></td>' +
+          '<td><input type="text" class="calc-inp ws-3a1b-catatan" value="' + escapeHtml(r.catatan || '') + '" placeholder="Catatan..." style="font-size:11px;"></td>' +
         '</tr>';
     });
 
     html += 
         '</tbody>' +
+        '<tfoot style="position:sticky; bottom:0; z-index:10; background:#f1f5f9; font-weight:700; border-top:2px solid #cbd5e1;">' +
+          '<tr>' +
+            '<td colspan="12" style="text-align:right; padding-right:12px; font-size:12px; color:#334155;">Rata-rata Keselarasan</td>' +
+            '<td style="text-align:center; font-size:12.5px; color:#1d4ed8; font-weight:700;" id="ws3a1bAvgScorePct">' + Math.round(info.pctMatched) + '%</td>' +
+            '<td style="text-align:center; font-size:11.5px; color:#64748b;">5.00</td>' +
+            '<td style="text-align:center; font-size:11.5px; color:#16a34a;" id="ws3a1bSumTerbobot">' + info.sumTerbobot.toFixed(2) + '</td>' +
+            '<td style="text-align:center; font-size:12.5px; color:#16a34a; font-weight:700;" id="ws3a1bAvgTerbobot">' + info.avgTerbobot.toFixed(2) + '</td>' +
+            '<td></td>' +
+          '</tr>' +
+        '</tfoot>' +
       '</table>' +
-      '<button type="button" class="btn-excel-add-row" id="btnAdd3a1bRow"><i class="fa fa-plus"></i> Tambah Sasaran / IKU OPD</button>' +
       '</div>';
 
     html += renderStandardCriteriaCard({
       code: '3.a.1.b',
       safeId: 'ws3a1b',
       title: 'Keterangan & Kriteria Penilaian Poin 3.a.1.b',
-      badgeText: 'Target Sasaran Daerah vs IKU OPD',
-      colTitle: 'Kriteria Keselarasan Target Sasaran Daerah dengan IKU Renstra/Renja OPD',
+      badgeText: 'Target dan Sasaran Daerah vs IKU OPD',
+      colTitle: 'Kriteria Keselarasan Target Daerah dengan IKU OPD Renstra/Renja',
       rows: [
-        { crit: 'A', text: 'Rata-rata keselarasan target daerah dengan IKU OPD kurang dari 25%', val: '0,000', color: '#dc2626' },
-        { crit: 'B', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 25% dan kurang dari 50%', val: '0,125', color: '#d97706' },
-        { crit: 'C', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 50% dan kurang dari 75%', val: '0,250', color: '#2563eb' },
-        { crit: 'D', text: 'Rata-rata keselarasan target daerah dengan IKU OPD sama dengan atau lebih dari 75% dan kurang dari 100%', val: '0,375', color: '#0891b2' },
-        { crit: 'E', text: 'Rata-rata keselarasan target daerah dengan IKU OPD mencapai 100% (selaras penuh / melampaui target daerah)', val: '0,500', color: '#16a34a' }
+        { crit: 'A', text: 'Tidak Ada', val: '0,000', color: '#dc2626' },
+        { crit: 'B', text: 'Ada sebagian', val: '2,000', color: '#d97706' },
+        { crit: 'C', text: 'Tercascade seluruhnya', val: '5,000', color: '#16a34a' }
       ],
       sourceTitle: 'Hasil Penyelarasan IKU OPD',
       infoRows: [
-        { label: 'Sumber Data:', value: 'Target RPJMD/RKPD vs IKU Renstra/Renja OPD' },
-        { label: 'Rata-rata Keselarasan:', id: 'ws3a1bPctMatched', value: '-' },
-        { label: 'Kriteria Terpenuhi:', id: 'ws3a1bCritText', value: '-' }
+        { label: 'Bukti Dukung:', value: 'Screenshot Indikator, Target, dan Satuan Program di RPJMD / RKPD dan Renstra OPD' },
+        { label: 'Catatan Perbaikan:', value: 'Bagian Renja OPD diisi manual oleh user' },
+        { label: 'Rata-rata Keselarasan:', id: 'ws3a1bPctMatched', value: Math.round(info.pctMatched) + '% (' + info.matchedCount + ' dari ' + info.totalRows + ' IKU Selaras)' },
+        { label: 'Rata-rata Keselarasan Terbobot:', id: 'ws3a1bAvgTerbobotInfo', value: info.avgTerbobot.toFixed(2) + ' (dari max 5.00)' },
+        { label: 'Kriteria Terpenuhi:', id: 'ws3a1bCritText', value: info.critText },
+        { label: 'Nilai Akhir Terbobot:', id: 'ws3a1bScoreText', value: numFmt(info.finalScore) }
       ]
     });
 
     return html;
+  }
+
+  function collectDetailJson_3_a_1_b() {
+    var rows = [];
+    var sumTerb = 0;
+    var sumScorePct = 0;
+    var matchedCount = 0;
+
+    var trList = document.querySelectorAll("#wsTable_3_a_1_b .ws-3a1b-row");
+    if (!trList || trList.length === 0) {
+      if (typeof AUTO_DATA_3_A_1_B !== 'undefined' && AUTO_DATA_3_A_1_B.rows) {
+        return AUTO_DATA_3_A_1_B;
+      }
+      return null;
+    }
+
+    trList.forEach(function(r, idx){
+      var indD = r.querySelector(".ws-3a1b-ind-daerah") ? r.querySelector(".ws-3a1b-ind-daerah").textContent.trim() : '';
+      var opdPengampu = r.querySelector(".ws-3a1b-opd-pengampu") ? r.querySelector(".ws-3a1b-opd-pengampu").textContent.trim() : '-';
+      var tgtD = r.querySelector(".ws-3a1b-tgt-daerah") ? r.querySelector(".ws-3a1b-tgt-daerah").textContent.trim() : '';
+      var unitD = r.querySelector(".ws-3a1b-unit-daerah") ? r.querySelector(".ws-3a1b-unit-daerah").textContent.trim() : '';
+
+      var opdRenjaInp = r.querySelector(".ws-3a1b-opd-renja");
+      var ikuInp = r.querySelector(".ws-3a1b-iku-opd");
+      var tgtOInp = r.querySelector(".ws-3a1b-tgt-opd");
+      var unitOInp = r.querySelector(".ws-3a1b-unit-opd");
+      var eksSel = r.querySelector(".ws-3a1b-ekspektasi");
+      var elMargin = r.querySelector(".ws-3a1b-margin-cell");
+      var elKet = r.querySelector(".ws-3a1b-ket-cell");
+      var elScore = r.querySelector(".ws-3a1b-score-cell");
+      var elTerb = r.querySelector(".ws-3a1b-terbobot-cell");
+      var catInp = r.querySelector(".ws-3a1b-catatan");
+
+      var opdRenja = opdRenjaInp ? opdRenjaInp.value.trim() : '';
+      var ikuOpd = ikuInp ? ikuInp.value.trim() : '';
+      var tgtO = tgtOInp ? tgtOInp.value.trim() : '';
+      var unitO = unitOInp ? unitOInp.value.trim() : '';
+      var eks = eksSel ? eksSel.value : 'Besar';
+      var marginHitung = elMargin ? elMargin.textContent.trim() : '100.00%';
+      var marginKet = elKet ? elKet.textContent.trim() : '100.00%';
+      var nilaiKeselarasan = elScore ? elScore.textContent.trim() : '0.00%';
+      var terbStr = elTerb ? elTerb.textContent.trim() : '0.00';
+      var rowTerb = parseFloat(terbStr) || 0;
+      var scoreVal = parseFloat(nilaiKeselarasan.replace('%', '')) || 0;
+
+      if (ikuOpd !== '') matchedCount++;
+      sumTerb += rowTerb;
+      sumScorePct += scoreVal;
+
+      rows.push({
+        no: idx + 1,
+        ind_daerah: indD,
+        opd_pengampu: opdPengampu,
+        target_daerah: tgtD,
+        unit_daerah: unitD,
+        opd_renja: opdRenja,
+        iku_opd: ikuOpd,
+        target_opd: tgtO,
+        unit_opd: unitO,
+        ekspektasi: eks,
+        margin_hitung: marginHitung,
+        margin_ket: marginKet,
+        nilai_keselarasan: nilaiKeselarasan,
+        bobot: '5.00',
+        keselarasan_terbobot: terbStr,
+        catatan: catInp ? catInp.value.trim() : ''
+      });
+    });
+
+    var totalRows = rows.length || 59;
+    var avgScorePct = totalRows > 0 ? (sumScorePct / totalRows) : 0;
+    var avgTerbobot = totalRows > 0 ? (sumTerb / totalRows) : 0;
+
+    var crit = 'A', critText = 'A. Tidak Ada', finalScore = 0.00;
+    if (avgScorePct >= 100.0) {
+      crit = 'C';
+      finalScore = 5.00;
+      critText = 'C. Tercascade seluruhnya';
+    } else if (avgScorePct > 0.0) {
+      crit = 'B';
+      finalScore = 2.00;
+      critText = 'B. Ada sebagian';
+    } else {
+      crit = 'A';
+      finalScore = 0.00;
+      critText = 'A. Tidak Ada';
+    }
+
+    var dokVal = (document.getElementById("modalRefDokumen") && document.getElementById("modalRefDokumen").value.trim()) ? document.getElementById("modalRefDokumen").value.trim() : 'RPJMD / RKPD & Renja OPD Kab. Banyuwangi 2026';
+    var halVal = (document.getElementById("modalRefHalaman") && document.getElementById("modalRefHalaman").value.trim()) ? document.getElementById("modalRefHalaman").value.trim() : '';
+    var tblVal = (document.getElementById("modalRefTabel") && document.getElementById("modalRefTabel").value.trim()) ? document.getElementById("modalRefTabel").value.trim() : '';
+    var catVal = (document.getElementById("modalCatatan") && document.getElementById("modalCatatan").value.trim()) ? document.getElementById("modalCatatan").value.trim() : ('Otomatis ditarik dari penyelarasan IKD Tahun Berjalan dengan Renja OPD (' + matchedCount + ' dari ' + totalRows + ' IKU selaras, rata-rata keselarasan terbobot ' + avgTerbobot.toFixed(2) + ')');
+
+    return {
+      rows: rows,
+      total_rows: totalRows,
+      matched_count: matchedCount,
+      pct_matched: avgScorePct,
+      sum_terbobot: sumTerb,
+      avg_terbobot: avgTerbobot,
+      kriteria: crit,
+      critText: critText,
+      score: finalScore,
+      opsi_aksi: critText,
+      dokumen: dokVal,
+      halaman: halVal,
+      tabel: tblVal,
+      catatan: catVal
+    };
   }
 
   // 13. General / Pilar 2 Worksheet Generator (Kualitas Perencanaan & Parameter Lain)
@@ -8991,36 +9600,63 @@ tr.type-sub:hover td {
 
     // 11. Sheet 3.a.1.a (OPD Penanggungjawab)
     else if (code === '3.a.1.a'){
-      var rows = document.querySelectorAll("#wsTable_3_a_1_a .ws-3a1a-row");
-      var sumScore = 0;
-      rows.forEach(function(r){
-        var opdVal = r.querySelector(".opd-inp").value.trim();
-        var isFilled = opdVal !== '' && opdVal !== '-';
-        var rowScoreRatio = isFilled ? 1.0 : (opdVal === '-' ? 0.5 : 0.0);
-        var elRowScore = r.querySelector(".row-score"); if (elRowScore) elRowScore.textContent = (rowScoreRatio * 100) + "%";
-        var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowScoreRatio * maxBobot);
-        sumScore += rowScoreRatio;
-      });
-      var avgRatio = rows.length > 0 ? (sumScore / rows.length) : 1.0;
-      var pct = avgRatio * 100;
-      computedFinalScore = avgRatio * maxBobot;
-      var elGrand = document.getElementById("ws3a1aGrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
+      var table = document.querySelector("#wsTable_3_a_1_a");
+      if (table) {
+        var trList = table.querySelectorAll(".ws-3a1a-row");
+        var totalRows = trList.length || 104;
+        var matchedCount = 0;
 
-      var crit = 'A';
-      var critLabel = '<= 25%';
-      if (pct >= 100) { crit = 'E'; critLabel = '100% (Seluruh Program Ada OPD)'; }
-      else if (pct > 75) { crit = 'D'; critLabel = '> 75% s/d <= 99%'; }
-      else if (pct > 50) { crit = 'C'; critLabel = '> 50% s/d <= 75%'; }
-      else if (pct > 25) { crit = 'B'; critLabel = '> 25% s/d <= 50%'; }
-      else { crit = 'A'; critLabel = '<= 25%'; }
+        trList.forEach(function(tr){
+          var sel = tr.querySelector(".ws-3a1a-score-sel");
+          var sc = sel ? parseFloat(sel.value) : 100.00;
+          var isSelaras = sc > 0;
+          if (isSelaras) matchedCount++;
 
-      updateStandardCriteriaHighlight('ws3a1a', crit, computedFinalScore, {
-        'ws3a1aPctMatched': pct.toFixed(1) + "% (" + Math.round(sumScore) + "/" + rows.length + " OPD Ditetapkan)",
-        'ws3a1aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
-      }, ['A', 'B', 'C', 'D', 'E']);
+          var terbCell = tr.querySelector(".ws-3a1a-row-terb");
+          if (terbCell) {
+            terbCell.textContent = numFmt(isSelaras ? 5.00 : 0.00);
+            if (isSelaras) {
+              terbCell.style.color = '#1e40af';
+              terbCell.style.background = '#eff6ff';
+            } else {
+              terbCell.style.color = '#dc2626';
+              terbCell.style.background = '#fef2f2';
+            }
+          }
+        });
 
-      if (excelFxContent) excelFxContent.textContent = "Penetapan OPD: " + pct.toFixed(1) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+        var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 0;
+        var crit = 'A', critText = 'A. Tidak Ada', score = 0.00;
+        if (pct >= 100.0) {
+          crit = 'C';
+          score = 5.00;
+          critText = 'C. Tercascade seluruhnya';
+        } else if (pct > 0.0) {
+          crit = 'B';
+          score = 2.00;
+          critText = 'B. Ada sebagian';
+        } else {
+          crit = 'A';
+          score = 0.00;
+          critText = 'A. Tidak Ada';
+        }
+
+        computedFinalScore = score;
+
+        var avgCol = table.querySelector(".ws-3a1a-avg-terb-col");
+        if (avgCol) avgCol.textContent = numFmt(score);
+
+        var sumPct = table.querySelector(".ws-3a1a-sum-pct");
+        if (sumPct) sumPct.textContent = Math.round(pct) + '%';
+
+        updateStandardCriteriaHighlight('ws3a1a', crit, computedFinalScore, {
+          'ws3a1aPctMatched': pct.toFixed(1) + "% (" + matchedCount + "/" + totalRows + " Program Ada OPD)",
+          'ws3a1aCritText': '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>',
+          'ws3a1aScoreText': numFmt(score)
+        }, ['A', 'B', 'C']);
+
+        if (excelFxContent) excelFxContent.textContent = "Penetapan OPD: " + pct.toFixed(1) + "% (" + critText + ") -> Nilai = " + numFmt(score);
+      }
     }
 
     // 12. Sheet 3.a.1.b (Target Daerah vs IKU OPD)
@@ -9028,49 +9664,108 @@ tr.type-sub:hover td {
       var rows = document.querySelectorAll("#wsTable_3_a_1_b .ws-3a1b-row");
       var sumTerb = 0;
       var sumScorePct = 0;
+      var matchedCount = 0;
+
       rows.forEach(function(r){
-        var tD = parseFloat(r.querySelector(".tgt-daerah").value) || 0;
-        var tO = parseFloat(r.querySelector(".tgt-opd").value) || 0;
-        var eks = r.querySelector(".ekspektasi-sel").value;
+        var tDElem = r.querySelector(".ws-3a1b-tgt-daerah");
+        var tD = tDElem ? (parseFloat(tDElem.textContent.trim().replace(',', '.')) || 0) : 0;
+        var tOInp = r.querySelector(".ws-3a1b-tgt-opd");
+        var tOVal = tOInp ? tOInp.value.trim() : '';
+        var tO = parseFloat(tOVal.replace(',', '.')) || 0;
+        var ikuInp = r.querySelector(".ws-3a1b-iku-opd");
+        var ikuVal = ikuInp ? ikuInp.value.trim() : '';
+        var eksSel = r.querySelector(".ws-3a1b-ekspektasi");
+        var eks = eksSel ? eksSel.value : 'Besar';
 
-        var margin = 0;
-        if (tD !== 0){
-          if (eks === 'Besar'){
-            margin = (tO >= tD) ? 0 : ((Math.abs(tD - tO) / Math.abs(tD)) * 100);
-          } else {
-            margin = (tO <= tD) ? 0 : ((Math.abs(tO - tD) / Math.abs(tD)) * 100);
+        var defIku = r.getAttribute("data-def-iku") || "";
+        var defTgt = r.getAttribute("data-def-tgt") || "";
+        var defEks = r.getAttribute("data-def-eks") || "";
+
+        var marginVal = 0.0;
+        var absMargin = 0.0;
+        var scorePct = 0;
+        var rowTerb = 0.0;
+
+        if (ikuVal === '') {
+          marginVal = 100.0;
+          absMargin = 100.0;
+          scorePct = 0;
+          rowTerb = 0.0;
+        } else if (ikuVal === defIku && tOVal === defTgt && (defEks === "" || eks === defEks) && r.getAttribute("data-def-score")) {
+          // Menggunakan nilai default acuan HTML bila input belum diubah
+          var defMarginStr = r.getAttribute("data-def-margin") || "0.00%";
+          var defKetStr = r.getAttribute("data-def-ket") || "0.00%";
+          var defScoreStr = r.getAttribute("data-def-score") || "0.00%";
+          marginVal = parseFloat(defMarginStr.replace("%", "")) || 0;
+          absMargin = parseFloat(defKetStr.replace("%", "")) || 0;
+          scorePct = parseFloat(defScoreStr.replace("%", "")) || 0;
+          rowTerb = parseFloat(r.getAttribute("data-def-terb") || "0") || 0;
+          matchedCount++;
+        } else {
+          if (tD !== 0) {
+            if (eks === 'Besar') {
+              marginVal = (tO >= tD) ? 0.0 : (((tO - tD) / Math.abs(tD)) * 100.0);
+            } else {
+              marginVal = (tO <= tD) ? 0.0 : (((tO - tD) / Math.abs(tD)) * 100.0);
+            }
           }
+          absMargin = Math.abs(marginVal);
+          scorePct = calcMarginScore(absMargin);
+          rowTerb = (scorePct / 100.0) * maxBobot;
+          matchedCount++;
         }
-        var scorePct = calcMarginScore(margin);
-        var rowTerb = (scorePct / 100) * maxBobot;
 
-        var elMargin = r.querySelector(".margin-cell"); if (elMargin) elMargin.textContent = margin.toFixed(1) + "%";
-        var elKet = r.querySelector(".ket-cell"); if (elKet) elKet.textContent = scorePct + "%";
-        var elScore = r.querySelector(".score-cell"); if (elScore) elScore.textContent = scorePct + "%";
-        var elRowTerb = r.querySelector(".row-terbobot"); if (elRowTerb) elRowTerb.textContent = numFmt(rowTerb);
+        var elMargin = r.querySelector(".ws-3a1b-margin-cell"); if (elMargin) elMargin.textContent = marginVal.toFixed(2) + "%";
+        var elKet = r.querySelector(".ws-3a1b-ket-cell"); if (elKet) elKet.textContent = absMargin.toFixed(2) + "%";
+        var elScore = r.querySelector(".ws-3a1b-score-cell"); if (elScore) elScore.textContent = scorePct.toFixed(2) + "%";
+        var elRowTerb = r.querySelector(".ws-3a1b-terbobot-cell"); if (elRowTerb) elRowTerb.textContent = rowTerb.toFixed(2);
+
         sumTerb += rowTerb;
         sumScorePct += scorePct;
       });
 
-      var avgScorePct = rows.length > 0 ? (sumScorePct / rows.length) : 100;
-      computedFinalScore = rows.length > 0 ? (sumTerb / rows.length) : maxBobot;
-      var elGrand = document.getElementById("ws3a1bGrandTerbobot");
-      if (elGrand) elGrand.textContent = numFmt(computedFinalScore);
+      var totalRows = rows.length || 59;
+      var avgScorePct = totalRows > 0 ? (sumScorePct / totalRows) : 0;
+      var avgTerbobot = totalRows > 0 ? (sumTerb / totalRows) : 0;
 
-      var crit = 'A';
-      var critLabel = '< 25%';
-      if (avgScorePct >= 100) { crit = 'E'; critLabel = '100% (Selaras Penuh)'; }
-      else if (avgScorePct >= 75) { crit = 'D'; critLabel = '>= 75% s.d < 100%'; }
-      else if (avgScorePct >= 50) { crit = 'C'; critLabel = '>= 50% s.d < 75%'; }
-      else if (avgScorePct >= 25) { crit = 'B'; critLabel = '>= 25% s.d < 50%'; }
-      else { crit = 'A'; critLabel = '< 25%'; }
+      var elAvgScore = document.getElementById("ws3a1bAvgScorePct");
+      if (elAvgScore) elAvgScore.textContent = Math.round(avgScorePct) + "%";
+      var elSumTerb = document.getElementById("ws3a1bSumTerbobot");
+      if (elSumTerb) elSumTerb.textContent = sumTerb.toFixed(2);
+      var elAvgTerb = document.getElementById("ws3a1bAvgTerbobot");
+      if (elAvgTerb) elAvgTerb.textContent = avgTerbobot.toFixed(2);
+      var elFirstAvg = document.querySelector("#wsTable_3_a_1_b .ws-3a1b-avg-terbobot-cell");
+      if (elFirstAvg) elFirstAvg.textContent = avgTerbobot.toFixed(2);
+
+      // Kriteria sesuai baris 66:
+      // A. Tidak Ada = 0.00
+      // B. Ada sebagian = 2.00
+      // C. Tercascade seluruhnya = 5.00
+      var crit = 'A', critText = 'A. Tidak Ada', finalScore = 0.00;
+      if (avgScorePct >= 100.0) {
+        crit = 'C';
+        finalScore = 5.00;
+        critText = 'C. Tercascade seluruhnya';
+      } else if (avgScorePct > 0.0) {
+        crit = 'B';
+        finalScore = 2.00;
+        critText = 'B. Ada sebagian';
+      } else {
+        crit = 'A';
+        finalScore = 0.00;
+        critText = 'A. Tidak Ada';
+      }
+
+      computedFinalScore = finalScore;
 
       updateStandardCriteriaHighlight('ws3a1b', crit, computedFinalScore, {
-        'ws3a1bPctMatched': avgScorePct.toFixed(1) + "% (" + rows.length + " IKU Terukur)",
-        'ws3a1bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critLabel + ')</span>'
-      }, ['A', 'B', 'C', 'D', 'E']);
+        'ws3a1bPctMatched': Math.round(avgScorePct) + "% (" + matchedCount + " dari " + totalRows + " IKU Selaras)",
+        'ws3a1bAvgTerbobotInfo': avgTerbobot.toFixed(2) + " (dari max " + numFmt(maxBobot) + ")",
+        'ws3a1bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>',
+        'ws3a1bScoreText': numFmt(computedFinalScore)
+      }, ['A', 'B', 'C']);
 
-      if (excelFxContent) excelFxContent.textContent = "Rata-rata Keselarasan IKU OPD: " + avgScorePct.toFixed(1) + "% (Kriteria " + crit + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
+      if (excelFxContent) excelFxContent.textContent = "Rata-rata Keselarasan IKU OPD: " + avgScorePct.toFixed(1) + "% (" + critText + ") -> Nilai Capaian = " + numFmt(computedFinalScore);
     }
 
     // 13. General / Pilar 2 Kualitas Perencanaan
@@ -10051,47 +10746,13 @@ tr.type-sub:hover td {
     }
     // 11. Sheet 3.a.1.a
     else if (code === '3.a.1.a'){
-      var rows = [];
-      document.querySelectorAll("#wsTable_3_a_1_a .ws-3a1a-row").forEach(function(r){
-        var bidInp = r.querySelector(".bidang-inp");
-        var progInp = r.querySelector(".prog-inp");
-        var opdInp = r.querySelector(".opd-inp");
-        if (bidInp || progInp){
-          rows.push({
-            bidang: bidInp ? bidInp.value.trim() : '',
-            prog: progInp ? progInp.value.trim() : '',
-            opd: opdInp ? opdInp.value.trim() : ''
-          });
-        }
-      });
-      json.rows = rows;
+      var d3a1a = collectDetailJson_3_a_1_a();
+      if (d3a1a) Object.assign(json, d3a1a);
     }
     // 12. Sheet 3.a.1.b
     else if (code === '3.a.1.b'){
-      var rows = [];
-      document.querySelectorAll("#wsTable_3_a_1_b .ws-3a1b-row").forEach(function(r){
-        var indDInp = r.querySelector(".ind-daerah");
-        var tgtDInp = r.querySelector(".tgt-daerah");
-        var unitDInp = r.querySelector(".unit-daerah");
-        var opdInp = r.querySelector(".opd-name");
-        var ikuInp = r.querySelector(".iku-opd");
-        var tgtOInp = r.querySelector(".tgt-opd");
-        var unitOInp = r.querySelector(".unit-opd");
-        var eksSel = r.querySelector(".ekspektasi-sel");
-        if (indDInp || ikuInp){
-          rows.push({
-            ind_daerah: indDInp ? indDInp.value.trim() : '',
-            target_daerah: tgtDInp ? tgtDInp.value.trim() : '',
-            unit_daerah: unitDInp ? unitDInp.value.trim() : 'Persen',
-            opd: opdInp ? opdInp.value.trim() : '',
-            iku_opd: ikuInp ? ikuInp.value.trim() : '',
-            target_opd: tgtOInp ? tgtOInp.value.trim() : '',
-            unit_opd: unitOInp ? unitOInp.value.trim() : 'Persen',
-            ekspektasi: eksSel ? eksSel.value : 'Besar'
-          });
-        }
-      });
-      json.rows = rows;
+      var d3a1b = collectDetailJson_3_a_1_b();
+      if (d3a1b) Object.assign(json, d3a1b);
     }
     // 13. General
     else {
@@ -10311,6 +10972,40 @@ tr.type-sub:hover td {
       if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || autoItem.halaman || 'IV-18';
       if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || autoItem.tabel || 'Tabel 4.4';
       if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || autoItem.catatan || 'Otomatis dihitung dari keselarasan Dukungan Program Daerah terhadap Kegiatan Prioritas pada ' + (autoItem.pn_title || 'PN RKP') + ' (/Daerah/DukunganPrioritasPembangunan)';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+
+    if (code === '3.a.1.a') {
+      var auto3a1a = getAutoScore_3_a_1_a(detailObj);
+      if (saved.bobot_capaian === null || saved.bobot_capaian === undefined || saved.bobot_capaian === "") {
+        currentVal = auto3a1a.finalScore;
+        modalBobotInput.value = currentVal;
+        modalCalcDisplay.textContent = numFmt(currentVal);
+      }
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || auto3a1a.dokumen || 'RKPD Kab. Banyuwangi 2026';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || auto3a1a.halaman || 'Bab IV';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || auto3a1a.tabel || 'Tabel Program Prioritas RKPD 2026';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || auto3a1a.catatan || '';
+      detailObj.dokumen = modalRefDokumen.value;
+      detailObj.halaman = modalRefHalaman.value;
+      detailObj.tabel = modalRefTabel.value;
+      detailObj.catatan = modalCatatan.value;
+    }
+
+    if (code === '3.a.1.b') {
+      var auto3a1b = getAutoScore_3_a_1_b(detailObj);
+      if (saved.bobot_capaian === null || saved.bobot_capaian === undefined || saved.bobot_capaian === "") {
+        currentVal = auto3a1b.finalScore;
+        modalBobotInput.value = currentVal;
+        modalCalcDisplay.textContent = numFmt(currentVal);
+      }
+      if (!modalRefDokumen.value) modalRefDokumen.value = detailObj.dokumen || auto3a1b.dokumen || 'RPJMD / RKPD & Renja OPD Kab. Banyuwangi 2026';
+      if (!modalRefHalaman.value) modalRefHalaman.value = detailObj.halaman || auto3a1b.halaman || '';
+      if (!modalRefTabel.value) modalRefTabel.value = detailObj.tabel || auto3a1b.tabel || '';
+      if (!modalCatatan.value) modalCatatan.value = detailObj.catatan || auto3a1b.catatan || '';
       detailObj.dokumen = modalRefDokumen.value;
       detailObj.halaman = modalRefHalaman.value;
       detailObj.tabel = modalRefTabel.value;
@@ -10542,8 +11237,8 @@ tr.type-sub:hover td {
       instansi_id: selectInstansi.value,
       item_code: code,
       bobot_capaian: bobotNum,
-      opsi_aksi: (code === '1.b.2.a' || code === '1.b.3.a' || code === '1.b.4.a' || code === '1.b.5.a' || code === '1.b.6.a' || code === '1.b.7.a' || code === '1.b.8.a' || code === '1.b.9.a') ? ((detailData && detailData.opsi_aksi) ? detailData.opsi_aksi : (bobotNum >= 0.625 ? '=> 75%' : (bobotNum >= 0.46875 ? '50% - 75%' : (bobotNum >= 0.3125 ? '25% - 50%' : '=< 25%')))) : ((code === '1.b.1.c' && detailData && detailData.kriteria) ? (detailData.kriteria === 'C' ? 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : (detailData.kriteria === 'B' ? 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : 'Tidak ada keterkaitan')) : (((code === '1.a.4' || code === '1.a.5') && detailData && detailData.kriteria) ? (detailData.kriteria === 'B' ? 'Ya' : 'Tidak') : (bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : ''))),
-      catatan: (code === '1.b.1.c' && detailData && detailData.kriteria) ? ('Otomatis dihitung dari keselarasan Prioritas Pembangunan Daerah terhadap Sasaran PN RKP (' + (detailData.matched_count || 0) + '/' + (detailData.total_pn || 8) + ' PN selaras, ' + (detailData.pct_matched || 0) + '%, Kriteria ' + (detailData.kriteria || 'C') + ' = ' + numFmt(bobotNum) + ')') : (((code === '1.a.2.a' || code === '1.a.2.b' || code === '1.a.2.c' || code === '1.a.4' || code === '1.a.5') && detailData && detailData.catatan !== undefined) ? detailData.catatan : ((detailData && detailData.catatan && !modalCatatan.value.trim()) ? detailData.catatan : modalCatatan.value.trim())),
+      opsi_aksi: (code === '3.a.1.b' && detailData && (detailData.critText || detailData.opsi_aksi)) ? (detailData.critText || detailData.opsi_aksi) : ((code === '3.a.1.a' && detailData && (detailData.critText || detailData.opsi_aksi)) ? (detailData.critText || detailData.opsi_aksi) : ((code === '2.b.1' || code === '2.b.2') && detailData && detailData.opsi_aksi ? detailData.opsi_aksi : ((code === '1.b.2.a' || code === '1.b.3.a' || code === '1.b.4.a' || code === '1.b.5.a' || code === '1.b.6.a' || code === '1.b.7.a' || code === '1.b.8.a' || code === '1.b.9.a') ? ((detailData && detailData.opsi_aksi) ? detailData.opsi_aksi : (bobotNum >= 0.625 ? '=> 75%' : (bobotNum >= 0.46875 ? '50% - 75%' : (bobotNum >= 0.3125 ? '25% - 50%' : '=< 25%')))) : ((code === '1.b.1.c' && detailData && detailData.kriteria) ? (detailData.kriteria === 'C' ? 'Di atas 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : (detailData.kriteria === 'B' ? 'Kurang dari 50% prioritas pembangunan daerah sesuai dengan sasaran PN RKP' : 'Tidak ada keterkaitan')) : (((code === '1.a.4' || code === '1.a.5') && detailData && detailData.kriteria) ? (detailData.kriteria === 'B' ? 'Ya' : 'Tidak') : (bobotNum !== null ? (bobotNum >= maxVal ? 'Memenuhi Sepenuhnya' : (bobotNum > 0 ? 'Sebagian Memenuhi' : 'Belum Memenuhi')) : '')))))),
+      catatan: ((code === '3.a.1.b' || code === '3.a.1.a') && detailData && detailData.catatan) ? detailData.catatan : ((code === '1.b.1.c' && detailData && detailData.kriteria) ? ('Otomatis dihitung dari keselarasan Prioritas Pembangunan Daerah terhadap Sasaran PN RKP (' + (detailData.matched_count || 0) + '/' + (detailData.total_pn || 8) + ' PN selaras, ' + (detailData.pct_matched || 0) + '%, Kriteria ' + (detailData.kriteria || 'C') + ' = ' + numFmt(bobotNum) + ')') : (((code === '1.a.2.a' || code === '1.a.2.b' || code === '1.a.2.c' || code === '1.a.4' || code === '1.a.5') && detailData && detailData.catatan !== undefined) ? detailData.catatan : ((detailData && detailData.catatan && !modalCatatan.value.trim()) ? detailData.catatan : modalCatatan.value.trim()))),
       bukti_dukung: modalBuktiDukung.value.trim(),
       detail_json: JSON.stringify(detailData)
     };
@@ -10701,6 +11396,10 @@ tr.type-sub:hover td {
           if (resp.AutoData_1_b_10_a) AUTO_DATA_1_B_10_A = resp.AutoData_1_b_10_a;
           if (resp.AutoData_1_b_10_b) AUTO_DATA_1_B_10_B = resp.AutoData_1_b_10_b;
           if (resp.AutoData_1_c_1) AUTO_DATA_1_C_1 = resp.AutoData_1_c_1;
+          if (resp.AutoData_2_b_1) AUTO_DATA_2_B_1 = resp.AutoData_2_b_1;
+          if (resp.AutoData_2_b_2) AUTO_DATA_2_B_2 = resp.AutoData_2_b_2;
+          if (resp.AutoData_3_a_1_a) AUTO_DATA_3_A_1_A = resp.AutoData_3_a_1_a;
+          if (resp.AutoData_3_a_1_b) AUTO_DATA_3_A_1_B = resp.AutoData_3_a_1_b;
 
           buildItemMap();
           renderTable();
@@ -11582,56 +12281,6 @@ tr.type-sub:hover td {
       return;
     }
 
-    // --- 3.a.1.a: Add / Del Row ---
-    var btnAdd3a1a = target.closest("#btnAdd3a1aRow");
-    if (btnAdd3a1a){
-      var tbody3a1a = document.querySelector("#wsTable_3_a_1_a tbody");
-      if (tbody3a1a){
-        var newTr = document.createElement("tr");
-        newTr.className = "ws-3a1a-row";
-        newTr.innerHTML = 
-          '<td class="excel-row-num">+</td>' +
-          '<td><input type="text" class="calc-inp bidang-inp" placeholder="Bidang Urusan..."></td>' +
-          '<td><input type="text" class="calc-inp prog-inp" placeholder="Program Prioritas..."></td>' +
-          '<td><input type="text" class="calc-inp opd-inp" placeholder="Nama Perangkat Daerah..."></td>' +
-          '<td class="cell-formula row-score" style="text-align:center; font-weight:700; color:#107c41;">100%</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1a-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>';
-        tbody3a1a.appendChild(newTr);
-        updateModalWorksheetScore();
-        renumberExcelSheetRows(document.getElementById("wsTable_3_a_1_a"));
-      }
-      return;
-    }
-
-    // --- 3.a.1.b: Add / Del Row ---
-    var btnAdd3a1b = target.closest("#btnAdd3a1bRow");
-    if (btnAdd3a1b){
-      var tbody3a1b = document.querySelector("#wsTable_3_a_1_b tbody");
-      if (tbody3a1b){
-        var newTr = document.createElement("tr");
-        newTr.className = "ws-3a1b-row";
-        newTr.innerHTML = 
-          '<td class="excel-row-num">+</td>' +
-          '<td><input type="text" class="calc-inp ind-daerah" placeholder="Indikator Daerah..."></td>' +
-          '<td><input type="text" class="calc-inp tgt-daerah" value="100" style="text-align:center; font-weight:600;"></td>' +
-          '<td><input type="text" class="calc-inp unit-daerah" value="Persen"></td>' +
-          '<td><input type="text" class="calc-inp opd-name" placeholder="OPD..."></td>' +
-          '<td><input type="text" class="calc-inp iku-opd" placeholder="IKU OPD..."></td>' +
-          '<td><input type="text" class="calc-inp tgt-opd" value="100" style="text-align:center; font-weight:600;"></td>' +
-          '<td><input type="text" class="calc-inp unit-opd" value="Persen"></td>' +
-          '<td>' +
-            '<select class="calc-inp ekspektasi-sel">' +
-              '<option value="Besar">Besar (Makin Besar Baik)</option>' +
-              '<option value="Kecil">Kecil (Makin Kecil Baik)</option>' +
-            '</select>' +
-          '</td>' +
-          '<td style="text-align:center;"><button type="button" class="btn-del-3a1b-row" style="border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Hapus Baris"><i class="fa fa-times"></i></button></td>';
-        tbody3a1b.appendChild(newTr);
-        updateModalWorksheetScore();
-        renumberExcelSheetRows(document.getElementById("wsTable_3_a_1_b"));
-      }
-      return;
-    }
 
     // --- General / Pilar 2: Add / Del Row ---
     var btnAddGen = target.closest("#btnAddGenRow");
@@ -11661,8 +12310,8 @@ tr.type-sub:hover td {
       return;
     }
 
-    // Generic Delete Row (for 1c1, 3a1a, 3a1b, gen)
-    var delGeneric = target.closest(".btn-del-1c1-row, .btn-del-1c1-sub, .btn-del-3a1a-row, .btn-del-3a1b-row, .btn-del-gen-row");
+    // Generic Delete Row (for 1c1, 3a1b, gen)
+    var delGeneric = target.closest(".btn-del-1c1-row, .btn-del-1c1-sub, .btn-del-3a1b-row, .btn-del-gen-row");
     if (delGeneric){
       var tbl = delGeneric.closest(".excel-grid-table");
       delGeneric.closest("tr").remove();

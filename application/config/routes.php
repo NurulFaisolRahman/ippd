@@ -53,6 +53,16 @@ $route['default_controller'] = 'Beranda';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+// ========== IPPD ALIAS ROUTES ==========
+$route['Daerah/TabelIPPD'] = 'Instansi/TabelIPPD';
+$route['Daerah/TabelIPPD/(.+)'] = 'Instansi/TabelIPPD/$1';
+$route['TabelIPPD'] = 'Instansi/TabelIPPD';
+$route['TabelIPPD/(.+)'] = 'Instansi/TabelIPPD/$1';
+$route['ippd'] = 'Instansi/TabelIPPD';
+$route['ippd/(.+)'] = 'Instansi/TabelIPPD/$1';
+$route['IPPD'] = 'Instansi/TabelIPPD';
+$route['IPPD/(.+)'] = 'Instansi/TabelIPPD/$1';
+
 // ========== API & REALTIME ROUTES ==========
 $route['api/iku/stream'] = 'Api/stream_iku';
 $route['api/iku/realtime'] = 'Api/stream_iku';

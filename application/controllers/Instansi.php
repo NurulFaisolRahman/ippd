@@ -29979,6 +29979,306 @@ public function updateStatusPerjanjianKinerja() {
         ];
     }
 
+
+private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
+        $u = strtoupper($progName . ' ' . $kodeProg);
+        if (strpos($u, 'SARANA PERTANIAN') !== false || strpos($u, 'PRASARANA PERTANIAN') !== false || strpos($u, 'BENCANA PERTANIAN') !== false || strpos($u, 'PENYULUHAN PERTANIAN') !== false || strpos($kodeProg, '3.27') === 0) return 'BIDANG PERTANIAN';
+        if (strpos($u, 'PENANGANAN BENCANA') !== false) return 'BIDANG SOSIAL';
+        if (strpos($u, 'PENDIDIKAN') !== false || strpos($kodeProg, '1.01') === 0) return 'BIDANG PENDIDIKAN';
+        if (strpos($u, 'KESEHATAN') !== false || strpos($u, 'FARMASI') !== false || strpos($kodeProg, '1.02') === 0) return 'BIDANG KESEHATAN';
+        if (strpos($u, 'PENYELENGGARAAN JALAN') !== false || strpos($u, 'PENATAAN RUANG') !== false || strpos($u, 'BANGUNAN GEDUNG') !== false || strpos($u, 'SUMBER DAYA AIR') !== false || strpos($u, 'AIR LIMBAH') !== false || strpos($u, 'DRAINASE') !== false || strpos($u, 'AIR MINUM') !== false || strpos($kodeProg, '1.03') === 0) return 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG';
+        if (strpos($u, 'PERUMAHAN') !== false || strpos($u, 'KAWASAN PERMUKIMAN') !== false || strpos($u, 'UTILITAS UMUM') !== false || strpos($u, 'PSU') !== false || strpos($kodeProg, '1.04') === 0) return 'BIDANG PERUMAHAN DAN KAWASAN PERMUKIMAN';
+        if (strpos($u, 'KETENTERAMAN') !== false || strpos($u, 'KEBAKARAN') !== false || strpos($u, 'PENANGGULANGAN BENCANA') !== false || strpos($kodeProg, '1.05') === 0) return 'BIDANG KETENTERAMAN, KETERTIBAN UMUM, DAN PERLINDUNGAN MASYARAKAT';
+        if (strpos($u, 'JAMINAN SOSIAL') !== false || strpos($u, 'WARGA NEGARA MIGRAN') !== false || strpos($u, 'REHABILITASI SOSIAL') !== false || strpos($u, 'PEMBERDAYAAN SOSIAL') !== false || strpos($kodeProg, '1.06') === 0) return 'BIDANG SOSIAL';
+        if (strpos($u, 'TENAGA KERJA') !== false || strpos($u, 'HUBUNGAN INDUSTRIAL') !== false || strpos($kodeProg, '2.07') === 0) return 'BIDANG TENAGA KERJA';
+        if (strpos($u, 'GENDER') !== false || strpos($u, 'PERLINDUNGAN PEREMPUAN') !== false || strpos($u, 'KUALITAS KELUARGA') !== false || strpos($u, 'HAK ANAK') !== false || strpos($kodeProg, '2.08') === 0) return 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK';
+        if (strpos($u, 'KEDAULATAN DAN KEMANDIRIAN PANGAN') !== false || strpos($u, 'KETAHANAN PANGAN') !== false || strpos($u, 'KERAWANAN PANGAN') !== false || strpos($kodeProg, '2.09') === 0) return 'BIDANG PANGAN';
+        if (strpos($u, 'LINGKUNGAN HIDUP') !== false || strpos($u, 'PENCEMARAN') !== false || strpos($u, 'LIMBAH BAHAN BERBAHAYA') !== false || strpos($u, 'PPLH') !== false || strpos($u, 'EKOSISTEMNYA') !== false || strpos($u, 'PERSAMPAHAN') !== false || strpos($kodeProg, '2.11') === 0) return 'BIDANG LINGKUNGAN HIDUP';
+        if (strpos($u, 'PENDAFTARAN PENDUDUK') !== false || strpos($u, 'PENCATATAN SIPIL') !== false || strpos($kodeProg, '2.12') === 0) return 'BIDANG ADMINISTRASI KEPENDUDUKAN DAN PENCATATAN SIPIL';
+        if (strpos($u, 'KERJASAMA DESA') !== false || strpos($u, 'LEMBAGA ADAT') !== false || strpos($u, 'PEMERINTAHAN DESA') !== false || strpos($kodeProg, '2.13') === 0) return 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA';
+        if (strpos($u, 'KELUARGA SEJAHTERA') !== false || strpos($u, 'PENGENDALIAN PENDUDUK') !== false || strpos($u, 'KELUARGA BERENCANA') !== false || strpos($kodeProg, '2.14') === 0) return 'BIDANG PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA';
+        if (strpos($u, 'LLAJ') !== false || strpos($u, 'LALU LINTAS DAN ANGKUTAN JALAN') !== false || strpos($kodeProg, '2.15') === 0) return 'BIDANG PERHUBUNGAN';
+        if (strpos($u, 'APLIKASI INFORMATIKA') !== false || strpos($u, 'INFORMASI DAN KOMUNIKASI') !== false || strpos($kodeProg, '2.16') === 0) return 'BIDANG KOMUNIKASI DAN INFORMATIKA';
+        if (strpos($u, 'STATISTIK') !== false || strpos($kodeProg, '2.17') === 0) return 'BIDANG STATISTIK';
+        if (strpos($u, 'PERSANDIAN') !== false || strpos($kodeProg, '2.18') === 0) return 'BIDANG PERSANDIAN';
+        if (strpos($u, 'ARSIP') !== false || strpos($kodeProg, '2.21') === 0) return 'BIDANG KEARSIPAN';
+        if (strpos($u, 'PERPUSTAKAAN') !== false || strpos($kodeProg, '2.20') === 0) return 'BIDANG PERPUSTAKAAN';
+        if (strpos($u, 'KOPERASI') !== false || strpos($u, 'UMKM') !== false || strpos($kodeProg, '3.30') === 0) return 'BIDANG KOPERASI DAN USAHA KECIL MENENGAH';
+        if (strpos($u, 'PENANAMAN MODAL') !== false || strpos($kodeProg, '3.31') === 0) return 'BIDANG PENANAMAN MODAL';
+        if (strpos($u, 'KEPEMUDAAN') !== false || strpos($u, 'OLAHRAGA') !== false || strpos($kodeProg, '3.32') === 0) return 'BIDANG KEPEMUDAAN DAN OLAHRAGA';
+        if (strpos($u, 'KEBUDAYAAN') !== false || strpos($kodeProg, '2.19') === 0) return 'BIDANG KEBUDAYAAN';
+        if (strpos($u, 'PERIKANAN TANGKAP') !== false || strpos($u, 'PERIKANAN BUDIDAYA') !== false || strpos($u, 'KELAUTAN') !== false || strpos($kodeProg, '3.25') === 0) return 'BIDANG KELAUTAN DAN PERIKANAN';
+        if (strpos($u, 'DESTINASI PARIWISATA') !== false || strpos($u, 'PEMASARAN PARIWISATA') !== false || strpos($u, 'EKONOMI KREATIF') !== false || strpos($kodeProg, '3.26') === 0) return 'BIDANG PARIWISATA';
+        if (strpos($u, 'PERTANIAN') !== false) return 'BIDANG PERTANIAN';
+        if (strpos($u, 'EKSPOR') !== false || strpos($u, 'DISTRIBUSI PERDAGANGAN') !== false || strpos($u, 'KEBUTUHAN POKOK') !== false || strpos($u, 'PERLINDUNGAN KONSUMEN') !== false || strpos($kodeProg, '3.28') === 0) return 'BIDANG PERDAGANGAN';
+        if (strpos($u, 'PEMBANGUNAN INDUSTRI') !== false || strpos($kodeProg, '3.29') === 0) return 'BIDANG PERINDUSTRIAN';
+        if (strpos($u, 'PEREKONOMIAN DAN PEMBANGUNAN') !== false || strpos($kodeProg, '4.01') === 0) return 'BIDANG PEREKONOMIAN DAN PEMBANGUNAN';
+        if (strpos($u, 'PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT') !== false) return 'BIDANG PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT';
+        if (strpos($u, 'IDEOLOGI PANCASILA') !== false || strpos($u, 'ORGANISASI KEMASYARAKATAN') !== false || strpos($kodeProg, '5.01') === 0) return 'BIDANG KESATUAN BANGSA DAN POLITIK';
+        if (strpos($u, 'PENGAWASAN') !== false || strpos($u, 'ASISTENSI') !== false || strpos($kodeProg, '4.03') === 0) return 'BIDANG PENGAWASAN';
+        if (strpos($u, 'PERENCANAAN, PENGENDALIAN') !== false || strpos($u, 'PENELITIAN DAN PENGEMBANGAN') !== false || strpos($kodeProg, '4.04') === 0) return 'BIDANG PERENCANAAN PEMBANGUNAN DAERAH';
+        if (strpos($u, 'BARANG MILIK DAERAH') !== false || strpos($u, 'KEUANGAN DAERAH') !== false || strpos($kodeProg, '4.05') === 0) return 'BIDANG KEUANGAN DAN ASET DAERAH';
+        if (strpos($u, 'PENDAPATAN DAERAH') !== false || strpos($kodeProg, '4.07') === 0) return 'BIDANG PENDAPATAN DAERAH';
+        if (strpos($u, 'KEPEGAWAIAN DAERAH') !== false || strpos($u, 'PENGEMBANGAN SUMBER DAYA MANUSIA') !== false || strpos($kodeProg, '4.06') === 0) return 'BIDANG KEPEGAWAIAN DAN PENGEMBANGAN SDM';
+        if (strpos($u, 'TUGAS DAN FUNGSI DPRD') !== false || strpos($kodeProg, '4.02') === 0) return 'BIDANG SEKRETARIAT DPRD';
+        if (strpos($u, 'DESA DAN KELURAHAN') !== false || strpos($u, 'PELAYANAN PUBLIK') !== false || strpos($kodeProg, '7.01') === 0) return 'BIDANG PEMERINTAHAN KECAMATAN';
+        if (strpos($u, 'PENUNJANG URUSAN PEMERINTAHAN') !== false || strpos($kodeProg, 'X.XX.01') === 0) return 'BIDANG PENUNJANG URUSAN PEMERINTAHAN';
+        
+        return 'BIDANG PENUNJANG URUSAN PEMERINTAHAN';
+    }
+
+    private function determine_default_opd_rkpd($bidang, $progName = '') {
+        $uProg = strtoupper($progName);
+        if ($bidang === 'BIDANG PENDIDIKAN') return 'DINAS PENDIDIKAN';
+        if ($bidang === 'BIDANG KESEHATAN') return 'DINAS KESEHATAN';
+        if ($bidang === 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG') {
+            if (strpos($uProg, 'SUMBER DAYA AIR') !== false || strpos($uProg, 'SDA') !== false) {
+                return 'DINAS PEKERJAAN UMUM PENGAIRAN';
+            }
+            return 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN';
+        }
+        if ($bidang === 'BIDANG PERUMAHAN DAN KAWASAN PERMUKIMAN') return 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN';
+        if ($bidang === 'BIDANG KETENTERAMAN, KETERTIBAN UMUM, DAN PERLINDUNGAN MASYARAKAT') {
+            if (strpos($uProg, 'KEBAKARAN') !== false) return 'DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN';
+            if (strpos($uProg, 'PENANGGULANGAN BENCANA') !== false) return 'BADAN PENANGGULANGAN BENCANA DAERAH';
+            return 'SATUAN POLISI PAMONG PRAJA';
+        }
+        if ($bidang === 'BIDANG SOSIAL') return 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA';
+        if ($bidang === 'BIDANG TENAGA KERJA') return 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN';
+        if ($bidang === 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK') return 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA';
+        if ($bidang === 'BIDANG PANGAN') return 'DINAS PERTANIAN DAN PANGAN';
+        if ($bidang === 'BIDANG LINGKUNGAN HIDUP') return 'DINAS LINGKUNGAN HIDUP';
+        if ($bidang === 'BIDANG ADMINISTRASI KEPENDUDUKAN DAN PENCATATAN SIPIL') return 'DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL';
+        if ($bidang === 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA') return 'DINAS PEMBERDAYAAN MASYARAKAT DAN DESA';
+        if ($bidang === 'BIDANG PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA') return 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA';
+        if ($bidang === 'BIDANG PERHUBUNGAN') return 'DINAS PERHUBUNGAN';
+        if ($bidang === 'BIDANG KOMUNIKASI DAN INFORMATIKA') return 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN';
+        if ($bidang === 'BIDANG STATISTIK') return 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN';
+        if ($bidang === 'BIDANG PERSANDIAN') return 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN';
+        if ($bidang === 'BIDANG KEARSIPAN') return 'DINAS PERPUSTAKAAN DAN KEARSIPAN';
+        if ($bidang === 'BIDANG PERPUSTAKAAN') return 'DINAS PERPUSTAKAAN DAN KEARSIPAN';
+        if ($bidang === 'BIDANG KOPERASI DAN USAHA KECIL MENENGAH') return 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN';
+        if ($bidang === 'BIDANG PENANAMAN MODAL') return 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU';
+        if ($bidang === 'BIDANG KEPEMUDAAN DAN OLAHRAGA') return 'DINAS PEMUDA DAN OLAHRAGA';
+        if ($bidang === 'BIDANG KEBUDAYAAN') return 'DINAS KEBUDAYAAN DAN PARIWISATA';
+        if ($bidang === 'BIDANG KELAUTAN DAN PERIKANAN') return 'DINAS PERIKANAN';
+        if ($bidang === 'BIDANG PARIWISATA') return 'DINAS KEBUDAYAAN DAN PARIWISATA';
+        if ($bidang === 'BIDANG PERTANIAN') return 'DINAS PERTANIAN DAN PANGAN';
+        if ($bidang === 'BIDANG PERDAGANGAN') return 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN';
+        if ($bidang === 'BIDANG PERINDUSTRIAN') return 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN';
+        if ($bidang === 'BIDANG PEREKONOMIAN DAN PEMBANGUNAN') return 'SEKRETARIAT DAERAH';
+        if ($bidang === 'BIDANG PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT') return 'SEKRETARIAT DAERAH';
+        if ($bidang === 'BIDANG KESATUAN BANGSA DAN POLITIK') return 'BADAN KESATUAN BANGSA DAN POLITIK';
+        if ($bidang === 'BIDANG PENGAWASAN') return 'INSPEKTORAT';
+        if ($bidang === 'BIDANG PERENCANAAN PEMBANGUNAN DAERAH') return 'BADAN PERENCANAAN PEMBANGUNAN DAERAH';
+        if ($bidang === 'BIDANG KEUANGAN DAN ASET DAERAH') return 'BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH';
+        if ($bidang === 'BIDANG PENDAPATAN DAERAH') return 'BADAN PENDAPATAN DAERAH';
+        if ($bidang === 'BIDANG KEPEGAWAIAN DAN PENGEMBANGAN SDM') return 'BADAN KEPEGAWAIAN, PENDIDIKAN DAN PELATIHAN';
+        if ($bidang === 'BIDANG SEKRETARIAT DPRD') return 'SEKRETARIAT DPRD';
+        if ($bidang === 'BIDANG PEMERINTAHAN KECAMATAN') return 'SELURUH KECAMATAN (SESUAI WILAYAH PELAKSANAAN)';
+        if ($bidang === 'BIDANG PENUNJANG URUSAN PEMERINTAHAN') return 'SELURUH PERANGKAT DAERAH';
+        return 'BAPPEDA / Perangkat Daerah Terkait';
+    }
+
+    private function get_program_prioritas_3a1a_template() {
+        return [
+            ['bidang' => 'BIDANG PENDIDIKAN', 'prog' => 'PROGRAM PENGELOLAAN PENDIDIKAN', 'opd' => 'DINAS PENDIDIKAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENDIDIKAN', 'prog' => 'PROGRAM PENGELOLAAN PENDIDIKAN', 'opd' => 'DINAS PENDIDIKAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENDIDIKAN', 'prog' => 'PROGRAM PENDIDIK DAN TENAGA KEPENDIDIKAN', 'opd' => 'DINAS PENDIDIKAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENDIDIKAN', 'prog' => 'PROGRAM PENGENDALIAN PERIZINAN PENDIDIKAN', 'opd' => 'DINAS PENDIDIKAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM PEMBERDAYAAN MASYARAKAT BIDANG KESEHATAN', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM PENINGKATAN KAPASITAS SUMBER DAYA MANUSIA KESEHATAN', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM PEMBERDAYAAN MASYARAKAT KESEHATAN', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESEHATAN', 'prog' => 'PROGRAM SEDIAAN FARMASI, ALAT KESEHATAN DAN MAKANAN MINUMAN', 'opd' => 'DINAS KESEHATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENYELENGGARAAN JALAN', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENYELENGGARAAN PENATAAN RUANG', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENATAAN BANGUNAN GEDUNG', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENYELENGGARAAN JALAN', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENGELOLAAN SUMBER DAYA AIR (SDA)', 'opd' => 'DINAS PEKERJAAN UMUM PENGAIRAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM AIR LIMBAH', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM DRAINASE', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEKERJAAN UMUM DAN PENATAAN RUANG', 'prog' => 'PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM PENYEDIAAN AIR MINUM', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERUMAHAN DAN KAWASAN PERMUKIMAN', 'prog' => 'PROGRAM PENGEMBANGAN PERUMAHAN', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERUMAHAN DAN KAWASAN PERMUKIMAN', 'prog' => 'PROGRAM KAWASAN PERMUKIMAN', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERUMAHAN DAN KAWASAN PERMUKIMAN', 'prog' => 'PROGRAM PENINGKATAN PRASARANA, SARANA DAN UTILITAS UMUM (PSU)', 'opd' => 'DINAS PEKERJAAN UMUM CIPTA KARYA, PERUMAHAN DAN PERMUKIMAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KETENTERAMAN, KETERTIBAN UMUM, DAN PERLINDUNGAN MASYARAKAT', 'prog' => 'PROGRAM PENINGKATAN KETENTERAMAN DAN KETERTIBAN UMUM', 'opd' => 'SATUAN POLISI PAMONG PRAJA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KETENTERAMAN, KETERTIBAN UMUM, DAN PERLINDUNGAN MASYARAKAT', 'prog' => 'PROGRAM PENCEGAHAN, PENANGGULANGAN, PENYELAMATAN KEBAKARAN DAN PENYELAMATAN NON KEBAKARAN', 'opd' => 'DINAS PEMADAM KEBAKARAN DAN PENYELAMATAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KETENTERAMAN, KETERTIBAN UMUM, DAN PERLINDUNGAN MASYARAKAT', 'prog' => 'PROGRAM PENANGGULANGAN BENCANA', 'opd' => 'BADAN PENANGGULANGAN BENCANA DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SOSIAL', 'prog' => 'PROGRAM PENANGANAN BENCANA', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SOSIAL', 'prog' => 'PROGRAM PERLINDUNGAN DAN JAMINAN SOSIAL', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SOSIAL', 'prog' => 'PROGRAM PENANGANAN WARGA NEGARA MIGRAN KORBAN TINDAK KEKERASAN', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SOSIAL', 'prog' => 'PROGRAM REHABILITASI SOSIAL', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SOSIAL', 'prog' => 'PROGRAM PEMBERDAYAAN SOSIAL', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG TENAGA KERJA', 'prog' => 'PROGRAM PERENCANAAN TENAGA KERJA', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG TENAGA KERJA', 'prog' => 'PROGRAM HUBUNGAN INDUSTRIAL', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG TENAGA KERJA', 'prog' => 'PROGRAM HUBUNGAN INDUSTRIAL', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG TENAGA KERJA', 'prog' => 'PROGRAM PELATIHAN KERJA DAN PRODUKTIVITAS TENAGA KERJA', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG TENAGA KERJA', 'prog' => 'PROGRAM PENEMPATAN TENAGA KERJA', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK', 'prog' => 'PROGRAM PENGARUSUTAMAAN GENDER DAN PEMBERDAYAAN PEREMPUAN', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK', 'prog' => 'PROGRAM PERLINDUNGAN PEREMPUAN', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK', 'prog' => 'PROGRAM PENINGKATAN KUALITAS KELUARGA', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK', 'prog' => 'PROGRAM PEMENUHAN HAK ANAK (PHA)', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PANGAN', 'prog' => 'PROGRAM PENGELOLAAN SUMBER DAYA EKONOMI UNTUK KEDAULATAN DAN KEMANDIRIAN PANGAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PANGAN', 'prog' => 'PROGRAM PENINGKATAN DIVERSIFIKASI DAN KETAHANAN PANGAN MASYARAKAT', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PANGAN', 'prog' => 'PROGRAM PENANGANAN KERAWANAN PANGAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM PERENCANAAN LINGKUNGAN HIDUP', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM PENGENDALIAN PENCEMARAN DAN/ATAU KERUSAKAN LINGKUNGAN HIDUP', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM PENGENDALIAN BAHAN BERBAHAYA DAN BERACUN (B3) DAN LIMBAH BAHAN BERBAHAYA DAN BERACUN (LIMBAH B3)', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM PEMBINAAN DAN PENGAWASAN TERHADAP IZIN LINGKUNGAN DAN IZIN PERLINDUNGAN DAN PENGELOLAAN LINGKUNGAN HIDUP (PPLH)', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM KONSERVASI SUMBER DAYA ALAM HAYATI DAN EKOSISTEMNYA', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG LINGKUNGAN HIDUP', 'prog' => 'PROGRAM PENGELOLAAN PERSAMPAHAN', 'opd' => 'DINAS LINGKUNGAN HIDUP', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG ADMINISTRASI KEPENDUDUKAN DAN PENCATATAN SIPIL', 'prog' => 'PROGRAM PENDAFTARAN PENDUDUK', 'opd' => 'DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG ADMINISTRASI KEPENDUDUKAN DAN PENCATATAN SIPIL', 'prog' => 'PROGRAM PENCATATAN SIPIL', 'opd' => 'DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA', 'prog' => 'PROGRAM PENINGKATAN KERJASAMA DESA', 'opd' => 'DINAS PEMBERDAYAAN MASYARAKAT DAN DESA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA', 'prog' => 'PROGRAM PEMBERDAYAAN LEMBAGA KEMASYARAKATAN, LEMBAGA ADAT DAN MASYARAKAT HUKUM ADAT', 'opd' => 'DINAS PEMBERDAYAAN MASYARAKAT DAN DESA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA', 'prog' => 'PROGRAM ADMINISTRASI PEMERINTAHAN DESA', 'opd' => 'DINAS PEMBERDAYAAN MASYARAKAT DAN DESA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMBERDAYAAN MASYARAKAT DAN DESA', 'prog' => 'PROGRAM PENINGKATAN KERJASAMA DESA', 'opd' => 'DINAS PEMBERDAYAAN MASYARAKAT DAN DESA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA', 'prog' => 'PROGRAM PEMBERDAYAAN DAN PENINGKATAN KELUARGA SEJAHTERA (KS)', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA', 'prog' => 'PROGRAM PENGENDALIAN PENDUDUK', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA', 'prog' => 'PROGRAM PEMBINAAN KELUARGA BERENCANA (KB)', 'opd' => 'DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN KELUARGA BERENCANA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERHUBUNGAN', 'prog' => 'PROGRAM PENYELENGGARAAN LALU LINTAS DAN ANGKUTAN JALAN (LLAJ)', 'opd' => 'DINAS PERHUBUNGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KOMUNIKASI DAN INFORMATIKA', 'prog' => 'PROGRAM APLIKASI INFORMATIKA', 'opd' => 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KOMUNIKASI DAN INFORMATIKA', 'prog' => 'PROGRAM INFORMASI DAN KOMUNIKASI PUBLIK', 'opd' => 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG STATISTIK', 'prog' => 'PROGRAM PENYELENGGARAAN STATISTIK SEKTORAL', 'opd' => 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERSANDIAN', 'prog' => 'PROGRAM PENYELENGGARAAN PERSANDIAN UNTUK PENGAMANAN INFORMASI', 'opd' => 'DINAS KOMUNIKASI, INFORMATIKA DAN PERSANDIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEARSIPAN', 'prog' => 'PROGRAM PENGELOLAAN ARSIP', 'opd' => 'DINAS PERPUSTAKAAN DAN KEARSIPAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERPUSTAKAAN', 'prog' => 'PROGRAM PEMBINAAN PERPUSTAKAAN', 'opd' => 'DINAS PERPUSTAKAAN DAN KEARSIPAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KOPERASI DAN USAHA KECIL MENENGAH', 'prog' => 'PROGRAM PENGEMBANGAN UMKM', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KOPERASI DAN USAHA KECIL MENENGAH', 'prog' => 'PROGRAM PEMBERDAYAAN DAN PERLINDUNGAN KOPERASI', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KOPERASI DAN USAHA KECIL MENENGAH', 'prog' => 'PROGRAM PEMBERDAYAAN USAHA MENENGAH, USAHA KECIL, DAN USAHA MIKRO (UMKM)', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENANAMAN MODAL', 'prog' => 'PROGRAM PENGEMBANGAN IKLIM PENANAMAN MODAL', 'opd' => 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENANAMAN MODAL', 'prog' => 'PROGRAM PROMOSI PENANAMAN MODAL', 'opd' => 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENANAMAN MODAL', 'prog' => 'PROGRAM PELAYANAN PENANAMAN MODAL', 'opd' => 'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEPEMUDAAN DAN OLAHRAGA', 'prog' => 'PROGRAM PENGEMBANGAN KAPASITAS DAYA SAING KEPEMUDAAN', 'opd' => 'DINAS PEMUDA DAN OLAHRAGA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEBUDAYAAN', 'prog' => 'PROGRAM PENGEMBANGAN KEBUDAYAAN', 'opd' => 'DINAS KEBUDAYAAN DAN PARIWISATA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KELAUTAN DAN PERIKANAN', 'prog' => 'PROGRAM PENGELOLAAN PERIKANAN TANGKAP', 'opd' => 'DINAS PERIKANAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KELAUTAN DAN PERIKANAN', 'prog' => 'PROGRAM PENGELOLAAN PERIKANAN BUDIDAYA', 'opd' => 'DINAS PERIKANAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PARIWISATA', 'prog' => 'PROGRAM PENINGKATAN DAYA TARIK DESTINASI PARIWISATA', 'opd' => 'DINAS KEBUDAYAAN DAN PARIWISATA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PARIWISATA', 'prog' => 'PROGRAM PEMASARAN PARIWISATA', 'opd' => 'DINAS KEBUDAYAAN DAN PARIWISATA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PARIWISATA', 'prog' => 'PROGRAM PENGEMBANGAN SUMBER DAYA PARIWISATA DAN EKONOMI KREATIF', 'opd' => 'DINAS KEBUDAYAAN DAN PARIWISATA', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERTANIAN', 'prog' => 'PROGRAM PENYEDIAAN DAN PENGEMBANGAN SARANA PERTANIAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERTANIAN', 'prog' => 'PROGRAM PENYEDIAAN DAN PENGEMBANGAN PRASARANA PERTANIAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERTANIAN', 'prog' => 'PROGRAM PENGENDALIAN DAN PENANGGULANGAN BENCANA PERTANIAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERTANIAN', 'prog' => 'PROGRAM PENYULUHAN PERTANIAN', 'opd' => 'DINAS PERTANIAN DAN PANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERDAGANGAN', 'prog' => 'PROGRAM PENGEMBANGAN EKSPOR', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERDAGANGAN', 'prog' => 'PROGRAM PENINGKATAN SARANA DISTRIBUSI PERDAGANGAN', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERDAGANGAN', 'prog' => 'PROGRAM STABILISASI HARGA BARANG KEBUTUHAN POKOK DAN BARANG PENTING', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERDAGANGAN', 'prog' => 'PROGRAM STANDARDISASI DAN PERLINDUNGAN KONSUMEN', 'opd' => 'DINAS KOPERASI, USAHA MIKRO DAN PERDAGANGAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERINDUSTRIAN', 'prog' => 'PROGRAM PERENCANAAN DAN PEMBANGUNAN INDUSTRI', 'opd' => 'DINAS TENAGA KERJA, TRANSMIGRASI DAN PERINDUSTRIAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEREKONOMIAN DAN PEMBANGUNAN', 'prog' => 'PROGRAM PEREKONOMIAN DAN PEMBANGUNAN', 'opd' => 'SEKRETARIAT DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEREKONOMIAN DAN PEMBANGUNAN', 'prog' => 'PROGRAM PEREKONOMIAN DAN PEMBANGUNAN', 'opd' => 'SEKRETARIAT DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT', 'prog' => 'PROGRAM PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT', 'opd' => 'SEKRETARIAT DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT', 'prog' => 'PROGRAM PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT', 'opd' => 'SEKRETARIAT DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESATUAN BANGSA DAN POLITIK', 'prog' => 'PROGRAM PENGUATAN IDEOLOGI PANCASILA DAN KARAKTER KEBANGSAAN', 'opd' => 'BADAN KESATUAN BANGSA DAN POLITIK', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KESATUAN BANGSA DAN POLITIK', 'prog' => 'PROGRAM PEMBERDAYAAN DAN PENGAWASAN ORGANISASI KEMASYARAKATAN', 'opd' => 'BADAN KESATUAN BANGSA DAN POLITIK', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENGAWASAN', 'prog' => 'PROGRAM PENYELENGGARAAN PENGAWASAN', 'opd' => 'INSPEKTORAT', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENGAWASAN', 'prog' => 'PROGRAM PERUMUSAN KEBIJAKAN, PENDAMPINGAN DAN ASISTENSI', 'opd' => 'INSPEKTORAT', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERENCANAAN PEMBANGUNAN DAERAH', 'prog' => 'PROGRAM PERENCANAAN, PENGENDALIAN DAN EVALUASI PEMBANGUNAN DAERAH', 'opd' => 'BADAN PERENCANAAN PEMBANGUNAN DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PERENCANAAN PEMBANGUNAN DAERAH', 'prog' => 'PROGRAM PENELITIAN DAN PENGEMBANGAN DAERAH', 'opd' => 'BADAN PERENCANAAN PEMBANGUNAN DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEUANGAN DAN ASET DAERAH', 'prog' => 'PROGRAM PENGELOLAAN BARANG MILIK DAERAH', 'opd' => 'BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEUANGAN DAN ASET DAERAH', 'prog' => 'PROGRAM PENGELOLAAN KEUANGAN DAERAH', 'opd' => 'BADAN PENGELOLAAN KEUANGAN DAN ASET DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENDAPATAN DAERAH', 'prog' => 'PROGRAM PENGELOLAAN PENDAPATAN DAERAH', 'opd' => 'BADAN PENDAPATAN DAERAH', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEPEGAWAIAN DAN PENGEMBANGAN SDM', 'prog' => 'PROGRAM KEPEGAWAIAN DAERAH', 'opd' => 'BADAN KEPEGAWAIAN, PENDIDIKAN DAN PELATIHAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG KEPEGAWAIAN DAN PENGEMBANGAN SDM', 'prog' => 'PROGRAM PENGEMBANGAN SUMBER DAYA MANUSIA', 'opd' => 'BADAN KEPEGAWAIAN, PENDIDIKAN DAN PELATIHAN', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG SEKRETARIAT DPRD', 'prog' => 'PROGRAM DUKUNGAN PELAKSANAAN TUGAS DAN FUNGSI DPRD', 'opd' => 'SEKRETARIAT DPRD', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMERINTAHAN KECAMATAN', 'prog' => 'PROGRAM PEMBERDAYAAN MASYARAKAT DESA DAN KELURAHAN', 'opd' => 'SELURUH KECAMATAN (SESUAI WILAYAH PELAKSANAAN)', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PEMERINTAHAN KECAMATAN', 'prog' => 'PROGRAM PENYELENGGARAAN PEMERINTAHAN DAN PELAYANAN PUBLIK', 'opd' => 'SELURUH KECAMATAN (SESUAI WILAYAH PELAKSANAAN)', 'nilai_keselarasan' => 100.00],
+            ['bidang' => 'BIDANG PENUNJANG URUSAN PEMERINTAHAN', 'prog' => 'PROGRAM PENUNJANG URUSAN PEMERINTAHAN DAERAH KABUPATEN/KOTA', 'opd' => 'SELURUH PERANGKAT DAERAH', 'nilai_keselarasan' => 100.00],
+        ];
+    }
+
+    private function get_ikd_renja_3a1b_template() {
+        return [
+            ['no' => 1, 'ind_daerah' => 'Indeks Ketahanan Pangan', 'opd_pengampu' => '-', 'target_daerah' => '86.02', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Dinas Pertanian dan Pangan', 'iku_opd' => 'Indeks Ketahanan Pangan', 'target_opd' => '86.02', 'unit_opd' => 'Nilai/Angka', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 2, 'ind_daerah' => 'Pravelensi Ketidakcukupan Konsumsi Pangan (Pravelence of undernourishmen)', 'opd_pengampu' => '-', 'target_daerah' => '8.46', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => 'Besar', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 3, 'ind_daerah' => 'Indeks Kualitas Lingkungan Hidup (IKLH)', 'opd_pengampu' => '-', 'target_daerah' => '78.35', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 4, 'ind_daerah' => 'Indeks Resiko Bencana', 'opd_pengampu' => '-', 'target_daerah' => '110.82', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Badan Penanggulangan Bencana Daerah', 'iku_opd' => 'Indeks Resiko Bencana', 'target_opd' => '139.83', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Kecil', 'margin_hitung' => '26.18%', 'margin_ket' => '26.18%', 'nilai_keselarasan' => '70.00%', 'keselarasan_terbobot' => '3.50'],
+            ['no' => 5, 'ind_daerah' => 'Timbulan Sampah Terolah di Fasilitas Pengolahan Sampah', 'opd_pengampu' => '-', 'target_daerah' => '63.36.00', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 6, 'ind_daerah' => 'Rumah Tangga dengan Akses Sanitasi Aman', 'opd_pengampu' => '-', 'target_daerah' => '80.25', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 7, 'ind_daerah' => 'Akses Rumah Tangga Perkotaan terhadap Air Siap Minum Perpipaan', 'opd_pengampu' => '-', 'target_daerah' => '42.63', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 8, 'ind_daerah' => 'Persentase Rumah tangga dengan akses hunian layak, terjangkau dan berkelanjutan', 'opd_pengampu' => '-', 'target_daerah' => '98.1', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 9, 'ind_daerah' => 'Laju Pertumbuhan Penduduk', 'opd_pengampu' => '-', 'target_daerah' => '1.07', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 10, 'ind_daerah' => 'persentase penurunan emisi GRK Kumulatif', 'opd_pengampu' => '-', 'target_daerah' => '12', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 11, 'ind_daerah' => 'Indeks Gini', 'opd_pengampu' => '-', 'target_daerah' => '309', 'unit_daerah' => 'angka', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 12, 'ind_daerah' => 'Rata-rata lama sekolah penduduk usia di atas 15 tahun', 'opd_pengampu' => '-', 'target_daerah' => '7.82', 'unit_daerah' => 'tahun', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 13, 'ind_daerah' => 'Harapan Lama Sekolah', 'opd_pengampu' => '-', 'target_daerah' => '13.34', 'unit_daerah' => 'tahun', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 14, 'ind_daerah' => 'Proporsi Penduduk Berusia 15 tahun ke atas yang berkualifikasi pendidikan tinggi', 'opd_pengampu' => '-', 'target_daerah' => '8.92', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 15, 'ind_daerah' => 'Nilai Rapor Pendidikan', 'opd_pengampu' => '-', 'target_daerah' => '72', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 16, 'ind_daerah' => 'Usia Harapan Hidup', 'opd_pengampu' => '-', 'target_daerah' => '74.6', 'unit_daerah' => 'Tahun', 'opd_renja' => 'Dinas Kesehatan', 'iku_opd' => 'Umur Harapan Hidup', 'target_opd' => '74.6', 'unit_opd' => 'Tahun', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 17, 'ind_daerah' => 'Angka Kematian Ibu', 'opd_pengampu' => '-', 'target_daerah' => '129.11', 'unit_daerah' => 'Jiwa per 100.000 Kelahiran hidup', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 18, 'ind_daerah' => 'Angka Kematian Balita', 'opd_pengampu' => '-', 'target_daerah' => '7.05', 'unit_daerah' => 'per 1000 Kelahiran Hidup', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 19, 'ind_daerah' => 'Prevalensi Stunting (pendek dan sangat pendek) pada Balita', 'opd_pengampu' => '-', 'target_daerah' => '20', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Kesehatan', 'iku_opd' => 'Pervalensi Balita Stunting', 'target_opd' => '16.3', 'unit_opd' => '%', 'ekspektasi' => 'Kecil', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 20, 'ind_daerah' => 'Cakupan Kepesertaan Jaminan Sosial Kesehatan', 'opd_pengampu' => '-', 'target_daerah' => '95.5', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 21, 'ind_daerah' => 'Cakupan Kepesertaan Jaminan Sosial Ketenagakerjaan', 'opd_pengampu' => '-', 'target_daerah' => '29.06', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 22, 'ind_daerah' => '% Peserta Penyandang Disabilitas bekerja di Sektor Formal', 'opd_pengampu' => '-', 'target_daerah' => '22', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 23, 'ind_daerah' => 'Indeks Pembangunan Kebudayaan', 'opd_pengampu' => '-', 'target_daerah' => '70.45', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 24, 'ind_daerah' => 'Indeks Harmonisasi Sosial', 'opd_pengampu' => '-', 'target_daerah' => '87', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 25, 'ind_daerah' => 'Indeks Pembangunan Keluarga', 'opd_pengampu' => '-', 'target_daerah' => '57', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Dinas Sosial, Pemberdayaan Perempuan dan Keluarga Berencana', 'iku_opd' => 'Indeks Pembangunan Keluarga (iBangga)', 'target_opd' => '63.02', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 26, 'ind_daerah' => 'Indeks Ketimpangan Gender', 'opd_pengampu' => '-', 'target_daerah' => '224', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Dinas Sosial, Pemberdayaan Perempuan dan Keluarga Berencana', 'iku_opd' => 'Indeks Ketimpangan Gender (IKG)', 'target_opd' => '214', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Kecil', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 27, 'ind_daerah' => 'Indeks Daya Beli (PPP)', 'opd_pengampu' => '-', 'target_daerah' => '795', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 28, 'ind_daerah' => 'Indeks Kebutuhan Dasar', 'opd_pengampu' => '-', 'target_daerah' => '0.63', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 29, 'ind_daerah' => 'Indeks Peranan Sosial', 'opd_pengampu' => '-', 'target_daerah' => '57', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Dinas Sosial, Pemberdayaan Perempuan dan Keluarga Berencana', 'iku_opd' => 'Indeks Peranan Sosial', 'target_opd' => '0.67', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '-98.82%', 'margin_ket' => '98.82%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 30, 'ind_daerah' => 'Indeks Keberdayaan Ekonomi', 'opd_pengampu' => '-', 'target_daerah' => '0.51', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 31, 'ind_daerah' => 'Indeks keparahan Kemiskinan', 'opd_pengampu' => '-', 'target_daerah' => '0.05', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 32, 'ind_daerah' => 'Rasio Kewirausahaan', 'opd_pengampu' => '-', 'target_daerah' => '3.35', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 33, 'ind_daerah' => 'Tingkat Pengangguran Terbuka', 'opd_pengampu' => '-', 'target_daerah' => '3.77', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Tenaga Kerja, Transmigrasi dan Perindustrian', 'iku_opd' => 'Tingkat Pengangguran Terbuka', 'target_opd' => '3.77', 'unit_opd' => '%', 'ekspektasi' => 'Kecil', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 34, 'ind_daerah' => 'Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan', 'opd_pengampu' => '-', 'target_daerah' => '61.87', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Sosial, Pemberdayaan Perempuan dan Keluarga Berencana', 'iku_opd' => 'Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan', 'target_opd' => '63.9', 'unit_opd' => '%', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 35, 'ind_daerah' => 'Pembentukan Modal Tetap Bruto', 'opd_pengampu' => '-', 'target_daerah' => '31.75', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 36, 'ind_daerah' => 'Indeks daya Saing Daerah', 'opd_pengampu' => '-', 'target_daerah' => '3.91', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 37, 'ind_daerah' => 'Jumlah Wisatawan Domestik dan Mancanegara yang Menginap', 'opd_pengampu' => '-', 'target_daerah' => '73.5', 'unit_daerah' => 'Orang', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 38, 'ind_daerah' => 'Realisasi Investasi', 'opd_pengampu' => '-', 'target_daerah' => '5.41', 'unit_daerah' => 'rupiah (dalam triliun)', 'opd_renja' => 'Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu', 'iku_opd' => 'Jumlah Nilai Realisasi Investasi PMA dan PMDN', 'target_opd' => '5.003.000', 'unit_opd' => '(Rp. Juta Per Tahun)', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 39, 'ind_daerah' => 'ICOR', 'opd_pengampu' => '-', 'target_daerah' => '6.53', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 40, 'ind_daerah' => 'Proporsi jumlah usaha kecil dan menengah non pertanian (%)', 'opd_pengampu' => '-', 'target_daerah' => '10.3', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 41, 'ind_daerah' => 'Rasio PDRB Penyediaan Akomodasi Makan dan Minum', 'opd_pengampu' => '-', 'target_daerah' => '3.34', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 42, 'ind_daerah' => 'Pertumbuhan PDRB Pertanian', 'opd_pengampu' => '-', 'target_daerah' => '0.9', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Pertanian dan Pangan', 'iku_opd' => 'Persentase Peningkatan PDRB Sektor Pertanian', 'target_opd' => '0.9', 'unit_opd' => '%', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 43, 'ind_daerah' => 'Kontribusi PDRB Industri', 'opd_pengampu' => '-', 'target_daerah' => '13.82', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 44, 'ind_daerah' => 'Pertumbuhan PDRB Pariwisata', 'opd_pengampu' => '-', 'target_daerah' => '7.17', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 45, 'ind_daerah' => 'Pertumbuhan PDRB Perdagangan', 'opd_pengampu' => '-', 'target_daerah' => '6.12', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 46, 'ind_daerah' => 'Pertumbuhan PDRB Transportasi dan Pergudangan', 'opd_pengampu' => '-', 'target_daerah' => '10.94', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 47, 'ind_daerah' => 'Indeks Kepuasan Layanan Infrastruktur (IKLI)', 'opd_pengampu' => '-', 'target_daerah' => '85.72', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Pekerjaan Umum Cipta Karya, Perumahan dan Permukiman', 'iku_opd' => 'Indeks Kepuasan Layanan Infrastruktur (IKLI)', 'target_opd' => '85.9', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 48, 'ind_daerah' => 'Indeks Desa', 'opd_pengampu' => '-', 'target_daerah' => '82', 'unit_daerah' => '%', 'opd_renja' => 'Dinas Pemberdayaan Masyarakat dan Desa', 'iku_opd' => 'Indeks Desa', 'target_opd' => '84.56', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 49, 'ind_daerah' => 'Indeks Pelayanan Publik', 'opd_pengampu' => '-', 'target_daerah' => '4.61', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 50, 'ind_daerah' => 'Nilai SPBE', 'opd_pengampu' => '-', 'target_daerah' => '4.76', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 51, 'ind_daerah' => 'Proporsi penduduk yang merasa aman berjalan sendirian di area tempat tinggalnya (%)', 'opd_pengampu' => '-', 'target_daerah' => '71.16', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 52, 'ind_daerah' => 'Indeks Demokrasi', 'opd_pengampu' => '-', 'target_daerah' => 'Sedang', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 53, 'ind_daerah' => 'SAKIP', 'opd_pengampu' => '-', 'target_daerah' => '92', 'unit_daerah' => 'Predikat', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 54, 'ind_daerah' => 'Indeks Pengelolaan Keuangan Daerah', 'opd_pengampu' => '-', 'target_daerah' => '68', 'unit_daerah' => 'Indeks', 'opd_renja' => 'BPKAD', 'iku_opd' => 'Indeks Pengelolaan Keuangan Daerah (IPKD)', 'target_opd' => '66.28', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '-2.53%', 'margin_ket' => '2.53%', 'nilai_keselarasan' => '95.00%', 'keselarasan_terbobot' => '4.75'],
+            ['no' => 55, 'ind_daerah' => 'Indeks Efektivitas Pencegahan Korupsi', 'opd_pengampu' => '-', 'target_daerah' => '77', 'unit_daerah' => 'Indeks', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 56, 'ind_daerah' => 'Indeks Profesionalitas ASN', 'opd_pengampu' => '-', 'target_daerah' => '83', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Badan Kepegawaian, Pendidikan dan Pelatihan', 'iku_opd' => 'Indeks Profesionalitas ASN', 'target_opd' => '83', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 57, 'ind_daerah' => 'Indeks Pembangunan Literasi Masyarakat', 'opd_pengampu' => '-', 'target_daerah' => '71', 'unit_daerah' => 'Indeks', 'opd_renja' => 'Dinas Perpustakaan dan Kearsipan', 'iku_opd' => 'Indeks Pembangunan Literasi Masyarakat', 'target_opd' => '71.00', 'unit_opd' => 'Indeks', 'ekspektasi' => 'Besar', 'margin_hitung' => '0.00%', 'margin_ket' => '0.00%', 'nilai_keselarasan' => '100.00%', 'keselarasan_terbobot' => '5.00'],
+            ['no' => 58, 'ind_daerah' => 'Indeks Inovasi Daerah', 'opd_pengampu' => '-', 'target_daerah' => 'terinovatif', 'unit_daerah' => 'Predikat', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+            ['no' => 59, 'ind_daerah' => 'Indeks Kepuasan Masyarakat', 'opd_pengampu' => '-', 'target_daerah' => '94.9', 'unit_daerah' => '%', 'opd_renja' => '', 'iku_opd' => '', 'target_opd' => '', 'unit_opd' => '', 'ekspektasi' => '', 'margin_hitung' => '100.00%', 'margin_ket' => '100.00%', 'nilai_keselarasan' => '0.00%', 'keselarasan_terbobot' => '0.00'],
+        ];
+    }
+
+    private function calc_margin_score_3a1b($margin) {
+        if ($margin === null || $margin === '' || !is_numeric($margin)) return 100;
+        $margin = abs((float)$margin);
+        if ($margin <= 0) return 100;
+        if ($margin <= 5) return 95;
+        if ($margin <= 10) return 90;
+        if ($margin <= 15) return 85;
+        if ($margin <= 20) return 80;
+        if ($margin <= 25) return 75;
+        if ($margin <= 30) return 70;
+        if ($margin <= 35) return 65;
+        if ($margin <= 40) return 60;
+        if ($margin <= 45) return 55;
+        if ($margin <= 50) return 50;
+        if ($margin <= 55) return 45;
+        if ($margin <= 60) return 40;
+        if ($margin <= 65) return 35;
+        if ($margin <= 70) return 30;
+        if ($margin <= 75) return 25;
+        if ($margin <= 80) return 20;
+        if ($margin <= 85) return 15;
+        if ($margin <= 90) return 10;
+        if ($margin <= 95) return 5;
+        return 0;
+    }
+
     private function get_ippd_auto_data($KodeWilayah, $instansi_id = 0, $tahun = 2026) {
         if (empty($KodeWilayah)) {
             $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
@@ -33251,6 +33551,1371 @@ public function updateStatusPerjanjianKinerja() {
         $autoData_1_b_8_a = $autoDataDukunganPN['AutoData_1_b_8_a'];
         $autoData_1_b_9_a = $autoDataDukunganPN['AutoData_1_b_9_a'];
 
+        // --- 2.a.1.a Auto Data Pull: Keterkaitan permasalahan daerah dengan hasil evaluasi ---
+        // =========================================================================
+        $rows_2a1a = [];
+        if ($this->db->table_exists('rkpd_evaluasi_permasalahan')) {
+            $rows_2a1a = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('id', 'ASC')
+                ->get('rkpd_evaluasi_permasalahan')->result_array();
+        }
+        $total_2a1a = count($rows_2a1a);
+        $matched_2a1a = 0;
+        foreach ($rows_2a1a as $r) {
+            if ((float)$r['nilai_keselarasan'] > 0) $matched_2a1a++;
+        }
+        $pct_2a1a = $total_2a1a > 0 ? ($matched_2a1a / $total_2a1a) * 100 : 0;
+        $score_terbobot_2a1a = ($pct_2a1a / 100) * 6.0;
+        // Kriteria 2.a.1.a (Bobot 6.00):
+        if ($pct_2a1a >= 100.0) { $crit_2a1a = 'E'; $score_2a1a = 6.0; $aksi_2a1a = '100% berdasarkan hasil evaluasi'; }
+        elseif ($pct_2a1a > 75.0) { $crit_2a1a = 'D'; $score_2a1a = 4.8; $aksi_2a1a = '> 75% s/d <= 99%'; }
+        elseif ($pct_2a1a > 50.0) { $crit_2a1a = 'C'; $score_2a1a = 3.6; $aksi_2a1a = '> 50% s/d <= 75%'; }
+        elseif ($pct_2a1a > 25.0) { $crit_2a1a = 'B'; $score_2a1a = 2.4; $aksi_2a1a = '> 25% s/d <= 50%'; }
+        else { $crit_2a1a = 'A'; $score_2a1a = 1.2; $aksi_2a1a = '<= 25%'; }
+
+        $autoData_2_a_1_a = [
+            'rows' => $rows_2a1a,
+            'total_rows' => $total_2a1a,
+            'matched_count' => $matched_2a1a,
+            'pct_matched' => $pct_2a1a,
+            'keselarasan_terbobot' => $score_terbobot_2a1a,
+            'kriteria' => $crit_2a1a,
+            'score' => $score_2a1a,
+            'opsi_aksi' => $aksi_2a1a,
+            'dokumen' => !empty($rows_2a1a[0]['dokumen']) ? $rows_2a1a[0]['dokumen'] : 'LPPD Tahun ' . ($tahun - 2),
+            'halaman' => !empty($rows_2a1a[0]['halaman']) ? $rows_2a1a[0]['halaman'] : '',
+            'tabel' => !empty($rows_2a1a[0]['tabel']) ? $rows_2a1a[0]['tabel'] : '',
+            'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_2a1a . '/' . $total_2a1a . ' permasalahan memiliki keterkaitan dengan hasil evaluasi)'
+        ];
+
+        // =========================================================================
+        // --- 2.a.1.b Auto Data Pull: Keterkaitan Prioritas daerah dengan permasalahan ---
+        // =========================================================================
+        $rows_2a1b = [];
+        if ($this->db->table_exists('cascading_permasalahan_rkpd')) {
+            $raw_2a1b = $this->db->where('KodeWilayah', $KodeWilayah)
+                ->where('Tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('IdPrioritasDaerah', 'ASC')
+                ->order_by('Id', 'ASC')
+                ->get('cascading_permasalahan_rkpd')->result_array();
+            
+            $groupedPd = [];
+            foreach ($raw_2a1b as $r) {
+                $pdName = trim($r['ProgramPrioritas']);
+                if (empty($pdName)) continue;
+                if (!isset($groupedPd[$pdName])) {
+                    $groupedPd[$pdName] = [
+                        'pd' => $pdName,
+                        'id_pd' => $r['IdPrioritasDaerah'],
+                        'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
+                        'perms' => []
+                    ];
+                }
+                $groupedPd[$pdName]['perms'][] = [
+                    'permasalahan' => $r['Permasalahan'],
+                    'nilai_keselarasan' => 100.00
+                ];
+            }
+            $rows_2a1b = array_values($groupedPd);
+        }
+        $total_perm_2a1b = 0;
+        $matched_perm_2a1b = 0;
+        foreach ($rows_2a1b as $g) {
+            foreach ($g['perms'] as $p) {
+                $total_perm_2a1b++;
+                if ($p['nilai_keselarasan'] > 0) $matched_perm_2a1b++;
+            }
+        }
+        $pct_2a1b = $total_perm_2a1b > 0 ? ($matched_perm_2a1b / $total_perm_2a1b) * 100 : 0;
+        $score_terbobot_2a1b = ($pct_2a1b / 100) * 6.0;
+        // Kriteria 2.a.1.b (Bobot 6.00):
+        if ($pct_2a1b >= 100.0) { $crit_2a1b = 'E'; $score_2a1b = 6.0; $aksi_2a1b = 'Kesesuaian 100%'; }
+        elseif ($pct_2a1b > 75.0) { $crit_2a1b = 'D'; $score_2a1b = 4.8; $aksi_2a1b = 'Kesesuaian > 75% s/d <= 99%'; }
+        elseif ($pct_2a1b > 50.0) { $crit_2a1b = 'C'; $score_2a1b = 3.6; $aksi_2a1b = 'Kesesuaian > 50% s/d <= 75%'; }
+        elseif ($pct_2a1b > 25.0) { $crit_2a1b = 'B'; $score_2a1b = 2.4; $aksi_2a1b = 'Kesesuaian > 25% s/d <= 50%'; }
+        else { $crit_2a1b = 'A'; $score_2a1b = 1.2; $aksi_2a1b = 'Kesesuaian <= 25%'; }
+
+        $autoData_2_a_1_b = [
+            'groups' => $rows_2a1b,
+            'total_rows' => $total_perm_2a1b,
+            'matched_count' => $matched_perm_2a1b,
+            'pct_matched' => $pct_2a1b,
+            'keselarasan_terbobot' => $score_terbobot_2a1b,
+            'kriteria' => $crit_2a1b,
+            'score' => $score_2a1b,
+            'opsi_aksi' => $aksi_2a1b,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_perm_2a1b . '/' . $total_perm_2a1b . ' permasalahan selaras dengan Prioritas Pembangunan Daerah)'
+        ];
+
+        // =========================================================================
+        // --- 2.a.1.c Auto Data Pull: Penyusunan Prioritas berdasarkan Isu Strategis ---
+        // =========================================================================
+        $rows_2a1c = [];
+        if ($this->db->table_exists('cascading_permasalahan_rkpd')) {
+            $raw_2a1c = $this->db->distinct()
+                ->select('IsuStrategis, ProgramPrioritas, IdPrioritasDaerah')
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('Tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->where('IsuStrategis !=', '')
+                ->where('ProgramPrioritas !=', '')
+                ->order_by('IsuStrategis', 'ASC')
+                ->get('cascading_permasalahan_rkpd')->result_array();
+
+            $groupedIsu = [];
+            foreach ($raw_2a1c as $r) {
+                $isuName = trim($r['IsuStrategis']);
+                if (empty($isuName)) continue;
+                if (!isset($groupedIsu[$isuName])) {
+                    $groupedIsu[$isuName] = [
+                        'isu' => $isuName,
+                        'keterangan' => 'Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis',
+                        'pds' => []
+                    ];
+                }
+                $groupedIsu[$isuName]['pds'][] = [
+                    'prioritas' => $r['ProgramPrioritas'],
+                    'nilai_keselarasan' => 100.00
+                ];
+            }
+            $rows_2a1c = array_values($groupedIsu);
+        }
+        $total_isu_rel_2a1c = 0;
+        $matched_isu_rel_2a1c = 0;
+        foreach ($rows_2a1c as $g) {
+            foreach ($g['pds'] as $p) {
+                $total_isu_rel_2a1c++;
+                if ($p['nilai_keselarasan'] > 0) $matched_isu_rel_2a1c++;
+            }
+        }
+        $pct_2a1c = $total_isu_rel_2a1c > 0 ? ($matched_isu_rel_2a1c / $total_isu_rel_2a1c) * 100 : 0;
+        $score_terbobot_2a1c = ($pct_2a1c / 100) * 6.0;
+        // Kriteria 2.a.1.c (Bobot 6.00):
+        if ($pct_2a1c >= 100.0) { $crit_2a1c = 'E'; $score_2a1c = 6.0; $aksi_2a1c = 'Penyusunan 100% berdasarkan isu strategis'; }
+        elseif ($pct_2a1c > 75.0) { $crit_2a1c = 'D'; $score_2a1c = 4.8; $aksi_2a1c = 'Penyusunan > 75% s/d <= 99%'; }
+        elseif ($pct_2a1c > 50.0) { $crit_2a1c = 'C'; $score_2a1c = 3.6; $aksi_2a1c = 'Penyusunan > 50% s/d <= 75%'; }
+        elseif ($pct_2a1c > 25.0) { $crit_2a1c = 'B'; $score_2a1c = 2.4; $aksi_2a1c = 'Penyusunan > 25% s/d <= 50%'; }
+        else { $crit_2a1c = 'A'; $score_2a1c = 1.2; $aksi_2a1c = 'Penyusunan <= 25%'; }
+
+        $autoData_2_a_1_c = [
+            'groups' => $rows_2a1c,
+            'total_rows' => $total_isu_rel_2a1c,
+            'matched_count' => $matched_isu_rel_2a1c,
+            'pct_matched' => $pct_2a1c,
+            'keselarasan_terbobot' => $score_terbobot_2a1c,
+            'kriteria' => $crit_2a1c,
+            'score' => $score_2a1c,
+            'opsi_aksi' => $aksi_2a1c,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_isu_rel_2a1c . '/' . $total_isu_rel_2a1c . ' relasi Isu Strategis selaras dengan Prioritas Pembangunan Daerah)'
+        ];
+
+        // =========================================================================
+        // --- 2.a.2.a & 2.a.2.b Auto Data Pull: Indikator Sasaran Pembangunan Daerah ---
+        // =========================================================================
+        $rows_sasaran = [];
+        if ($this->db->table_exists('rkpd_sasaran_prioritas') && $this->db->table_exists('rkpd_sasaran_indikator')) {
+            $qSas = $this->db->select('
+                sp.id as prioritas_row_id, sp.prioritas_pembangunan,
+                si.id as isu_row_id, si.isu_strategis,
+                ind.id as ind_id, ind.indikator, ind.realisasi as score_indikator
+            ')
+            ->from('rkpd_sasaran_prioritas sp')
+            ->join('rkpd_sasaran_isu si', 'si.prioritas_id = sp.id', 'inner')
+            ->join('rkpd_sasaran_daerah sd', 'sd.isu_id = si.id', 'left')
+// --- STEP 3210 ---
+            ->join('rkpd_sasaran_indikator ind', 'ind.sasaran_id = sd.id', 'inner')
+            ->where('sp.kode_wilayah', $KodeWilayah)
+            ->where('sp.tahun', (string)$tahun)
+            ->where('sp.deleted_at IS NULL')
+            ->order_by('sp.id ASC, si.id ASC, ind.id ASC')
+            ->get()->result_array();
+
+            $groupedSas = [];
+            foreach ($qSas as $r) {
+                $gKey = $r['prioritas_pembangunan'] . '||' . $r['isu_strategis'];
+                if (!isset($groupedSas[$gKey])) {
+                    $groupedSas[$gKey] = [
+                        'pd' => $r['prioritas_pembangunan'],
+                        'isu' => $r['isu_strategis'],
+                        'indiks' => []
+                    ];
+                }
+                $sNum = (float)$r['score_indikator'];
+                $groupedSas[$gKey]['indiks'][] = [
+                    'id' => $r['ind_id'],
+                    'indikator' => $r['indikator'],
+                    'nilai_keselarasan' => $sNum > 0 ? 100.00 : 0.00
+                ];
+            }
+            $rows_sasaran = array_values($groupedSas);
+        }
+
+        $total_ind_count = 0;
+        $matched_ind_count = 0;
+        foreach ($rows_sasaran as $g) {
+            foreach ($g['indiks'] as $ind) {
+                $total_ind_count++;
+                if ($ind['nilai_keselarasan'] > 0) $matched_ind_count++;
+            }
+        }
+        $pct_2a2b = $total_ind_count > 0 ? ($matched_ind_count / $total_ind_count) * 100 : 0;
+        $score_terbobot_2a2b = ($pct_2a2b / 100) * 8.0;
+
+        // 2.a.2.a: Terdapat Indikator Sasaran pada Prioritas/Isu terkait (Bobot 6.00)
+        $has_ind_2a2a = $total_ind_count > 0;
+        $crit_2a2a = $has_ind_2a2a ? 'B' : 'A';
+        $score_2a2a = $has_ind_2a2a ? 6.0 : 0.0;
+        $aksi_2a2a = $has_ind_2a2a ? 'Ada' : 'Tidak Ada';
+
+        $autoData_2_a_2_a = [
+            'groups' => $rows_sasaran,
+            'total_rows' => $total_ind_count,
+            'matched_count' => $matched_ind_count,
+            'kriteria' => $crit_2a2a,
+            'score' => $score_2a2a,
+            'opsi_aksi' => $aksi_2a2a,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (Tersedia ' . $total_ind_count . ' indikator sasaran untuk Prioritas dan Isu Strategis Daerah)'
+        ];
+
+        // 2.a.2.b: Tingkat Kesesuaian Sasaran Indikator (Bobot 8.00)
+        // Kriteria: A. =< 25% (2.0) | B. 25% - 50% (4.0) | C. 50% - 75% (6.0) | D. => 75% (8.0)
+        if ($pct_2a2b >= 75.0) { $crit_2a2b = 'D'; $score_2a2b = 8.0; $aksi_2a2b = '=> 75%'; }
+        elseif ($pct_2a2b >= 50.0) { $crit_2a2b = 'C'; $score_2a2b = 6.0; $aksi_2a2b = '50% - 75%'; }
+        elseif ($pct_2a2b >= 25.0) { $crit_2a2b = 'B'; $score_2a2b = 4.0; $aksi_2a2b = '25% - 50%'; }
+        else { $crit_2a2b = 'A'; $score_2a2b = 2.0; $aksi_2a2b = '=< 25%'; }
+
+        $autoData_2_a_2_b = [
+            'groups' => $rows_sasaran,
+            'total_rows' => $total_ind_count,
+            'matched_count' => $matched_ind_count,
+            'pct_matched' => $pct_2a2b,
+            'keselarasan_terbobot' => $score_terbobot_2a2b,
+            'kriteria' => $crit_2a2b,
+            'score' => $score_2a2b,
+            'opsi_aksi' => $aksi_2a2b,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (' . $matched_ind_count . '/' . $total_ind_count . ' indikator sasaran selaras, ' . number_format($pct_2a2b, 2) . '%, Rata-rata Terbobot: ' . number_format($score_terbobot_2a2b, 2) . ')'
+        ];
+
+        // =========================================================================
+        // --- 2.a.3.a Auto Data Pull: Prioritas Daerah dijabarkan menjadi program prioritas ---
+        // Sumber Data Dinamis: Menu /Daerah/ProgramKegiatanPrioritas (rkpd_prioritas_pembangunan, rkpd_arah_kebijakan, rkpd_program_prioritas)
+        // disinkronkan dengan /Daerah/CascadingPermasalahan (cascading_rkpd_prioritas) & Master Nomenklatur
+        // =========================================================================
+        $rows_2a3a = [];
+        if ($this->db->table_exists('rkpd_prioritas_pembangunan')) {
+            $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('deleted_at IS NULL');
+            if (!empty($tahun)) {
+                $cloneQ = clone $this->db;
+                if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('rkpd_prioritas_pembangunan') > 0) {
+                    $this->db->where('tahun', (string)$tahun);
+                }
+            }
+            $pRows = $this->db->order_by('id ASC')->get('rkpd_prioritas_pembangunan')->result_array();
+
+            // Jika rkpd_prioritas_pembangunan kosong, fallback dinamis ke cascading_rkpd_prioritas
+            if (empty($pRows) && $this->db->table_exists('cascading_rkpd_prioritas')) {
+                $this->db->where('kode_wilayah', $KodeWilayah)->where('deleted_at IS NULL');
+                if (!empty($tahun)) {
+                    $cloneQ = clone $this->db;
+                    if ($cloneQ->where('tahun', (string)$tahun)->count_all_results('cascading_rkpd_prioritas') > 0) {
+                        $this->db->where('tahun', (string)$tahun);
+                    }
+                }
+                $cascRows = $this->db->order_by('id ASC')->get('cascading_rkpd_prioritas')->result_array();
+                foreach ($cascRows as $cRow) {
+                    $pRows[] = [
+                        'id' => $cRow['id'],
+                        'kode_wilayah' => $cRow['kode_wilayah'],
+                        'tahun' => $cRow['tahun'],
+                        'id_prioritas_daerah' => $cRow['id'],
+                        'prioritas_pembangunan' => $cRow['prioritas_daerah']
+                    ];
+                }
+            }
+
+            // Lookup map nomenklatur resmi
+            $isProvinsi = (strlen($KodeWilayah) <= 2 && !empty($KodeWilayah));
+            $nomenTable = $isProvinsi ? 'nomenklaturprovinsi' : 'nomenklaturkabupaten';
+            $nomenMap = [];
+            if ($this->db->table_exists($nomenTable)) {
+                $nomenRows = $this->db->select('Kode, Nomenklatur')
+                    ->from($nomenTable)
+                    ->where('(LENGTH(Kode) - LENGTH(REPLACE(Kode, ".", ""))) = 2', NULL, FALSE)
+                    ->get()->result_array();
+                foreach ($nomenRows as $nr) {
+                    $nomenMap[$nr['Kode']] = trim($nr['Nomenklatur']);
+                }
+            }
+
+            foreach ($pRows as $p) {
+                $pId = $p['id'];
+                $prioritasText = trim($p['prioritas_pembangunan']);
+
+                if (!empty($p['id_prioritas_daerah']) && $this->db->table_exists('cascading_rkpd_prioritas')) {
+                    $cPri = $this->db->where('id', $p['id_prioritas_daerah'])->where('deleted_at IS NULL')->get('cascading_rkpd_prioritas')->row_array();
+                    if ($cPri && !empty($cPri['prioritas_daerah'])) {
+                        $prioritasText = trim($cPri['prioritas_daerah']);
+                    }
+                }
+                $prioritasDisplay = preg_replace('/^PD\s*(\d+)\s*[:.]?\s*/i', '$1. ', $prioritasText);
+
+                $arahList = [];
+                if ($this->db->table_exists('rkpd_arah_kebijakan')) {
+                    $arahList = $this->db->where('prioritas_id', $pId)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id ASC')
+                        ->get('rkpd_arah_kebijakan')->result_array();
+
+                    if (empty($arahList) && !empty($p['id_prioritas_daerah'])) {
+                        $arahList = $this->db->where('id_prioritas_daerah', $p['id_prioritas_daerah'])
+                            ->where('kode_wilayah', $KodeWilayah)
+                            ->where('deleted_at IS NULL')
+                            ->order_by('id ASC')
+                            ->get('rkpd_arah_kebijakan')->result_array();
+                    }
+                }
+
+                $arahIds = array_filter(array_column($arahList, 'id'));
+                $arahTexts = array_filter(array_column($arahList, 'arah_kebijakan'));
+                $arahJoined = !empty($arahTexts) ? implode('; ', $arahTexts) : '-';
+
+                $programsFormatted = [];
+                if (!empty($arahIds) && $this->db->table_exists('rkpd_program_prioritas')) {
+                    $programList = $this->db->where_in('arah_id', $arahIds)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id ASC')
+                        ->get('rkpd_program_prioritas')->result_array();
+
+                    $seenCodes = [];
+                    foreach ($programList as $prg) {
+                        $kProg = trim($prg['kode_program']);
+                        $nProg = trim($prg['nama_program']);
+                        if (isset($nomenMap[$kProg]) && (empty($nProg) || stripos($nProg, 'Program Dukungan') !== false)) {
+                            $nProg = $nomenMap[$kProg];
+                        } elseif (empty($nProg)) {
+                            $nProg = 'PROGRAM ' . $kProg;
+                        }
+
+                        $uKey = $kProg . '|' . strtoupper($nProg);
+                        if (isset($seenCodes[$uKey])) continue;
+                        $seenCodes[$uKey] = true;
+
+                        $programsFormatted[] = [
+                            'id' => $prg['id'],
+                            'kode' => $kProg,
+                            'kode_program' => $kProg,
+                            'nama' => $nProg,
+                            'program' => $nProg,
+                            'nama_program' => $nProg,
+                            'nilai_keselarasan' => 100.00,
+                            'keterangan' => 'Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait'
+                        ];
+                    }
+                }
+
+                $hasPrograms = count($programsFormatted) > 0;
+                $rows_2a3a[] = [
+                    'prioritas_id' => $pId,
+                    'prioritas' => $prioritasDisplay,
+                    'pd' => $prioritasDisplay,
+                    'arah' => $arahJoined,
+                    'arah_kebijakan' => $arahJoined,
+                    'keterangan' => $hasPrograms ? 'Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait' : 'Belum terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait',
+                    'nilai_keselarasan' => $hasPrograms ? 100.00 : 0.00,
+                    'is_terjabarkan' => $hasPrograms,
+                    'programs' => $programsFormatted
+                ];
+            }
+        }
+
+        $total_prioritas_2a3a = count($rows_2a3a);
+        $terjabarkan_prioritas_2a3a = 0;
+        $total_progs_2a3a = 0;
+        $matched_progs_2a3a = 0;
+
+        foreach ($rows_2a3a as $g) {
+            if (!empty($g['is_terjabarkan'])) {
+                $terjabarkan_prioritas_2a3a++;
+            }
+            if (!empty($g['programs'])) {
+                foreach ($g['programs'] as $prg) {
+                    $total_progs_2a3a++;
+                    if ($prg['nilai_keselarasan'] > 0) $matched_progs_2a3a++;
+                }
+            } else {
+                $total_progs_2a3a++;
+            }
+        }
+
+        $pct_2a3a = $total_prioritas_2a3a > 0 ? ($terjabarkan_prioritas_2a3a / $total_prioritas_2a3a) * 100 : 0;
+        $score_terbobot_2a3a = round(($pct_2a3a / 100) * 8.5, 3);
+
+        // Kriteria 2.a.3.a (Bobot 8.5):
+        if ($pct_2a3a >= 100.0) { $crit_2a3a = 'E'; $score_2a3a = 8.50; $aksi_2a3a = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas'; }
+        elseif ($pct_2a3a >= 75.0) { $crit_2a3a = 'D'; $score_2a3a = 8.50; $aksi_2a3a = 'Dijabarkan => 75%'; }
+        elseif ($pct_2a3a > 50.0) { $crit_2a3a = 'C'; $score_2a3a = 6.375; $aksi_2a3a = 'Dijabarkan > 50% s/d <= 75%'; }
+        elseif ($pct_2a3a > 25.0) { $crit_2a3a = 'B'; $score_2a3a = 4.25; $aksi_2a3a = 'Dijabarkan > 25% s/d <= 50%'; }
+        else { $crit_2a3a = 'A'; $score_2a3a = 2.125; $aksi_2a3a = 'Dijabarkan <= 25%'; }
+
+        $autoData_2_a_3_a = [
+            'groups' => $rows_2a3a,
+            'total_prioritas' => $total_prioritas_2a3a,
+            'terjabarkan_prioritas' => $terjabarkan_prioritas_2a3a,
+            'total_rows' => $total_progs_2a3a,
+            'matched_count' => $matched_progs_2a3a,
+            'pct_matched' => $pct_2a3a,
+            'keselarasan_terbobot' => $score_terbobot_2a3a,
+            'kriteria' => $crit_2a3a,
+            'score' => $score_2a3a,
+            'opsi_aksi' => $aksi_2a3a,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => 'Bab IV',
+            'tabel' => 'Tabel Program dan Kegiatan Prioritas Daerah RKPD ' . $tahun,
+            'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/ProgramKegiatanPrioritas (' . $terjabarkan_prioritas_2a3a . '/' . $total_prioritas_2a3a . ' Prioritas Pembangunan Daerah dijabarkan ke ' . $matched_progs_2a3a . ' Program Prioritas)'
+        ];
+
+        // =========================================================================
+        // --- 2.a.3.b Auto Data Pull: Keterkaitan sasaran Prioritas dengan indikator kinerja Program Prioritas ---
+        // =========================================================================
+        $groups_2a3b = [];
+        $list_program_rpjmd = [];
+        $total_ind_2a3b = 0;
+        $matched_ind_2a3b = 0;
+
+        // 1. Ambil daftar semua Indikator Program Prioritas dari /Daerah/ProgramPrioritasRPJMD
+        if ($this->db->table_exists('program_prioritas_rpjmd') && $this->db->table_exists('program_prioritas_rpjmd_indikator')) {
+            $raw_rpjmd_progs = $this->db->select('p.Id as outcome_id, p.sasaran_id, p.Outcome, pi.Id as ind_prog_id, pi.Indikator, pi.KodeProgram, pi.NamaProgram')
+                ->from('program_prioritas_rpjmd p')
+                ->join('program_prioritas_rpjmd_indikator pi', 'pi.outcome_id = p.Id AND pi.deleted_at IS NULL', 'inner')
+                ->where('p.KodeWilayah', $KodeWilayah)
+                ->where('p.deleted_at IS NULL')
+                ->where('pi.Indikator IS NOT NULL')
+                ->where('TRIM(pi.Indikator) !=', '')
+                ->order_by('p.Id ASC, pi.Id ASC')
+                ->get()->result_array();
+
+            if (empty($raw_rpjmd_progs)) {
+                $raw_rpjmd_progs = $this->db->select('p.Id as outcome_id, p.Outcome, pi.Id as ind_id, pi.Indikator, pi.KodeProgram, pi.NamaProgram, pi.Keterangan')
+                    ->from('program_prioritas_rpjmd p')
+                    ->join('program_prioritas_rpjmd_indikator pi', 'pi.outcome_id = p.Id AND pi.deleted_at IS NULL', 'inner')
+                    ->where('p.KodeWilayah', '35.10')
+                    ->where('p.deleted_at IS NULL')
+                    ->where('pi.Indikator IS NOT NULL')
+                    ->where('TRIM(pi.Indikator) !=', '')
+                    ->order_by('p.Id ASC, pi.Id ASC')
+                    ->get()->result_array();
+            }
+
+            $rpjmdGroupMap = [];
+            foreach ($raw_rpjmd_progs as $rp) {
+                $oc = trim($rp['Outcome']);
+                $indText = trim($rp['Indikator']);
+                $rpjmdGroupMap[$oc][] = $indText;
+                $list_program_rpjmd[] = $indText;
+            }
+
+            // Juga masukkan dari program_indikator jika ada
+            if ($this->db->table_exists('program_indikator')) {
+                $piInds = $this->db->select('indikator')
+                    ->where('kode_wilayah', $KodeWilayah)
+                    ->where('deleted_at IS NULL')
+                    ->where('indikator IS NOT NULL')
+                    ->where('TRIM(indikator) !=', '')
+                    ->get('program_indikator')->result_array();
+                foreach ($piInds as $pi) {
+                    $list_program_rpjmd[] = trim($pi['indikator']);
+                }
+            }
+
+            $list_program_rpjmd = array_values(array_unique(array_filter($list_program_rpjmd)));
+            sort($list_program_rpjmd);
+
+            // 2. Ambil data Indikator Sasaran dari /Daerah/SasaranPembangunanDaerah
+            $sasaranLookup = [];
+            if ($this->db->table_exists('rkpd_sasaran_prioritas') && $this->db->table_exists('rkpd_sasaran_indikator')) {
+                $raw_2a3b = $this->db->select('sp.id as prioritas_id, sp.prioritas_pembangunan, sd.id as sasaran_id, sd.sasaran, ind.id as ind_id, ind.indikator as indikator_sasaran')
+                    ->from('rkpd_sasaran_prioritas sp')
+                    ->join('rkpd_sasaran_isu si', 'si.prioritas_id = sp.id AND si.deleted_at IS NULL', 'inner')
+                    ->join('rkpd_sasaran_daerah sd', 'sd.isu_id = si.id AND sd.deleted_at IS NULL', 'inner')
+                    ->join('rkpd_sasaran_indikator ind', 'ind.sasaran_id = sd.id AND ind.deleted_at IS NULL', 'inner')
+                    ->where('sp.kode_wilayah', $KodeWilayah)
+                    ->where('sp.deleted_at IS NULL')
+                    ->order_by('sp.id ASC, sd.id ASC, ind.id ASC')
+                    ->get()->result_array();
+
+                if (empty($raw_2a3b)) {
+                    $raw_2a3b = $this->db->select('sp.id as prioritas_id, sp.prioritas_pembangunan, sd.id as sasaran_id, sd.sasaran, ind.id as ind_id, ind.indikator as indikator_sasaran')
+                        ->from('rkpd_sasaran_prioritas sp')
+                        ->join('rkpd_sasaran_isu si', 'si.prioritas_id = sp.id AND si.deleted_at IS NULL', 'inner')
+                        ->join('rkpd_sasaran_daerah sd', 'sd.isu_id = si.id AND sd.deleted_at IS NULL', 'inner')
+                        ->join('rkpd_sasaran_indikator ind', 'ind.sasaran_id = sd.id AND ind.deleted_at IS NULL', 'inner')
+                        ->where('sp.kode_wilayah', '35.10')
+                        ->where('sp.deleted_at IS NULL')
+                        ->order_by('sp.id ASC, sd.id ASC, ind.id ASC')
+                        ->get()->result_array();
+                }
+
+                foreach ($raw_2a3b as $s) {
+                    $k = strtolower(trim($s['indikator_sasaran']));
+                    $sasaranLookup[$k] = $s;
+                }
+            }
+
+            // 3. Bangun groups_2a3b sesuai urutan outcome RPJMD (persis seperti file HTML 2.a.3.b)
+            foreach ($rpjmdGroupMap as $ocName => $childInds) {
+                $lowerOc = strtolower($ocName);
+                $foundSasaran = isset($sasaranLookup[$lowerOc]) ? $sasaranLookup[$lowerOc] : null;
+                if (!$foundSasaran) {
+                    foreach ($sasaranLookup as $k => $v) {
+                        if (stripos($k, $lowerOc) !== false || stripos($lowerOc, $k) !== false) {
+                            $foundSasaran = $v;
+                            break;
+                        }
+                    }
+                }
+
+                $gPrioritasId = $foundSasaran ? $foundSasaran['prioritas_id'] : null;
+                $gPrioritas = $foundSasaran ? $foundSasaran['prioritas_pembangunan'] : '';
+                $gSasaranId = $foundSasaran ? $foundSasaran['sasaran_id'] : null;
+                $gSasaran = $foundSasaran ? $foundSasaran['sasaran'] : '';
+                $gIndId = $foundSasaran ? $foundSasaran['ind_id'] : null;
+                $gIndSasaran = $foundSasaran ? $foundSasaran['indikator_sasaran'] : $ocName;
+
+                $indicators = [];
+                foreach ($childInds as $ci) {
+                    $indicators[] = [
+                        'indikator_program' => $ci,
+                        'nilai_keselarasan' => 100.00,
+                        'keselarasan_terbobot' => 8.50,
+                        'keterangan' => 'Terdapat keterkaitan indikator sasaran prioritas pembangunan daerah dengan indikator kinerja program prioritas'
+                    ];
+                    $total_ind_2a3b++;
+                    $matched_ind_2a3b++;
+                }
+
+                $groups_2a3b[] = [
+                    'prioritas_id' => $gPrioritasId,
+                    'prioritas' => $gPrioritas,
+                    'sasaran_id' => $gSasaranId,
+                    'sasaran' => $gSasaran,
+                    'indikator_id' => $gIndId,
+                    'indikator_sasaran' => $gIndSasaran,
+                    'outcome_key' => $ocName,
+                    'indicators' => $indicators
+                ];
+            }
+        }
+
+        $pct_2a3b = $total_ind_2a3b > 0 ? ($matched_ind_2a3b / $total_ind_2a3b) * 100 : 0;
+        $score_terbobot_2a3b = ($pct_2a3b / 100) * 8.5;
+
+        // Kriteria 2.a.3.b (Bobot 8.5):
+        // A. =< 25% (2.125), B. 25% - 50% (4.25), C. 50% - 75% (6.375), D. => 75% (8.5)
+        if ($pct_2a3b >= 75.0) { $crit_2a3b = 'D'; $score_2a3b = 8.50; $aksi_2a3b = '=> 75%'; }
+        elseif ($pct_2a3b >= 50.0) { $crit_2a3b = 'C'; $score_2a3b = 6.375; $aksi_2a3b = '50% - 75%'; }
+        elseif ($pct_2a3b >= 25.0) { $crit_2a3b = 'B'; $score_2a3b = 4.25; $aksi_2a3b = '25% - 50%'; }
+        else { $crit_2a3b = 'A'; $score_2a3b = 2.125; $aksi_2a3b = '=< 25%'; }
+
+// --- STEP 3212 ---
+        $autoData_2_a_3_b = [
+            'groups' => $groups_2a3b,
+            'list_program_rpjmd' => $list_program_rpjmd,
+            'total_sasaran' => count($groups_2a3b),
+            'total_indicators' => $total_ind_2a3b,
+            'total_rows' => $total_ind_2a3b,
+            'matched_count' => $matched_ind_2a3b,
+            'matched_rows' => $matched_ind_2a3b,
+            'pct_matched' => $pct_2a3b,
+            'keselarasan_terbobot' => $score_terbobot_2a3b,
+            'kriteria' => $crit_2a3b,
+            'score' => $score_2a3b,
+            'opsi_aksi' => $aksi_2a3b,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => 'Bab IV',
+            'tabel' => 'Tabel Sasaran dan Program Prioritas Daerah RKPD ' . $tahun,
+            'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/SasaranPembangunanDaerah dan /Daerah/ProgramPrioritasRPJMD (' . $matched_ind_2a3b . '/' . $total_ind_2a3b . ' indikator kinerja program prioritas selaras, ' . number_format($pct_2a3b, 1) . '%)'
+        ];
+
+        // =========================================================================
+        // --- 2.b.1 Auto Data Pull: Keterkaitan Permasalahan Daerah dengan Inovasi Daerah ---
+        // =========================================================================
+        $groups_2b1 = [];
+        $rows_2b1 = [];
+        $total_inov_2b1 = 0;
+        $matched_inov_2b1 = 0;
+
+        // 1. Tarik daftar permasalahan daerah secara otomatis dari /Daerah/CascadingPermasalahan
+        $list_permasalahan_cp = [];
+        if ($this->db->table_exists('cascading_permasalahan_rkpd')) {
+            $raw_cp = $this->db->select('Permasalahan')
+                ->where('KodeWilayah', $KodeWilayah)
+                ->where('Tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->where('Permasalahan !=', '')
+                ->order_by('Id', 'ASC')
+                ->get('cascading_permasalahan_rkpd')->result_array();
+
+            if (empty($raw_cp) && $isBanyuwangi) {
+                $raw_cp = $this->db->select('Permasalahan')
+                    ->where('KodeWilayah', '35.10')
+                    ->where('Tahun', '2026')
+                    ->where('deleted_at IS NULL')
+                    ->where('Permasalahan !=', '')
+                    ->order_by('Id', 'ASC')
+                    ->get('cascading_permasalahan_rkpd')->result_array();
+            }
+
+            foreach ($raw_cp as $cp) {
+                $pText = trim($cp['Permasalahan']);
+                if (!empty($pText) && !in_array($pText, $list_permasalahan_cp)) {
+                    $list_permasalahan_cp[] = $pText;
+                }
+            }
+        }
+
+        if ($this->db->table_exists('cascading_rkpd_permasalahan')) {
+            $raw_crp = $this->db->select('permasalahan as Permasalahan')
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->where('permasalahan !=', '')
+                ->order_by('id', 'ASC')
+                ->get('cascading_rkpd_permasalahan')->result_array();
+
+            foreach ($raw_crp as $crp) {
+                $pText = trim($crp['Permasalahan']);
+                if (!empty($pText) && !in_array($pText, $list_permasalahan_cp)) {
+                    $list_permasalahan_cp[] = $pText;
+                }
+            }
+        }
+
+        // 2. Ambil inovasi daerah dari rkpd_inovasi_daerah (yang diisi oleh user)
+        $groupedInv = [];
+        if ($this->db->table_exists('rkpd_inovasi_daerah')) {
+            $raw_inv = $this->db->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->order_by('id ASC, urutan ASC')
+                ->get('rkpd_inovasi_daerah')->result_array();
+
+            if (empty($raw_inv)) {
+                if ($isBanyuwangi) {
+                    $raw_inv = $this->db->where('kode_wilayah', '35.10')
+                        ->where('tahun', '2026')
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id ASC, urutan ASC')
+                        ->get('rkpd_inovasi_daerah')->result_array();
+                } else {
+                    $raw_inv = $this->db->where('kode_wilayah', $KodeWilayah)
+                        ->where('deleted_at IS NULL')
+                        ->order_by('id ASC, urutan ASC')
+                        ->get('rkpd_inovasi_daerah')->result_array();
+                }
+            }
+
+            foreach ($raw_inv as $ri) {
+                $pText = trim($ri['permasalahan']);
+                $iText = trim($ri['inovasi_daerah']);
+                $isM = ((float)$ri['nilai_keselarasan'] > 0) || (!empty($iText) && $iText !== '-');
+                $groupedInv[$pText][] = [
+                    'inovasi' => $iText,
+                    'nilai_keselarasan' => $isM ? 100.00 : 0.00,
+                    'keterangan' => $isM ? 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah' : 'Belum terdapat keterkaitan permasalahan daerah dengan Inovasi Daerah'
+                ];
+            }
+        }
+
+        // 3. Gabungkan permasalahan dari /Daerah/CascadingPermasalahan dengan inovasi daerah
+        if (!empty($groupedInv)) {
+            foreach ($groupedInv as $pKey => $iList) {
+                $groups_2b1[] = [
+                    'permasalahan' => $pKey,
+                    'source' => '/Daerah/CascadingPermasalahan',
+                    'inovasi_list' => $iList
+                ];
+                foreach ($iList as $invItem) {
+                    $rows_2b1[] = [
+                        'permasalahan' => $pKey,
+                        'inovasi' => $invItem['inovasi'],
+                        'nilai_keselarasan' => $invItem['nilai_keselarasan'],
+                        'keterangan' => $invItem['keterangan']
+                    ];
+                    $total_inov_2b1++;
+                    if ($invItem['nilai_keselarasan'] > 0) $matched_inov_2b1++;
+                }
+            }
+        } elseif (!empty($list_permasalahan_cp)) {
+            // Jika belum ada data di rkpd_inovasi_daerah, tarik otomatis semua permasalahan dari CascadingPermasalahan
+            foreach ($list_permasalahan_cp as $pText) {
+                $item = [
+                    'inovasi' => '',
+                    'nilai_keselarasan' => 0.00,
+                    'keterangan' => 'Belum terdapat keterkaitan permasalahan daerah dengan Inovasi Daerah'
+                ];
+                $groups_2b1[] = [
+                    'permasalahan' => $pText,
+                    'source' => '/Daerah/CascadingPermasalahan',
+                    'inovasi_list' => [$item]
+                ];
+                $rows_2b1[] = [
+                    'permasalahan' => $pText,
+                    'inovasi' => '',
+                    'nilai_keselarasan' => 0.00,
+                    'keterangan' => 'Belum terdapat keterkaitan permasalahan daerah dengan Inovasi Daerah'
+                ];
+                $total_inov_2b1++;
+            }
+        }
+
+        // Fallback default Banyuwangi jika tabel belum ada atau kosong sama sekali
+        if (empty($groups_2b1)) {
+            $defaultMap = [
+                'Belum signifikan penurunan kemiskinan di Kabupaten Banyuwangi' => [
+                    'Kanggo Riko', 'UGDK (Unit Gawat Darurat Kemiskinan)', 'GAMBIRAN GEMBIRA (Gambiran Bergerak Bersama Menuju Sejahtera)'
+                ],
+                'Kurangnya tingkat serapan angkatan kerja' => [
+                    'BIMBINGAN JABATAN ONLINE', 'Aplikasi SICAKEP (Sistem Pencatatan Perjanjian Kerja Perusahaan)', 'Goker Wangi (Golek Kerjo Banyuwangi)'
+                ],
+                'Masih adanya angka putus sekolah' => [
+                    'Sekolah Adat Kampoeng Baca Taman Rimba (BATARA)', 'GARDA AMPUH (GERAKAN ANGKAT ANAK MUDA PUTUS SEKOLAH)'
+                ],
+                'Rerata kemampuan Numerasi SMP berdasarkan asesmen nasional menurun 2023' => [
+                    'AYO INKLUSIF AGAGE PINTER', 'BANYUWANGI MENGAJAR', 'BUDIWANGI (Buku Digitalnya Warga Banyuwangi)'
+                ],
+                'capaian indikator SPM kesehatan pada tahun 2023 menurun, indikatornya Pelayanan Kesehatan Ibu Hamil dan pelayanan lanjut usia' => [
+                    'AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)',
+                    'BARAK PITTU (BAnyuwangi beRgerAK Peduli pada Ibu hamil Tujuh TerlalU)',
+                    'BERSELENDANG SUTRA DENGAN RT PANTAU (Bersama Masyarakat dan Lintas Sektor Bergandengan Tangan Turunkan AKI dan AKB dengan RT Pantau)',
+                    'BENTOR SEHATKU (Becak Motor Sehatkan Wargaku',
+                    'MELANKOLIS (Melayani Lansia dengan Komprehensif, Luwes dan Istikomah)',
+                    'RANTANG KASIH',
+                    'AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)'
+                ],
+                'potensi stunting yang cukup tinggi' => [
+                    'ANTING EMAS TOP (Antisipasi Stunting Di Masa Emas Tumbuh Optimal)',
+                    'BISKUIT ALIT (Kabat Atasi Stunting Kelola Nutrisi Pada balita)',
+                    'BJ HAB\'B\' (Bayi Jadi Hebat Berkat Bunda)',
+                    'BTS (Banyuwangi Tanggap Stunting)',
+                    'DUTA GIZI (Wujudkan Upaya Peningkatan Asupan Gizi)',
+                    'GEMA CETING (Gerakan Bersama Cegah Stunting)',
+                    'GEMPITA CETTING (GERAKAN PEDULI BALITA CEGAH STUNTING)'
+                ],
+                'jumlah kunjungan wisatawan dan lama tinggal belum dapat mencapai kembali angka seperti ditahun 2019 sebelum covid' => [
+                    'SIJAMUWANGI (Sistem Informasi Sejarah & Museum Banyuwangi)',
+                    'E-TICKETING WISATA BANYUWANGI',
+                    'BANYUWANGI TOURISM APP',
+                    'HOMESTAY NAIK KELAS',
+                    'GEOTRIP',
+                    'AMTOMA (Anti Mainstream Tourism Marketing)'
+                ],
+                'Daya saing UMKM belum optimal' => [
+                    'Boba Wangi (Belanja Online Banyuwangi)', 'Teman Usaha Rakyat', 'WENAK (Warung Naik Kelas)', 'TERASI WANGI (Tera Aplikasi sistem Banyuwangi)'
+                ],
+                'Perlambatan PDRB sektor Pertanian' => [
+                    'ANIMAL HEALTH CLINIC APPLICATION (AHC)', 'Bunga Karang (Budidaya Ikan Di Pekarangan)', 'CEK PUBERTAS (Cek Pupuk Bersubsidi Secara Terbatas)',
+                    'EFI RABA SIRIP (Efisiensi Pengairan Tanaman Cabai dengan Sistem Drip)', 'E-NAK WANGI (ELEKTRONIK KARTU TERNAK BANYUWANGI)', 'GERBANG LAMPERA (Gerakan Pengembangan Lampu Perangkap Serangga)'
+                ],
+                'perubahan budaya terutama pada generasi Z' => [
+                    'BANYUWANGI CULTURE EVERYWEEK'
+                ],
+                'Perubahan iklim.' => [
+                    'Banyuwangi Hijau'
+                ],
+                'Persentase Sampah yang Dikelola kecenderungan menurun' => [
+                    'GERBEK AMPUH (Gerakan Bersama mengatasi Masalah Sampah Rumahan )', 'PIL SAKTI (Pilah Sampah Wujudkan Kantor Tertata Asri)',
+                    'GEROBAKS ( Gerakan Rogojampi Bebas Kumuh dari Sampah dan PKL )', 'Gemar Melati (Gerakan Masyarakat Mengumpulkan Sampah Plastik)', 'PEMUDA PEDULI SAMPAH'
+                ],
+                'Kualitas lingkungan Hidup meningkat, tetapi tidak lebih baik di bandingkan angka 2019' => [
+                    'SIMPLING (Sistem Informasi Manajemen Pelayanan Laboratorium Lingkungan)', 'LABLING GOES TO SCHOOL (Laboratorium Lingkungan Goes To School)', 'CONTEST WANGI (Comparison Testing An Enviromental Laboratory Of Banyuwangi)'
+                ],
+                'Aplikasi pemerintahan belum di integrasikan karena belum terwujud dengan super apps' => [
+                    'Smart Kampung', 'Portal Banyuwangi Satu Data', 'Super ASN (Sistem Upskilling Pembelajaran Terintegrasi ASN)', 'SIMPEG (Sistem Informasi Manajemen Kepegawaian)', 'SILAKAN (Sistem Layanan Kepegawaian Online)'
+                ],
+                'Jalan kondisi baik menurun di tahun 2023' => [
+                    'PIJAR (Peningkatan Infrastruktur Jalan Poros Antar Desa)', 'SITARU (Sistem Informasi Pengendalian Tata Ruang)'
+                ]
+            ];
+
+            foreach ($defaultMap as $pText => $invList) {
+                $iList = [];
+                foreach ($invList as $inv) {
+                    $iList[] = [
+                        'inovasi' => $inv,
+                        'nilai_keselarasan' => 100.00,
+                        'keterangan' => 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah'
+                    ];
+                    $rows_2b1[] = [
+                        'permasalahan' => $pText,
+                        'inovasi' => $inv,
+                        'nilai_keselarasan' => 100.00,
+                        'keterangan' => 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah'
+                    ];
+                    $total_inov_2b1++;
+                    $matched_inov_2b1++;
+                }
+                $groups_2b1[] = [
+                    'permasalahan' => $pText,
+                    'source' => '/Daerah/CascadingPermasalahan',
+                    'inovasi_list' => $iList
+                ];
+            }
+        }
+
+        $list_inovasi_2b1 = [];
+        foreach ($rows_2b1 as $r) {
+            if (!empty($r['inovasi']) && !in_array($r['inovasi'], $list_inovasi_2b1)) {
+                $list_inovasi_2b1[] = $r['inovasi'];
+            }
+        }
+
+        // Pastikan seluruh permasalahan dari /Daerah/CascadingPermasalahan masuk ke daftar pilihan
+        $list_permasalahan_2b1 = array_values(array_unique(array_filter(array_merge($list_permasalahan_cp, array_column($groups_2b1, 'permasalahan')))));
+
+        $total_perm_2b1 = count($groups_2b1);
+        $pct_2b1 = $total_inov_2b1 > 0 ? (($matched_inov_2b1 / $total_inov_2b1) * 100) : 0;
+        
+        // Kriteria Penilaian Sesuai File HTML (Baris 65-67):
+        // A. Lemah (< 50%) = 1.00
+        // B. Kuat (>= 50%) = 4.50 (Bobot Maksimal)
+        if ($total_inov_2b1 == 0) {
+            $crit_2b1 = 'A';
+            $score_2b1 = 0.00;
+            $aksi_2b1 = 'A. Lemah (Belum ada data inovasi daerah)';
+        } elseif ($pct_2b1 >= 50.0) {
+            $crit_2b1 = 'B';
+            $score_2b1 = 4.50;
+            $aksi_2b1 = 'B. Kuat (Nilai keselarasan di atas 50%)';
+        } else {
+            $crit_2b1 = 'A';
+            $score_2b1 = 1.00;
+            $aksi_2b1 = 'A. Lemah (Nilai keselarasan di bawah 50%)';
+        }
+
+        $autoData_2_b_1 = [
+            'groups' => $groups_2b1,
+            'rows' => $rows_2b1,
+            'source' => '/Daerah/CascadingPermasalahan',
+            'list_inovasi' => array_values(array_unique(array_filter($list_inovasi_2b1))),
+            'list_permasalahan' => $list_permasalahan_2b1,
+            'total_permasalahan' => $total_perm_2b1,
+            'total_inovasi' => $total_inov_2b1,
+            'total_rows' => $total_inov_2b1,
+            'matched_count' => $matched_inov_2b1,
+            'matched_inovasi' => $matched_inov_2b1,
+            'pct_matched' => $pct_2b1,
+            'keselarasan_terbobot' => $score_2b1,
+            'kriteria' => $crit_2b1,
+            'score' => $score_2b1,
+            'opsi_aksi' => $aksi_2b1,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => 'Bab IV',
+            'tabel' => 'Tabel Permasalahan dan Inovasi Daerah RKPD ' . $tahun,
+            'catatan' => 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah (' . $matched_inov_2b1 . '/' . $total_inov_2b1 . ' inovasi daerah selaras menjawab ' . $total_perm_2b1 . ' permasalahan daerah)'
+        ];
+
+        // =========================================================================
+        // --- 2.b.2 Auto Data Pull: Keterkaitan Output dengan Outcome Inovasi Daerah ---
+        // =========================================================================
+        $rows_2b2 = [];
+        $total_2b2 = 0;
+        $matched_2b2 = 0;
+
+        // Tarik Inovasi Daerah dari rkpd_inovasi_daerah (Menu 2.b.1)
+        if ($this->db->table_exists('rkpd_inovasi_daerah')) {
+            $raw_inovasi_2b2 = $this->db->select('id, inovasi_daerah, output, outcome, nilai_keselarasan, keterangan')
+                ->from('rkpd_inovasi_daerah')
+                ->where('kode_wilayah', $KodeWilayah)
+                ->where('tahun', (string)$tahun)
+                ->where('deleted_at IS NULL')
+                ->where("inovasi_daerah != '' AND inovasi_daerah != '-'")
+                ->order_by('urutan ASC, id ASC')
+                ->get()->result_array();
+
+            // Jika untuk KodeWilayah saat ini belum ada, coba fallback
+            if (empty($raw_inovasi_2b2)) {
+                $raw_inovasi_2b2 = $this->db->select('id, inovasi_daerah, output, outcome, nilai_keselarasan, keterangan')
+                    ->from('rkpd_inovasi_daerah')
+                    ->where('tahun', (string)$tahun)
+                    ->where('deleted_at IS NULL')
+                    ->where("inovasi_daerah != '' AND inovasi_daerah != '-'")
+                    ->order_by('urutan ASC, id ASC')
+                    ->limit(58)
+                    ->get()->result_array();
+            }
+
+            // Cek jika ada detail_json yang tersimpan pada ippd_penilaian poin 2.b.2
+            $saved_2b2 = $this->db->where([
+                'kodewilayah' => $KodeWilayah,
+                'tahun' => (int)$tahun,
+                'item_code' => '2.b.2',
+                'deleted_at IS NULL' => null
+            ])->get('ippd_penilaian')->row_array();
+
+            $saved_map_2b2 = [];
+            if ($saved_2b2 && !empty($saved_2b2['detail_json'])) {
+                $dec_2b2 = json_decode($saved_2b2['detail_json'], true);
+                if (!empty($dec_2b2['rows']) && is_array($dec_2b2['rows'])) {
+                    foreach ($dec_2b2['rows'] as $rDec) {
+                        $iName = trim($rDec['inovasi'] ?? '');
+                        if (!empty($iName)) {
+                            $saved_map_2b2[$iName] = [
+                                'output' => $rDec['output'] ?? '',
+                                'outcome' => $rDec['outcome'] ?? '',
+                                'nilai_keselarasan' => isset($rDec['nilai_keselarasan']) ? (float)$rDec['nilai_keselarasan'] : 100.00,
+                                'keterangan' => $rDec['keterangan'] ?? ''
+                            ];
+                        }
+                    }
+                }
+            }
+
+            foreach ($raw_inovasi_2b2 as $r) {
+                $invName = trim($r['inovasi_daerah']);
+                if (empty($invName) || $invName === '-') continue;
+
+                $outp = !empty($r['output']) ? $r['output'] : ($saved_map_2b2[$invName]['output'] ?? '');
+                $outc = !empty($r['outcome']) ? $r['outcome'] : ($saved_map_2b2[$invName]['outcome'] ?? '');
+                $sc = isset($saved_map_2b2[$invName]['nilai_keselarasan']) ? (float)$saved_map_2b2[$invName]['nilai_keselarasan'] : (isset($r['nilai_keselarasan']) && $r['nilai_keselarasan'] !== null ? (float)$r['nilai_keselarasan'] : 100.00);
+                $ket = $sc > 0 ? 'Terdapat Keterkaitan outcome dengan output inovasi daerah' : 'Belum terdapat keterkaitan outcome dengan output inovasi daerah';
+
+                $rows_2b2[] = [
+                    'inovasi' => $invName,
+                    'output' => $outp,
+                    'outcome' => $outc,
+                    'nilai_keselarasan' => $sc,
+                    'keterangan' => $ket
+                ];
+                $total_2b2++;
+                if ($sc > 0) $matched_2b2++;
+            }
+        }
+
+        // Fallback jika database belum berisi baris inovasi
+        if (empty($rows_2b2)) {
+            if (!empty($rows_2b1)) {
+                foreach ($rows_2b1 as $r1) {
+                    $invName = trim($r1['inovasi'] ?? '');
+                    if (empty($invName) || $invName === '-') continue;
+                    $outp = $saved_map_2b2[$invName]['output'] ?? '';
+                    $outc = $saved_map_2b2[$invName]['outcome'] ?? '';
+                    $sc = isset($saved_map_2b2[$invName]['nilai_keselarasan']) ? (float)$saved_map_2b2[$invName]['nilai_keselarasan'] : 100.00;
+                    $ket = $sc > 0 ? 'Terdapat Keterkaitan outcome dengan output inovasi daerah' : 'Belum terdapat keterkaitan outcome dengan output inovasi daerah';
+                    $rows_2b2[] = [
+                        'inovasi' => $invName,
+                        'output' => $outp,
+                        'outcome' => $outc,
+                        'nilai_keselarasan' => $sc,
+                        'keterangan' => $ket
+                    ];
+                    $total_2b2++;
+                    if ($sc > 0) $matched_2b2++;
+                }
+            } else {
+                $default_58_inovasi = [
+                    'Kanggo Riko', 'UGDK (Unit Gawat Darurat Kemiskinan)', 'GAMBIRAN GEMBIRA (Gambiran Bergerak Bersama Menuju Sejahtera)',
+                    'BIMBINGAN JABATAN ONLINE', 'Aplikasi SICAKEP (Sistem Pencatatan Perjanjian Kerja Perusahaan)', 'Goker Wangi (Golek Kerjo Banyuwangi)',
+                    'Sekolah Adat Kampoeng Baca Taman Rimba (BATARA)', 'GARDA AMPUH (GERAKAN ANGKAT ANAK MUDA PUTUS SEKOLAH)',
+                    'AYO INKLUSIF AGAGE PINTER', 'BANYUWANGI MENGAJAR', 'BUDIWANGI (Buku Digitalnya Warga Banyuwangi)',
+                    'AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)',
+                    'BARAK PITTU (BAnyuwangi beRgerAK Peduli pada Ibu hamil Tujuh TerlalU)',
+                    'BERSELENDANG SUTRA DENGAN RT PANTAU (Bersama Masyarakat dan Lintas Sektor Bergandengan Tangan Turunkan AKI dan AKB dengan RT Pantau)',
+                    'BENTOR SEHATKU (Becak Motor Sehatkan Wargaku', 'MELANKOLIS (Melayani Lansia dengan Komprehensif, Luwes dan Istikomah)',
+                    'RANTANG KASIH', 'AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)',
+                    'ANTING EMAS TOP (Antisipasi Stunting Di Masa Emas Tumbuh Optimal)', 'BISKUIT ALIT (Kabat Atasi Stunting Kelola Nutrisi Pada balita)',
+                    'BJ HAB\'B\' (Bayi Jadi Hebat Berkat Bunda)', 'BTS (Banyuwangi Tanggap Stunting)', 'DUTA GIZI (Wujudkan Upaya Peningkatan Asupan Gizi)',
+                    'GEMA CETING (Gerakan Bersama Cegah Stunting)', 'GEMPITA CETTING (GERAKAN PEDULI BALITA CEGAH STUNTING)',
+                    'SIJAMUWANGI (Sistem Informasi Sejarah & Museum Banyuwangi)', 'E-TICKETING WISATA BANYUWANGI', 'BANYUWANGI TOURISM APP',
+                    'HOMESTAY NAIK KELAS', 'GEOTRIP', 'AMTOMA (Anti Mainstream Tourism Marketing)', 'Boba Wangi (Belanja Online Banyuwangi)',
+                    'Teman Usaha Rakyat', 'WENAK (Warung Naik Kelas)', 'TERASI WANGI (Tera Aplikasi sistem Banyuwangi)',
+                    'ANIMAL HEALTH CLINIC APPLICATION (AHC)', 'Bunga Karang (Budidaya Ikan Di Pekarangan)', 'CEK PUBERTAS (Cek Pupuk Bersubsidi Secara Terbatas)',
+                    'EFI RABA SIRIP (Efisiensi Pengairan Tanaman Cabai dengan Sistem Drip)', 'E-NAK WANGI (ELEKTRONIK KARTU TERNAK BANYUWANGI)',
+                    'GERBANG LAMPERA (Gerakan Pengembangan Lampu Perangkap Serangga)', 'BANYUWANGI CULTURE EVERYWEEK', 'Banyuwangi Hijau',
+                    'GERBEK AMPUH (Gerakan Bersama mengatasi Masalah Sampah Rumahan )', 'PIL SAKTI (Pilah Sampah Wujudkan Kantor Tertata Asri)',
+                    'GEROBAKS ( Gerakan Rogojampi Bebas Kumuh dari Sampah dan PKL )', 'Gemar Melati (Gerakan Masyarakat Mengumpulkan Sampah Plastik)',
+                    'PEMUDA PEDULI SAMPAH', 'SIMPLING (Sistem Informasi Manajemen Pelayanan Laboratorium Lingkungan)',
+                    'LABLING GOES TO SCHOOL (Laboratorium Lingkungan Goes To School)', 'CONTEST WANGI (Comparison Testing An Enviromental Laboratory Of Banyuwangi)',
+                    'Smart Kampung', 'Portal Banyuwangi Satu Data', 'Super ASN (Sistem Upskilling Pembelajaran Terintegrasi ASN)',
+                    'SIMPEG (Sistem Informasi Manajemen Kepegawaian)', 'SILAKAN (Sistem Layanan Kepegawaian Online)',
+                    'PIJAR (Peningkatan Infrastruktur Jalan Poros Antar Desa)', 'SITARU (Sistem Informasi Pengendalian Tata Ruang)'
+                ];
+                foreach ($default_58_inovasi as $invName) {
+                    $outp = $saved_map_2b2[$invName]['output'] ?? '';
+                    $outc = $saved_map_2b2[$invName]['outcome'] ?? '';
+                    $sc = isset($saved_map_2b2[$invName]['nilai_keselarasan']) ? (float)$saved_map_2b2[$invName]['nilai_keselarasan'] : 100.00;
+                    $ket = $sc > 0 ? 'Terdapat Keterkaitan outcome dengan output inovasi daerah' : 'Belum terdapat keterkaitan outcome dengan output inovasi daerah';
+                    $rows_2b2[] = [
+                        'inovasi' => $invName,
+                        'output' => $outp,
+                        'outcome' => $outc,
+                        'nilai_keselarasan' => $sc,
+                        'keterangan' => $ket
+                    ];
+                    $total_2b2++;
+                    if ($sc > 0) $matched_2b2++;
+                }
+            }
+        }
+
+        $pct_2b2 = $total_2b2 > 0 ? (($matched_2b2 / $total_2b2) * 100) : 100.0;
+        
+        // Kriteria Sesuai File HTML (Baris 66-68):
+        // A. Lemah (< 50%) = 1.00
+        // B. Kuat (>= 50%) = 4.50 (Bobot Maksimal)
+        if ($total_2b2 == 0) {
+            $crit_2b2 = 'A';
+            $score_2b2 = 0.00;
+            $aksi_2b2 = 'A. Lemah (Belum ada data inovasi daerah)';
+        } elseif ($pct_2b2 >= 50.0) {
+            $crit_2b2 = 'B';
+            $score_2b2 = 4.50;
+            $aksi_2b2 = 'B. Kuat (Nilai keselarasan di atas 50%)';
+        } else {
+            $crit_2b2 = 'A';
+            $score_2b2 = 1.00;
+            $aksi_2b2 = 'A. Lemah (Nilai keselarasan di bawah 50%)';
+        }
+
+        $autoData_2_b_2 = [
+            'rows' => $rows_2b2,
+            'total_rows' => $total_2b2,
+            'matched_count' => $matched_2b2,
+            'pct_matched' => $pct_2b2,
+            'keselarasan_terbobot' => $score_2b2,
+            'kriteria' => $crit_2b2,
+            'score' => $score_2b2,
+            'opsi_aksi' => $aksi_2b2,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => 'Bab IV',
+            'tabel' => 'Tabel Inovasi Daerah, Output dan Outcome RKPD ' . $tahun,
+            'catatan' => 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' . $matched_2b2 . '/' . $total_2b2 . ' inovasi daerah selaras)'
+        ];
+
+        // =========================================================================
+        // --- 3.a.1.a Auto Data Pull: Tersedianya OPD Penanggung Jawab untuk Program Prioritas ---
+        // =========================================================================
+        $template_3a1a = $this->get_program_prioritas_3a1a_template();
+        
+        // Tarik data dinamis dari /Daerah/ProgramKegiatanPrioritas
+        $dbProgramMap = [];
+        if ($this->db->table_exists('rkpd_program_prioritas')) {
+            $dbPrograms = $this->db->select('pr.id as program_id, pr.kode_program, pr.nama_program, sub.nama_instansi')
+                ->from('rkpd_program_prioritas pr')
+                ->join('rkpd_kegiatan_prioritas k', 'k.program_id = pr.id', 'left')
+                ->join('rkpd_subkegiatan_prioritas sub', 'sub.kegiatan_id = k.id AND sub.deleted_at IS NULL', 'left')
+                ->where('pr.deleted_at IS NULL')
+                ->order_by('pr.id ASC')
+                ->get()->result_array();
+
+            foreach ($dbPrograms as $dp) {
+                $prNameKey = strtoupper(trim($dp['nama_program']));
+                if (!isset($dbProgramMap[$prNameKey])) {
+                    $dbProgramMap[$prNameKey] = [
+                        'kode_program' => $dp['kode_program'],
+                        'nama_program' => $dp['nama_program'],
+                        'opds' => []
+                    ];
+                }
+                if (!empty($dp['nama_instansi']) && $dp['nama_instansi'] !== 'BAPPEDA / Perangkat Daerah Terkait') {
+                    $splitOpds = explode(',', $dp['nama_instansi']);
+                    foreach ($splitOpds as $so) {
+                        $soClean = trim($so);
+                        if (!empty($soClean) && !in_array($soClean, $dbProgramMap[$prNameKey]['opds'])) {
+                            $dbProgramMap[$prNameKey]['opds'][] = $soClean;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Cek jika ada detail_json tersimpan pada ippd_penilaian poin 3.a.1.a
+        $saved_3a1a = $this->db->where([
+            'kodewilayah' => $KodeWilayah,
+            'tahun' => (int)$tahun,
+            'item_code' => '3.a.1.a',
+            'deleted_at IS NULL' => null
+        ])->get('ippd_penilaian')->row_array();
+
+        $saved_map_3a1a = [];
+        if ($saved_3a1a && !empty($saved_3a1a['detail_json'])) {
+            $dec_3a1a = json_decode($saved_3a1a['detail_json'], true);
+            if (!empty($dec_3a1a['rows']) && is_array($dec_3a1a['rows'])) {
+                foreach ($dec_3a1a['rows'] as $rDec) {
+                    $pName = trim($rDec['prog'] ?? '');
+                    if (!empty($pName)) {
+                        $normK = preg_replace('/[^A-Z0-9]/', '', strtoupper($pName));
+                        $saved_map_3a1a[$normK] = [
+                            'opd' => $rDec['opd'] ?? '',
+                            'nilai_keselarasan' => isset($rDec['nilai_keselarasan']) ? (float)$rDec['nilai_keselarasan'] : 100.00
+                        ];
+                    }
+                }
+            }
+        }
+
+        $dbNormMap = [];
+        foreach ($dbProgramMap as $k => $dp) {
+            $normK = preg_replace('/[^A-Z0-9]/', '', $k);
+            if (!empty($normK)) {
+                $dbNormMap[$normK] = $dp;
+            }
+        }
+
+        $rows_3a1a = [];
+        $matchedNormKeys = [];
+        foreach ($template_3a1a as $t) {
+            $k = strtoupper(trim($t['prog']));
+            $normK = preg_replace('/[^A-Z0-9]/', '', $k);
+            $opd = $t['opd'];
+            if (isset($dbNormMap[$normK]) && !empty($dbNormMap[$normK]['opds'])) {
+                $opd = implode(', ', $dbNormMap[$normK]['opds']);
+            } elseif (isset($saved_map_3a1a[$normK]['opd']) && $saved_map_3a1a[$normK]['opd'] !== '') {
+                $opd = $saved_map_3a1a[$normK]['opd'];
+            }
+            $sc = isset($saved_map_3a1a[$normK]['nilai_keselarasan']) ? (float)$saved_map_3a1a[$normK]['nilai_keselarasan'] : ((!empty($opd) && $opd !== '-') ? 100.00 : 0.00);
+            $isMatched = $sc > 0;
+            $rows_3a1a[] = [
+                'bidang' => $t['bidang'],
+                'prog' => $t['prog'],
+                'opd' => $opd,
+                'nilai_keselarasan' => $sc,
+                'keselarasan_terbobot' => $isMatched ? 5.00 : 0.00
+            ];
+            $matchedNormKeys[$normK] = true;
+        }
+
+        $total_3a1a = count($rows_3a1a);
+        $matched_3a1a = 0;
+        foreach ($rows_3a1a as $r) {
+            if (!empty($r['opd']) && $r['opd'] !== '-' && $r['opd'] !== '') $matched_3a1a++;
+        }
+        $pct_3a1a = $total_3a1a > 0 ? ($matched_3a1a / $total_3a1a) * 100 : 0;
+        $score_terbobot_3a1a = ($pct_3a1a / 100) * 5.0;
+
+        // Kriteria Sesuai File HTML (Baris 110-111):
+        // A. Tidak Ada = 0
+        // B. Ada sebagian = 2
+        // C. Tercascade seluruhnya = 5
+        if ($pct_3a1a >= 100.0) {
+            $crit_3a1a = 'C';
+            $score_3a1a = 5.0;
+            $aksi_3a1a = 'C. Tercascade seluruhnya';
+        } elseif ($pct_3a1a > 0.0) {
+            $crit_3a1a = 'B';
+            $score_3a1a = 2.0;
+            $aksi_3a1a = 'B. Ada sebagian';
+        } else {
+            $crit_3a1a = 'A';
+            $score_3a1a = 0.0;
+            $aksi_3a1a = 'A. Tidak Ada';
+        }
+
+        $autoData_3_a_1_a = [
+            'rows' => $rows_3a1a,
+            'total_rows' => $total_3a1a,
+            'matched_count' => $matched_3a1a,
+            'pct_matched' => $pct_3a1a,
+            'keselarasan_terbobot' => $score_3a1a,
+            'kriteria' => $crit_3a1a,
+            'score' => $score_3a1a,
+            'opsi_aksi' => $aksi_3a1a,
+            'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => 'Bab IV',
+            'tabel' => 'Tabel Program Prioritas RKPD ' . $tahun,
+            'catatan' => 'Tersedianya penanggungjawab OPD untuk seluruh program prioritas pembangunan daerah di RKPD (' . $matched_3a1a . '/' . $total_3a1a . ' program terisi OPD)'
+        ];
+
+        // =========================================================================
+        // --- 3.a.1.b Auto Data Pull: Target Daerah vs IKU Renstra/Renja OPD (Tarik data dari /Daerah/IKDTahunBerjalan) ---
+        // =========================================================================
+        $template_3a1b = $this->get_ikd_renja_3a1b_template();
+
+        // 1. Cek apakah ada data tersimpan dari user di ippd_penilaian untuk 3.a.1.b
+        $savedMap3a1b = [];
+        if ($this->db->table_exists('ippd_penilaian')) {
+            $this->db->where('item_code', '3.a.1.b')->where('deleted_at IS NULL');
+            if (!empty($tahun)) $this->db->where('tahun', (int)$tahun);
+            if (!empty($KodeWilayah)) $this->db->where('kodewilayah', $KodeWilayah);
+            $savedRow3a1b = $this->db->get('ippd_penilaian')->row_array();
+            if ($savedRow3a1b && !empty($savedRow3a1b['detail_json'])) {
+                $dec3a1b = json_decode($savedRow3a1b['detail_json'], true);
+                if (isset($dec3a1b['rows']) && is_array($dec3a1b['rows'])) {
+                    foreach ($dec3a1b['rows'] as $idx => $sr) {
+                        $k = !empty($sr['ind_daerah']) ? preg_replace('/[^a-z0-9]/', '', strtolower($sr['ind_daerah'])) : ('row_' . $idx);
+                        $savedMap3a1b[$k] = $sr;
+                        $savedMap3a1b['idx_' . $idx] = $sr;
+                    }
+                }
+            }
+        }
+
+        // 2. Tarik data dinamis dari /Daerah/IKDTahunBerjalan (tabel ikd_tahun_berjalan)
+        // Formulasi: Target RKPD ditarik dari override ikd_tahun_berjalan jika ada perubahan di menu tersebut.
+        // Jika data OPD memang tidak ada/kosong pada penarikan IKD, maka opd_pengampu tetap '-' sesuai berkas acuan HTML.
+        $tbTargetMap = [];
+        if ($this->db->table_exists('ikd_tahun_berjalan')) {
+            $tbQuery = $this->db->where('deleted_at IS NULL');
+            if (!empty($KodeWilayah)) {
+                $tbQuery->where('kode_wilayah', $KodeWilayah);
+            }
+            if (!empty($tahun)) {
+                $tbQuery->where('tahun', (int)$tahun);
+            }
+            $tbList = $tbQuery->get('ikd_tahun_berjalan')->result_array();
+            foreach ($tbList as $tb) {
+                if (!empty($tb['target'])) {
+                    $normTb = preg_replace('/[^a-z0-9]/', '', strtolower($tb['indikator_kinerja_daerah'] ?? ''));
+                    $tbTargetMap[$tb['ikd_id']] = $tb['target'];
+                    if (!empty($normTb)) {
+                        $tbTargetMap[$normTb] = $tb['target'];
+                    }
+                }
+            }
+        }
+
+        // 3. Petakan data template baseline dengan data dinamis penarikan dan input tersimpan user
+        $rows_3a1b = [];
+        $sum_terbobot_3a1b = 0.0;
+        $sum_nilai_3a1b = 0.0;
+        $matched_3a1b = 0;
+
+        foreach ($template_3a1b as $idx => $tRow) {
+            $r = $tRow;
+            $normTpl = preg_replace('/[^a-z0-9]/', '', strtolower($tRow['ind_daerah']));
+            $normTplNoParen = preg_replace('/[^a-z0-9]/', '', strtolower(preg_replace('/\s*\(.*?\)\s*/', '', $tRow['ind_daerah'])));
+
+            // Formulasi penarikan dinamis target jika ada update di /Daerah/IKDTahunBerjalan
+            if (isset($tbTargetMap[$normTpl])) {
+                $r['target_daerah'] = str_replace(',', '.', $tbTargetMap[$normTpl]);
+            } elseif (isset($tbTargetMap[$normTplNoParen])) {
+                $r['target_daerah'] = str_replace(',', '.', $tbTargetMap[$normTplNoParen]);
+            }
+
+            // Formulasi OPD: jika data OPD tidak ada / kosong / '-', kolom nama opd pengampu tetap '-' sesuai berkas acuan HTML
+            if (empty($r['opd_pengampu']) || trim($r['opd_pengampu']) === '') {
+                $r['opd_pengampu'] = '-';
+            }
+
+            // Ambil input manual Renja OPD yang disimpan oleh user jika ada
+            $savedItem = $savedMap3a1b[$normTpl] ?? $savedMap3a1b['idx_' . $idx] ?? null;
+            if ($savedItem) {
+                if (isset($savedItem['opd_renja'])) $r['opd_renja'] = $savedItem['opd_renja'];
+                if (isset($savedItem['iku_opd'])) $r['iku_opd'] = $savedItem['iku_opd'];
+                if (isset($savedItem['target_opd'])) $r['target_opd'] = $savedItem['target_opd'];
+                if (isset($savedItem['unit_opd'])) $r['unit_opd'] = $savedItem['unit_opd'];
+                if (isset($savedItem['ekspektasi'])) $r['ekspektasi'] = $savedItem['ekspektasi'];
+                if (isset($savedItem['catatan'])) $r['catatan'] = $savedItem['catatan'];
+            }
+
+            // Hitung keselarasan target
+            $iku = trim($r['iku_opd'] ?? '');
+            if (empty($iku)) {
+                $marginHitung = '100.00%';
+                $marginKet = '100.00%';
+                $nilaiKeselarasan = '0.00%';
+                $rowTerbobot = 0.00;
+                $scPct = 0;
+            } else {
+                // Jika baris baseline template dan belum diedit user, pertahankan margin/nilai default acuan HTML
+                if (!$savedItem && isset($tRow['nilai_keselarasan']) && isset($tRow['keselarasan_terbobot'])) {
+                    $marginHitung = $tRow['margin_hitung'] ?? '0.00%';
+                    $marginKet = $tRow['margin_ket'] ?? '0.00%';
+                    $nilaiKeselarasan = $tRow['nilai_keselarasan'];
+                    $scPct = (float)str_replace('%', '', $nilaiKeselarasan);
+                    $rowTerbobot = (float)($tRow['keselarasan_terbobot'] ?? 0);
+                } else {
+                    $tD = (float)str_replace(',', '.', $r['target_daerah'] ?? '0');
+                    $tO = (float)str_replace(',', '.', $r['target_opd'] ?? '0');
+                    $eks = $r['ekspektasi'] ?? 'Besar';
+
+                    $marginVal = 0.0;
+                    if ($tD != 0) {
+                        if ($eks === 'Besar') {
+                            $marginVal = ($tO >= $tD) ? 0.0 : ((($tO - $tD) / abs($tD)) * 100.0);
+                        } else {
+                            $marginVal = ($tO <= $tD) ? 0.0 : ((($tO - $tD) / abs($tD)) * 100.0);
+                        }
+                    }
+                    $absMargin = abs($marginVal);
+                    $scPct = $this->calc_margin_score_3a1b($absMargin);
+                    $rowTerbobot = ($scPct / 100.0) * 5.0;
+
+                    $marginHitung = number_format($marginVal, 2, '.', '') . '%';
+                    $marginKet = number_format($absMargin, 2, '.', '') . '%';
+                    $nilaiKeselarasan = number_format($scPct, 2, '.', '') . '%';
+                }
+                $matched_3a1b++;
+            }
+
+            $r['margin_hitung'] = $marginHitung;
+            $r['margin_ket'] = $marginKet;
+            $r['nilai_keselarasan'] = $nilaiKeselarasan;
+            $r['keselarasan_terbobot'] = number_format($rowTerbobot, 2, '.', '');
+            $r['dokumen'] = '';
+            $r['halaman'] = '';
+            $r['tabel'] = '';
+            $r['catatan'] = $r['catatan'] ?? '';
+
+            $sum_terbobot_3a1b += $rowTerbobot;
+            $sum_nilai_3a1b += $scPct;
+            $rows_3a1b[] = $r;
+        }
+
+        $total_3a1b = count($rows_3a1b);
+        $avg_nilai_3a1b = $total_3a1b > 0 ? ($sum_nilai_3a1b / $total_3a1b) : 0.0;
+        $avg_terbobot_3a1b = $total_3a1b > 0 ? round($sum_terbobot_3a1b / $total_3a1b, 2) : 0.0;
+
+        // Kriteria Sesuai File HTML (Baris 66):
+        // A. Tidak Ada = 0.00
+        // B. Ada sebagian = 2.00
+        // C. Tercascade seluruhnya = 5.00
+        if ($avg_nilai_3a1b >= 100.0) {
+            $crit_3a1b = 'C';
+            $score_3a1b = 5.0;
+            $aksi_3a1b = 'C. Tercascade seluruhnya';
+        } elseif ($avg_nilai_3a1b > 0.0) {
+            $crit_3a1b = 'B';
+            $score_3a1b = 2.0;
+            $aksi_3a1b = 'B. Ada sebagian';
+        } else {
+            $crit_3a1b = 'A';
+            $score_3a1b = 0.0;
+            $aksi_3a1b = 'A. Tidak Ada';
+        }
+
+        $autoData_3_a_1_b = [
+            'rows' => $rows_3a1b,
+            'total_rows' => $total_3a1b,
+            'matched_count' => $matched_3a1b,
+            'pct_matched' => $avg_nilai_3a1b,
+            'sum_terbobot' => $sum_terbobot_3a1b,
+            'avg_terbobot' => $avg_terbobot_3a1b,
+            'kriteria' => $crit_3a1b,
+            'score' => $score_3a1b,
+            'opsi_aksi' => $aksi_3a1b,
+            'dokumen' => 'RPJMD / RKPD & Renja OPD ' . $namaWilRkpd . ' ' . $tahun,
+            'halaman' => '',
+            'tabel' => '',
+            'catatan' => 'Otomatis ditarik dari penyelarasan IKD Tahun Berjalan dengan Renja OPD (' . $matched_3a1b . ' dari ' . $total_3a1b . ' IKU selaras, rata-rata keselarasan terbobot ' . number_format($avg_terbobot_3a1b, 2) . ')'
+        ];
+
+
         return [
             'AutoData_1_a_1_a' => $autoData_1_a_1_a,
             'AutoData_1_a_1_b' => $autoData_1_a_1_b,
@@ -33293,6 +34958,17 @@ public function updateStatusPerjanjianKinerja() {
             'AutoData_1_b_8_b' => $autoData_1_b_8_b,
             'AutoData_1_b_9_b' => $autoData_1_b_9_b,
             'AutoData_1_c_1' => $autoData_1_c_1,
+            'AutoData_2_a_1_a' => $autoData_2_a_1_a,
+            'AutoData_2_a_1_b' => $autoData_2_a_1_b,
+            'AutoData_2_a_1_c' => $autoData_2_a_1_c,
+            'AutoData_2_a_2_a' => $autoData_2_a_2_a,
+            'AutoData_2_a_2_b' => $autoData_2_a_2_b,
+            'AutoData_2_a_3_a' => $autoData_2_a_3_a,
+            'AutoData_2_a_3_b' => $autoData_2_a_3_b,
+            'AutoData_2_b_1' => $autoData_2_b_1,
+            'AutoData_2_b_2' => $autoData_2_b_2,
+            'AutoData_3_a_1_a' => $autoData_3_a_1_a,
+            'AutoData_3_a_1_b' => $autoData_3_a_1_b,
         ];
     }
 
@@ -34648,6 +36324,207 @@ public function updateStatusPerjanjianKinerja() {
                 'tgl_verifikasi' => null
             ];
         }
+                // --- Auto-generate Dimensi 2 & 3 scores jika ada data AutoData ---
+        if ((!isset($scoresMap['2.a.1.a']) || $scoresMap['2.a.1.a']['bobot_capaian'] === null || empty($scoresMap['2.a.1.a']['detail_json'])) && !empty($autoData['AutoData_2_a_1_a'])) {
+            $ad2a1a = $autoData['AutoData_2_a_1_a'];
+            $scoresMap['2.a.1.a'] = [
+                'id' => $scoresMap['2.a.1.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a1a['score'],
+                'opsi_aksi' => $ad2a1a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.a']['catatan']) ? $scoresMap['2.a.1.a']['catatan'] : $ad2a1a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.1.b']) || $scoresMap['2.a.1.b']['bobot_capaian'] === null || empty($scoresMap['2.a.1.b']['detail_json'])) && !empty($autoData['AutoData_2_a_1_b'])) {
+            $ad2a1b = $autoData['AutoData_2_a_1_b'];
+            $scoresMap['2.a.1.b'] = [
+                'id' => $scoresMap['2.a.1.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a1b['score'],
+                'opsi_aksi' => $ad2a1b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.b']['catatan']) ? $scoresMap['2.a.1.b']['catatan'] : $ad2a1b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.1.c']) || $scoresMap['2.a.1.c']['bobot_capaian'] === null || empty($scoresMap['2.a.1.c']['detail_json'])) && !empty($autoData['AutoData_2_a_1_c'])) {
+            $ad2a1c = $autoData['AutoData_2_a_1_c'];
+            $scoresMap['2.a.1.c'] = [
+                'id' => $scoresMap['2.a.1.c']['id'] ?? null,
+                'bobot_capaian' => $ad2a1c['score'],
+                'opsi_aksi' => $ad2a1c['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.c']['catatan']) ? $scoresMap['2.a.1.c']['catatan'] : $ad2a1c['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.c']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1c),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.2.a']) || $scoresMap['2.a.2.a']['bobot_capaian'] === null || empty($scoresMap['2.a.2.a']['detail_json'])) && !empty($autoData['AutoData_2_a_2_a'])) {
+            $ad2a2a = $autoData['AutoData_2_a_2_a'];
+            $scoresMap['2.a.2.a'] = [
+                'id' => $scoresMap['2.a.2.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a2a['score'],
+                'opsi_aksi' => $ad2a2a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.2.a']['catatan']) ? $scoresMap['2.a.2.a']['catatan'] : $ad2a2a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.2.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a2a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.2.b']) || $scoresMap['2.a.2.b']['bobot_capaian'] === null || empty($scoresMap['2.a.2.b']['detail_json'])) && !empty($autoData['AutoData_2_a_2_b'])) {
+            $ad2a2b = $autoData['AutoData_2_a_2_b'];
+            $scoresMap['2.a.2.b'] = [
+                'id' => $scoresMap['2.a.2.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a2b['score'],
+                'opsi_aksi' => $ad2a2b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.2.b']['catatan']) ? $scoresMap['2.a.2.b']['catatan'] : $ad2a2b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.2.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a2b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.3.a']) || $scoresMap['2.a.3.a']['bobot_capaian'] === null || empty($scoresMap['2.a.3.a']['detail_json'])) && !empty($autoData['AutoData_2_a_3_a'])) {
+            $ad2a3a = $autoData['AutoData_2_a_3_a'];
+            $scoresMap['2.a.3.a'] = [
+                'id' => $scoresMap['2.a.3.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a3a['score'],
+                'opsi_aksi' => $ad2a3a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.3.a']['catatan']) ? $scoresMap['2.a.3.a']['catatan'] : $ad2a3a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.3.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a3a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.3.b']) || $scoresMap['2.a.3.b']['bobot_capaian'] === null || empty($scoresMap['2.a.3.b']['detail_json'])) && !empty($autoData['AutoData_2_a_3_b'])) {
+            $ad2a3b = $autoData['AutoData_2_a_3_b'];
+            $scoresMap['2.a.3.b'] = [
+                'id' => $scoresMap['2.a.3.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a3b['score'],
+                'opsi_aksi' => $ad2a3b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.3.b']['catatan']) ? $scoresMap['2.a.3.b']['catatan'] : $ad2a3b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.3.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a3b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.b.1']) || $scoresMap['2.b.1']['bobot_capaian'] === null || empty($scoresMap['2.b.1']['detail_json'])) && !empty($autoData['AutoData_2_b_1'])) {
+            $ad2b1 = $autoData['AutoData_2_b_1'];
+            $scoresMap['2.b.1'] = [
+                'id' => $scoresMap['2.b.1']['id'] ?? null,
+                'bobot_capaian' => $ad2b1['score'],
+                'opsi_aksi' => $ad2b1['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.b.1']['catatan']) ? $scoresMap['2.b.1']['catatan'] : $ad2b1['catatan'],
+                'bukti_dukung' => $scoresMap['2.b.1']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2b1),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.b.2']) || $scoresMap['2.b.2']['bobot_capaian'] === null || empty($scoresMap['2.b.2']['detail_json'])) && !empty($autoData['AutoData_2_b_2'])) {
+            $ad2b2 = $autoData['AutoData_2_b_2'];
+            $scoresMap['2.b.2'] = [
+                'id' => $scoresMap['2.b.2']['id'] ?? null,
+                'bobot_capaian' => $ad2b2['score'],
+                'opsi_aksi' => $ad2b2['opsi_aksi'],
+                'catatan' => (!empty($scoresMap['2.b.2']['catatan']) && $scoresMap['2.b.2']['catatan'] !== 'Keterkaitan logis antara output dan outcome terukur jelas') ? $scoresMap['2.b.2']['catatan'] : $ad2b2['catatan'],
+                'bukti_dukung' => $scoresMap['2.b.2']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2b2),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if (!empty($autoData['AutoData_3_a_1_a'])) {
+            $ad3a1a = $autoData['AutoData_3_a_1_a'];
+            if (!isset($scoresMap['3.a.1.a']) || $scoresMap['3.a.1.a']['bobot_capaian'] === null || empty($scoresMap['3.a.1.a']['detail_json']) || (isset($scoresMap['3.a.1.a']['opsi_aksi']) && strpos($scoresMap['3.a.1.a']['opsi_aksi'], '100%') === 0)) {
+                $scoresMap['3.a.1.a'] = [
+                    'id' => $scoresMap['3.a.1.a']['id'] ?? null,
+                    'bobot_capaian' => $ad3a1a['score'],
+                    'opsi_aksi' => $ad3a1a['opsi_aksi'],
+                    'catatan' => (!empty($scoresMap['3.a.1.a']['catatan']) && strpos($scoresMap['3.a.1.a']['catatan'], 'Otomatis ditarik dari penetapan') !== false) ? $ad3a1a['catatan'] : (!empty($scoresMap['3.a.1.a']['catatan']) ? $scoresMap['3.a.1.a']['catatan'] : $ad3a1a['catatan']),
+                    'bukti_dukung' => $scoresMap['3.a.1.a']['bukti_dukung'] ?? '',
+                    'detail_json' => json_encode($ad3a1a),
+                    'bobot_verifikator' => null,
+                    'opsi_aksi_verifikator' => '',
+                    'catatan_verifikator' => '',
+                    'bukti_dukung_verifikator' => '',
+                    'status_verifikasi' => 'Draft',
+                    'tgl_verifikasi' => null
+                ];
+            }
+        }
+
+        if ((!isset($scoresMap['3.a.1.b']) || $scoresMap['3.a.1.b']['bobot_capaian'] === null || empty($scoresMap['3.a.1.b']['detail_json']) || (isset($scoresMap['3.a.1.b']['opsi_aksi']) && (strpos($scoresMap['3.a.1.b']['opsi_aksi'], '100%') === 0 || strpos($scoresMap['3.a.1.b']['opsi_aksi'], 'Memenuhi') !== false))) && !empty($autoData['AutoData_3_a_1_b'])) {
+            $ad3a1b = $autoData['AutoData_3_a_1_b'];
+            $scoresMap['3.a.1.b'] = [
+                'id' => $scoresMap['3.a.1.b']['id'] ?? null,
+                'bobot_capaian' => $ad3a1b['score'],
+                'opsi_aksi' => $ad3a1b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['3.a.1.b']['catatan']) ? $scoresMap['3.a.1.b']['catatan'] : $ad3a1b['catatan'],
+                'bukti_dukung' => $scoresMap['3.a.1.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad3a1b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
         $Data['SavedScores'] = $scoresMap;
 
         $this->load->view('Daerah/header', $Header);
@@ -35836,6 +37713,207 @@ public function updateStatusPerjanjianKinerja() {
             ];
         }
 
+                // --- Auto-generate Dimensi 2 & 3 scores jika ada data AutoData ---
+        if ((!isset($scoresMap['2.a.1.a']) || $scoresMap['2.a.1.a']['bobot_capaian'] === null || empty($scoresMap['2.a.1.a']['detail_json'])) && !empty($autoData['AutoData_2_a_1_a'])) {
+            $ad2a1a = $autoData['AutoData_2_a_1_a'];
+            $scoresMap['2.a.1.a'] = [
+                'id' => $scoresMap['2.a.1.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a1a['score'],
+                'opsi_aksi' => $ad2a1a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.a']['catatan']) ? $scoresMap['2.a.1.a']['catatan'] : $ad2a1a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.1.b']) || $scoresMap['2.a.1.b']['bobot_capaian'] === null || empty($scoresMap['2.a.1.b']['detail_json'])) && !empty($autoData['AutoData_2_a_1_b'])) {
+            $ad2a1b = $autoData['AutoData_2_a_1_b'];
+            $scoresMap['2.a.1.b'] = [
+                'id' => $scoresMap['2.a.1.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a1b['score'],
+                'opsi_aksi' => $ad2a1b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.b']['catatan']) ? $scoresMap['2.a.1.b']['catatan'] : $ad2a1b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.1.c']) || $scoresMap['2.a.1.c']['bobot_capaian'] === null || empty($scoresMap['2.a.1.c']['detail_json'])) && !empty($autoData['AutoData_2_a_1_c'])) {
+            $ad2a1c = $autoData['AutoData_2_a_1_c'];
+            $scoresMap['2.a.1.c'] = [
+                'id' => $scoresMap['2.a.1.c']['id'] ?? null,
+                'bobot_capaian' => $ad2a1c['score'],
+                'opsi_aksi' => $ad2a1c['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.1.c']['catatan']) ? $scoresMap['2.a.1.c']['catatan'] : $ad2a1c['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.1.c']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a1c),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.2.a']) || $scoresMap['2.a.2.a']['bobot_capaian'] === null || empty($scoresMap['2.a.2.a']['detail_json'])) && !empty($autoData['AutoData_2_a_2_a'])) {
+            $ad2a2a = $autoData['AutoData_2_a_2_a'];
+            $scoresMap['2.a.2.a'] = [
+                'id' => $scoresMap['2.a.2.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a2a['score'],
+                'opsi_aksi' => $ad2a2a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.2.a']['catatan']) ? $scoresMap['2.a.2.a']['catatan'] : $ad2a2a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.2.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a2a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.2.b']) || $scoresMap['2.a.2.b']['bobot_capaian'] === null || empty($scoresMap['2.a.2.b']['detail_json'])) && !empty($autoData['AutoData_2_a_2_b'])) {
+            $ad2a2b = $autoData['AutoData_2_a_2_b'];
+            $scoresMap['2.a.2.b'] = [
+                'id' => $scoresMap['2.a.2.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a2b['score'],
+                'opsi_aksi' => $ad2a2b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.2.b']['catatan']) ? $scoresMap['2.a.2.b']['catatan'] : $ad2a2b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.2.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a2b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.3.a']) || $scoresMap['2.a.3.a']['bobot_capaian'] === null || empty($scoresMap['2.a.3.a']['detail_json'])) && !empty($autoData['AutoData_2_a_3_a'])) {
+            $ad2a3a = $autoData['AutoData_2_a_3_a'];
+            $scoresMap['2.a.3.a'] = [
+                'id' => $scoresMap['2.a.3.a']['id'] ?? null,
+                'bobot_capaian' => $ad2a3a['score'],
+                'opsi_aksi' => $ad2a3a['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.3.a']['catatan']) ? $scoresMap['2.a.3.a']['catatan'] : $ad2a3a['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.3.a']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a3a),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.a.3.b']) || $scoresMap['2.a.3.b']['bobot_capaian'] === null || empty($scoresMap['2.a.3.b']['detail_json'])) && !empty($autoData['AutoData_2_a_3_b'])) {
+            $ad2a3b = $autoData['AutoData_2_a_3_b'];
+            $scoresMap['2.a.3.b'] = [
+                'id' => $scoresMap['2.a.3.b']['id'] ?? null,
+                'bobot_capaian' => $ad2a3b['score'],
+                'opsi_aksi' => $ad2a3b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.a.3.b']['catatan']) ? $scoresMap['2.a.3.b']['catatan'] : $ad2a3b['catatan'],
+                'bukti_dukung' => $scoresMap['2.a.3.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2a3b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.b.1']) || $scoresMap['2.b.1']['bobot_capaian'] === null || empty($scoresMap['2.b.1']['detail_json'])) && !empty($autoData['AutoData_2_b_1'])) {
+            $ad2b1 = $autoData['AutoData_2_b_1'];
+            $scoresMap['2.b.1'] = [
+                'id' => $scoresMap['2.b.1']['id'] ?? null,
+                'bobot_capaian' => $ad2b1['score'],
+                'opsi_aksi' => $ad2b1['opsi_aksi'],
+                'catatan' => !empty($scoresMap['2.b.1']['catatan']) ? $scoresMap['2.b.1']['catatan'] : $ad2b1['catatan'],
+                'bukti_dukung' => $scoresMap['2.b.1']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2b1),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if ((!isset($scoresMap['2.b.2']) || $scoresMap['2.b.2']['bobot_capaian'] === null || empty($scoresMap['2.b.2']['detail_json'])) && !empty($autoData['AutoData_2_b_2'])) {
+            $ad2b2 = $autoData['AutoData_2_b_2'];
+            $scoresMap['2.b.2'] = [
+                'id' => $scoresMap['2.b.2']['id'] ?? null,
+                'bobot_capaian' => $ad2b2['score'],
+                'opsi_aksi' => $ad2b2['opsi_aksi'],
+                'catatan' => (!empty($scoresMap['2.b.2']['catatan']) && $scoresMap['2.b.2']['catatan'] !== 'Keterkaitan logis antara output dan outcome terukur jelas') ? $scoresMap['2.b.2']['catatan'] : $ad2b2['catatan'],
+                'bukti_dukung' => $scoresMap['2.b.2']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad2b2),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
+        if (!empty($autoData['AutoData_3_a_1_a'])) {
+            $ad3a1a = $autoData['AutoData_3_a_1_a'];
+            if (!isset($scoresMap['3.a.1.a']) || $scoresMap['3.a.1.a']['bobot_capaian'] === null || empty($scoresMap['3.a.1.a']['detail_json']) || (isset($scoresMap['3.a.1.a']['opsi_aksi']) && strpos($scoresMap['3.a.1.a']['opsi_aksi'], '100%') === 0)) {
+                $scoresMap['3.a.1.a'] = [
+                    'id' => $scoresMap['3.a.1.a']['id'] ?? null,
+                    'bobot_capaian' => $ad3a1a['score'],
+                    'opsi_aksi' => $ad3a1a['opsi_aksi'],
+                    'catatan' => (!empty($scoresMap['3.a.1.a']['catatan']) && strpos($scoresMap['3.a.1.a']['catatan'], 'Otomatis ditarik dari penetapan') !== false) ? $ad3a1a['catatan'] : (!empty($scoresMap['3.a.1.a']['catatan']) ? $scoresMap['3.a.1.a']['catatan'] : $ad3a1a['catatan']),
+                    'bukti_dukung' => $scoresMap['3.a.1.a']['bukti_dukung'] ?? '',
+                    'detail_json' => json_encode($ad3a1a),
+                    'bobot_verifikator' => null,
+                    'opsi_aksi_verifikator' => '',
+                    'catatan_verifikator' => '',
+                    'bukti_dukung_verifikator' => '',
+                    'status_verifikasi' => 'Draft',
+                    'tgl_verifikasi' => null
+                ];
+            }
+        }
+
+        if ((!isset($scoresMap['3.a.1.b']) || $scoresMap['3.a.1.b']['bobot_capaian'] === null || empty($scoresMap['3.a.1.b']['detail_json']) || (isset($scoresMap['3.a.1.b']['opsi_aksi']) && (strpos($scoresMap['3.a.1.b']['opsi_aksi'], '100%') === 0 || strpos($scoresMap['3.a.1.b']['opsi_aksi'], 'Memenuhi') !== false))) && !empty($autoData['AutoData_3_a_1_b'])) {
+            $ad3a1b = $autoData['AutoData_3_a_1_b'];
+            $scoresMap['3.a.1.b'] = [
+                'id' => $scoresMap['3.a.1.b']['id'] ?? null,
+                'bobot_capaian' => $ad3a1b['score'],
+                'opsi_aksi' => $ad3a1b['opsi_aksi'],
+                'catatan' => !empty($scoresMap['3.a.1.b']['catatan']) ? $scoresMap['3.a.1.b']['catatan'] : $ad3a1b['catatan'],
+                'bukti_dukung' => $scoresMap['3.a.1.b']['bukti_dukung'] ?? '',
+                'detail_json' => json_encode($ad3a1b),
+                'bobot_verifikator' => null,
+                'opsi_aksi_verifikator' => '',
+                'catatan_verifikator' => '',
+                'bukti_dukung_verifikator' => '',
+                'status_verifikasi' => 'Draft',
+                'tgl_verifikasi' => null
+            ];
+        }
+
         $response = array_merge([
             'status' => 'success',
             'master' => $this->get_ippd_master_data(),
@@ -35981,6 +38059,25 @@ public function updateStatusPerjanjianKinerja() {
                 $id = $this->db->insert_id();
             }
 
+            // Sync ke rkpd_inovasi_daerah jika poin 2.b.2 disimpan
+            if ($item_code === '2.b.2' && !empty($detail_str)) {
+                $decRows = json_decode($detail_str, true);
+                if (!empty($decRows['rows']) && is_array($decRows['rows'])) {
+                    foreach ($decRows['rows'] as $rItem) {
+                        $inv = trim($rItem['inovasi'] ?? '');
+                        if (!empty($inv)) {
+                            $updInov = [];
+                            if (isset($rItem['output'])) $updInov['output'] = $rItem['output'];
+                            if (isset($rItem['outcome'])) $updInov['outcome'] = $rItem['outcome'];
+                            if (isset($rItem['nilai_keselarasan'])) $updInov['nilai_keselarasan'] = (float)$rItem['nilai_keselarasan'];
+                            if (!empty($updInov)) {
+                                $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                            }
+                        }
+                    }
+                }
+            }
+
             $msg = ($status_verifikasi === 'Perlu Perbaikan') ? 
                 'Catatan perbaikan berhasil disimpan dan dikirimkan ke daerah.' : 
                 'Penilaian verifikator berhasil diverifikasi dan disimpan.';
@@ -36053,6 +38150,25 @@ public function updateStatusPerjanjianKinerja() {
                 $saveData['created_at'] = date('Y-m-d H:i:s');
                 $this->db->insert('ippd_penilaian', $saveData);
                 $id = $this->db->insert_id();
+            }
+
+            // Sync ke rkpd_inovasi_daerah jika poin 2.b.2 disimpan
+            if ($item_code === '2.b.2' && !empty($detail_str)) {
+                $decRows = json_decode($detail_str, true);
+                if (!empty($decRows['rows']) && is_array($decRows['rows'])) {
+                    foreach ($decRows['rows'] as $rItem) {
+                        $inv = trim($rItem['inovasi'] ?? '');
+                        if (!empty($inv)) {
+                            $updInov = [];
+                            if (isset($rItem['output'])) $updInov['output'] = $rItem['output'];
+                            if (isset($rItem['outcome'])) $updInov['outcome'] = $rItem['outcome'];
+                            if (isset($rItem['nilai_keselarasan'])) $updInov['nilai_keselarasan'] = (float)$rItem['nilai_keselarasan'];
+                            if (!empty($updInov)) {
+                                $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                            }
+                        }
+                    }
+                }
             }
 
             echo json_encode([
