@@ -21776,13 +21776,20 @@ public function updateStatusPerjanjianKinerja() {
             $KodeWilayah = $this->get_kode_wilayah();
             $HasFiltered = true;
         } else {
-            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: ($this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE));
             if (!empty($paramKw)) {
                 $KodeWilayah = $paramKw;
                 $HasFiltered = true;
+                $this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
+            } else if (!empty($_SESSION['TempKodeWilayah'])) {
+                $KodeWilayah = $_SESSION['TempKodeWilayah'];
+                $HasFiltered = true;
+            } else if (!empty($_SESSION['KodeWilayah'])) {
+                $KodeWilayah = $_SESSION['KodeWilayah'];
+                $HasFiltered = true;
             } else {
-                $KodeWilayah = '';
-                $HasFiltered = false;
+                $KodeWilayah = '35.10';
+                $HasFiltered = true;
             }
         }
         $Data['HasFiltered'] = $HasFiltered;
@@ -21906,13 +21913,20 @@ public function updateStatusPerjanjianKinerja() {
             $KodeWilayah = $this->get_kode_wilayah();
             $HasFiltered = true;
         } else {
-            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: ($this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE));
             if (!empty($paramKw)) {
                 $KodeWilayah = $paramKw;
                 $HasFiltered = true;
+                $this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
+            } else if (!empty($_SESSION['TempKodeWilayah'])) {
+                $KodeWilayah = $_SESSION['TempKodeWilayah'];
+                $HasFiltered = true;
+            } else if (!empty($_SESSION['KodeWilayah'])) {
+                $KodeWilayah = $_SESSION['KodeWilayah'];
+                $HasFiltered = true;
             } else {
-                $KodeWilayah = '';
-                $HasFiltered = false;
+                $KodeWilayah = '35.10';
+                $HasFiltered = true;
             }
         }
         $Data['HasFiltered'] = $HasFiltered;
@@ -34981,13 +34995,20 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $KodeWilayah = $this->get_kode_wilayah();
             $HasFiltered = true;
         } else {
-            $paramKw = $this->input->get('kodewilayah', TRUE) ?: $this->input->get('kode_wilayah', TRUE);
+            $paramKw = $this->input->get('kodewilayah', TRUE) ?: ($this->input->get('kode_wilayah', TRUE) ?: $this->input->get('KodeWilayah', TRUE));
             if (!empty($paramKw)) {
                 $KodeWilayah = $paramKw;
                 $HasFiltered = true;
+                $this->session->set_userdata('TempKodeWilayah', $KodeWilayah);
+            } else if (!empty($_SESSION['TempKodeWilayah'])) {
+                $KodeWilayah = $_SESSION['TempKodeWilayah'];
+                $HasFiltered = true;
+            } else if (!empty($_SESSION['KodeWilayah'])) {
+                $KodeWilayah = $_SESSION['KodeWilayah'];
+                $HasFiltered = true;
             } else {
-                $KodeWilayah = '';
-                $HasFiltered = false;
+                $KodeWilayah = '35.10';
+                $HasFiltered = true;
             }
         }
         $Data['HasFiltered'] = $HasFiltered;

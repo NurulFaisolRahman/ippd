@@ -3070,6 +3070,7 @@ tr.type-sub:hover td {
   }
 
   function renderTable(){
+    if (!tbody) return;
     tbody.innerHTML = "";
     var searchKeyword = inputSearch.value.trim().toLowerCase();
     var rollup = calculateRollupScores();
