@@ -8398,22 +8398,16 @@ function renderWs_2_a_1_a(d, maxBobot) {
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_1_a" style="min-width: 1200px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_a" style="min-width: 1000px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 420px; text-align: center; vertical-align: middle;">Hasil Evaluasi Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 140px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 150px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 160px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 320px; text-align: center;">Permasalahan Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Hasil Evaluasi Pembangunan Daerah</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -8435,9 +8429,6 @@ function renderWs_2_a_1_a(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
         '<td class="ws-2a1a-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a1a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'LPPD Tahun 2024') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a1a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
       '</tr>';
   });
@@ -8450,7 +8441,7 @@ function renderWs_2_a_1_a(d, maxBobot) {
           '<td id="ws2a1aFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">6.00</td>' +
           '<td id="ws2a1aFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -8463,11 +8454,11 @@ function renderWs_2_a_1_a(d, maxBobot) {
     badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
     colTitle: 'Kriteria Keterkaitan Permasalahan Daerah dengan Hasil Evaluasi',
     rows: [
-      { crit: 'A', text: 'Kebutuhan daerah sama dengan atau kurang dari 25% hasil evaluasi', val: '1,20', color: '#dc2626' },
-      { crit: 'B', text: 'Kebutuhan daerah lebih dari 25% dan sama dengan atau kurang dari 50% hasil evaluasi', val: '2,40', color: '#d97706' },
-      { crit: 'C', text: 'Kebutuhan daerah lebih dari 50% dan sama dengan atau kurang dari 75% hasil evaluasi', val: '3,60', color: '#2563eb' },
-      { crit: 'D', text: 'Kebutuhan daerah lebih dari 75% dan sama dengan atau kurang dari 99% hasil evaluasi', val: '4,80', color: '#0891b2' },
-      { crit: 'E', text: 'Kebutuhan daerah 100% berdasarkan hasil evaluasi', val: '6,00', color: '#16a34a' }
+      { crit: 'A', text: 'Penyusunan kebutuhan daerah sama dengan atau kurang dari 25% hasil evaluasi', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Penyusunan kebutuhan daerah lebih dari 25% dan sama dengan atau kurang dari 50% hasil evaluasi', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Penyusunan kebutuhan daerah lebih dari 50% dan sama dengan atau kurang dari 75% hasil evaluasi', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Penyusunan kebutuhan daerah lebih dari 75% dan sama dengan atau kurang dari 99% hasil evaluasi', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Penyusunan kebutuhan daerah 100% berdasarkan hasil evaluasi', val: '6,00', color: '#16a34a' }
     ],
     sourceTitle: 'Hasil Evaluasi Kebutuhan Daerah',
     infoRows: [
@@ -8529,38 +8520,42 @@ function updateScore_2_a_1_a(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_1_b(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.a.1.b');
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A1B);
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A1B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1B)) : []);
   var totalRows = 0;
   var matchedCount = 0;
+
   groups.forEach(function(g) {
     (g.perms || []).forEach(function(p) {
       totalRows++;
-      if (parseFloat(p.nilai_keselarasan) > 0) matchedCount++;
+      var val = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
+      if (isNaN(val)) val = 100.0;
+      if (val > 0) matchedCount++;
     });
   });
-  if (totalRows === 0) totalRows = 15;
-  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var maxBobot = 6.0;
-  var score = (pct / 100) * maxBobot;
+
+  if (totalRows === 0) totalRows = 60;
+  var pctMatched = (matchedCount / totalRows) * 100;
+  var score = (pctMatched / 100) * 6.0;
   score = Math.round(score * 100) / 100;
+
   var crit = 'E';
   var critText = 'Kesesuaian 100%';
-  if (pct >= 100.0) { crit = 'E'; critText = 'Kesesuaian 100%'; }
-  else if (pct > 75.0) { crit = 'D'; critText = 'Kesesuaian > 75% s/d <= 99%'; }
-  else if (pct > 50.0) { crit = 'C'; critText = 'Kesesuaian > 50% s/d <= 75%'; }
-  else if (pct > 25.0) { crit = 'B'; critText = 'Kesesuaian > 25% s/d <= 50%'; }
+  if (pctMatched >= 100.0) { crit = 'E'; critText = 'Kesesuaian 100%'; }
+  else if (pctMatched > 75.0) { crit = 'D'; critText = 'Kesesuaian > 75% s/d <= 99%'; }
+  else if (pctMatched > 50.0) { crit = 'C'; critText = 'Kesesuaian > 50% s/d <= 75%'; }
+  else if (pctMatched > 25.0) { crit = 'B'; critText = 'Kesesuaian > 25% s/d <= 50%'; }
   else { crit = 'A'; critText = 'Kesesuaian <= 25%'; }
+
   return {
     groups: groups,
     totalRows: totalRows,
     matchedCount: matchedCount,
-    pctMatched: pct,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian 100%)'
+    catatan: 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian ' + pctMatched.toFixed(2) + '%)'
   };
 }
 
@@ -8576,22 +8571,16 @@ function renderWs_2_a_1_b(d, maxBobot) {
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_1_b" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_b" style="min-width: 1000px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 320px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Permasalahan Daerah</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -8609,7 +8598,7 @@ function renderWs_2_a_1_b(d, maxBobot) {
       if (pIdx === 0) {
         html +=
           '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
-          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.pd || '-') + '</td>';
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.prioritas || '-') + '</td>';
       }
       html +=
         '<td style="text-align:left;">' + escapeHtml(p.permasalahan || '-') + '</td>' +
@@ -8621,9 +8610,6 @@ function renderWs_2_a_1_b(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
         '<td class="ws-2a1b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a1b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || '') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a1b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
       '</tr>';
       rowNum++;
@@ -8638,7 +8624,7 @@ function renderWs_2_a_1_b(d, maxBobot) {
           '<td id="ws2a1bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">6.00</td>' +
           '<td id="ws2a1bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -8649,18 +8635,18 @@ function renderWs_2_a_1_b(d, maxBobot) {
     safeId: 'ws2a1b',
     title: 'Keterangan & Kriteria Penilaian Poin 2.a.1.b',
     badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
-    colTitle: 'Kriteria Keterkaitan Prioritas Pembangunan Daerah dengan Permasalahan Daerah',
+    colTitle: 'Kriteria Keterkaitan Prioritas Pembangunan Daerah dengan Permasalahan Pembangunan',
     rows: [
-      { crit: 'A', text: 'Prioritas pembangunan daerah menjawab sama dengan atau kurang dari 25% permasalahan daerah', val: '1,20', color: '#dc2626' },
-      { crit: 'B', text: 'Prioritas pembangunan daerah menjawab lebih dari 25% dan sama dengan atau kurang dari 50% permasalahan daerah', val: '2,40', color: '#d97706' },
-      { crit: 'C', text: 'Prioritas pembangunan daerah menjawab lebih dari 50% dan sama dengan atau kurang dari 75% permasalahan daerah', val: '3,60', color: '#2563eb' },
-      { crit: 'D', text: 'Prioritas pembangunan daerah menjawab lebih dari 75% dan sama dengan atau kurang dari 99% permasalahan daerah', val: '4,80', color: '#0891b2' },
-      { crit: 'E', text: 'Prioritas pembangunan daerah 100% menjawab permasalahan daerah', val: '6,00', color: '#16a34a' }
+      { crit: 'A', text: 'Kesesuaian sama dengan atau kurang dari 25%', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Kesesuaian lebih dari 25% dan sama dengan atau kurang dari 50%', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Kesesuaian lebih dari 50% dan sama dengan atau kurang dari 75%', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Kesesuaian lebih dari 75% dan sama dengan atau kurang dari 99%', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Kesesuaian 100%', val: '6,00', color: '#16a34a' }
     ],
-    sourceTitle: 'Hasil Keterkaitan Prioritas dengan Permasalahan',
+    sourceTitle: 'Hasil Keterkaitan Prioritas vs Permasalahan Daerah',
     infoRows: [
-      { label: 'Total Permasalahan:', id: 'ws2a1bTotalRows', value: totalRows + ' Permasalahan' },
-      { label: 'Permasalahan Terjawab:', id: 'ws2a1bPctMatched', value: info.matchedCount + ' Permasalahan (' + numFmt(pctMatched) + '%)' },
+      { label: 'Total Relasi Masalah:', id: 'ws2a1bTotalRows', value: totalRows + ' Permasalahan Terpetakan' },
+      { label: 'Prioritas Sesuai Masalah:', id: 'ws2a1bPctMatched', value: info.matchedCount + ' Permasalahan (' + numFmt(pctMatched) + '%)' },
       { label: 'Kriteria Terpenuhi:', id: 'ws2a1bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
     ],
     initialScore: score
@@ -8671,7 +8657,7 @@ function renderWs_2_a_1_b(d, maxBobot) {
 
 function updateScore_2_a_1_b(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_a_1_b .ws-2a1b-row');
-  var totalRows = rows.length || 15;
+  var totalRows = rows.length || 60;
   var matchedCount = 0;
   rows.forEach(function(r) {
     var sel = r.querySelector('.ws-2a1b-score-sel');
@@ -8704,7 +8690,7 @@ function updateScore_2_a_1_b(maxBobot) {
   if (excelFxContent) excelFxContent.textContent = 'Prioritas vs Permasalahan: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
   updateStandardCriteriaHighlight('ws2a1b', crit, terbAvg, {
-    'ws2a1bTotalRows': totalRows + ' Permasalahan',
+    'ws2a1bTotalRows': totalRows + ' Permasalahan Terpetakan',
     'ws2a1bPctMatched': matchedCount + ' Permasalahan (' + numFmt(pct) + '%)',
     'ws2a1bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
   }, ['A', 'B', 'C', 'D', 'E']);
@@ -8713,37 +8699,41 @@ function updateScore_2_a_1_b(maxBobot) {
 }
 
 // -------------------------------------------------------------------------
-// 3. POIN 2.a.1.c: Isu Strategis Daerah vs Prioritas Pembangunan Daerah (Bobot 6.00)
+// 3. POIN 2.a.1.c: Penyusunan Prioritas Daerah berdasarkan Isu Strategis (Bobot 6.00)
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_1_c(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.a.1.c');
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A1C);
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A1C !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1C)) : []);
   var totalRows = 0;
   var matchedCount = 0;
+
   groups.forEach(function(g) {
     (g.pds || []).forEach(function(p) {
       totalRows++;
-      if (parseFloat(p.nilai_keselarasan) > 0) matchedCount++;
+      var val = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
+      if (isNaN(val)) val = 100.0;
+      if (val > 0) matchedCount++;
     });
   });
-  if (totalRows === 0) totalRows = 8;
-  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var maxBobot = 6.0;
-  var score = (pct / 100) * maxBobot;
+
+  if (totalRows === 0) totalRows = 19;
+  var pctMatched = (matchedCount / totalRows) * 100;
+  var score = (pctMatched / 100) * 6.0;
   score = Math.round(score * 100) / 100;
+
   var crit = 'E';
-  var critText = 'Penyusunan 100% berdasarkan isu strategis';
-  if (pct >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis'; }
-  else if (pct > 75.0) { crit = 'D'; critText = 'Penyusunan > 75% s/d <= 99%'; }
-  else if (pct > 50.0) { crit = 'C'; critText = 'Penyusunan > 50% s/d <= 75%'; }
-  else if (pct > 25.0) { crit = 'B'; critText = 'Penyusunan > 25% s/d <= 50%'; }
-  else { crit = 'A'; critText = 'Penyusunan <= 25%'; }
+  var critText = 'Penyusunan 100% berdasarkan isu strategis yang telah diidentifikasi';
+  if (pctMatched >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis yang telah diidentifikasi'; }
+  else if (pctMatched > 75.0) { crit = 'D'; critText = 'Penyusunan prioritas lebih dari 75% dan sama dengan atau kurang dari 99% isu strategis yang telah diidentifikasi'; }
+  else if (pctMatched > 50.0) { crit = 'C'; critText = 'Penyusunan prioritas lebih dari 50% dan sama dengan atau kurang dari 75% isu strategis yang telah diidentifikasi'; }
+  else if (pctMatched > 25.0) { crit = 'B'; critText = 'Penyusunan prioritas lebih dari 25% dan sama dengan atau kurang dari 50% isu strategis yang telah diidentifikasi'; }
+  else { crit = 'A'; critText = 'Penyusunan prioritas sama dengan atau kurang dari 25% isu strategis yang telah diidentifikasi'; }
+
   return {
     groups: groups,
     totalRows: totalRows,
     matchedCount: matchedCount,
-    pctMatched: pct,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
@@ -8764,22 +8754,16 @@ function renderWs_2_a_1_c(d, maxBobot) {
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_1_c" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_c" style="min-width: 1000px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 320px; text-align: center;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -8796,10 +8780,10 @@ function renderWs_2_a_1_c(d, maxBobot) {
       if (pIdx === 0) {
         html +=
           '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
-          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.isu || '-') + '</td>';
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.isu_strategis || '-') + '</td>';
       }
       html +=
-        '<td style="text-align:left;">' + escapeHtml(p.prioritas || '-') + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(p.pd || '-') + '</td>' +
         '<td style="text-align:center;">' +
           '<select class="form-control ws-2a1c-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
             '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
@@ -8808,9 +8792,6 @@ function renderWs_2_a_1_c(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
         '<td class="ws-2a1c-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a1c-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1c-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || '') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a1c-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a1c-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
       '</tr>';
     });
@@ -8824,7 +8805,7 @@ function renderWs_2_a_1_c(d, maxBobot) {
           '<td id="ws2a1cFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">6.00</td>' +
           '<td id="ws2a1cFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -8837,16 +8818,16 @@ function renderWs_2_a_1_c(d, maxBobot) {
     badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: 75%-99% | E: 100%',
     colTitle: 'Kriteria Penyusunan Prioritas Pembangunan Daerah Berdasarkan Isu Strategis',
     rows: [
-      { crit: 'A', text: 'Penyusunan prioritas pembangunan daerah sama dengan atau kurang dari 25% isu strategis daerah', val: '1,20', color: '#dc2626' },
-      { crit: 'B', text: 'Penyusunan prioritas pembangunan daerah lebih dari 25% dan sama dengan atau kurang dari 50% isu strategis daerah', val: '2,40', color: '#d97706' },
-      { crit: 'C', text: 'Penyusunan prioritas pembangunan daerah lebih dari 50% dan sama dengan atau kurang dari 75% isu strategis daerah', val: '3,60', color: '#2563eb' },
-      { crit: 'D', text: 'Penyusunan prioritas pembangunan daerah lebih dari 75% dan sama dengan atau kurang dari 99% isu strategis daerah', val: '4,80', color: '#0891b2' },
-      { crit: 'E', text: 'Penyusunan prioritas pembangunan daerah 100% berdasarkan isu strategis yang telah diidentifikasi', val: '6,00', color: '#16a34a' }
+      { crit: 'A', text: 'Penyusunan prioritas sama dengan atau kurang dari 25% isu strategis yang telah diidentifikasi', val: '1,20', color: '#dc2626' },
+      { crit: 'B', text: 'Penyusunan prioritas lebih dari 25% dan sama dengan atau kurang dari 50% isu strategis yang telah diidentifikasi', val: '2,40', color: '#d97706' },
+      { crit: 'C', text: 'Penyusunan prioritas lebih dari 50% dan sama dengan atau kurang dari 75% isu strategis yang telah diidentifikasi', val: '3,60', color: '#2563eb' },
+      { crit: 'D', text: 'Penyusunan prioritas lebih dari 75% dan sama dengan atau kurang dari 99% isu strategis yang telah diidentifikasi', val: '4,80', color: '#0891b2' },
+      { crit: 'E', text: 'Penyusunan 100% berdasarkan isu strategis yang telah diidentifikasi', val: '6,00', color: '#16a34a' }
     ],
-    sourceTitle: 'Hasil Penyusunan Prioritas Berdasarkan Isu Strategis',
+    sourceTitle: 'Hasil Penyusunan Prioritas vs Isu Strategis',
     infoRows: [
-      { label: 'Total Isu Strategis:', id: 'ws2a1cTotalRows', value: totalRows + ' Isu Strategis' },
-      { label: 'Isu Terakomodir Prioritas:', id: 'ws2a1cPctMatched', value: info.matchedCount + ' Isu (' + numFmt(pctMatched) + '%)' },
+      { label: 'Total Relasi Prioritas:', id: 'ws2a1cTotalRows', value: totalRows + ' Relasi Isu Strategis' },
+      { label: 'Prioritas Sesuai Isu:', id: 'ws2a1cPctMatched', value: info.matchedCount + ' Relasi (' + numFmt(pctMatched) + '%)' },
       { label: 'Kriteria Terpenuhi:', id: 'ws2a1cCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
     ],
     initialScore: score
@@ -8857,7 +8838,7 @@ function renderWs_2_a_1_c(d, maxBobot) {
 
 function updateScore_2_a_1_c(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_a_1_c .ws-2a1c-row');
-  var totalRows = rows.length || 8;
+  var totalRows = rows.length || 19;
   var matchedCount = 0;
   rows.forEach(function(r) {
     var sel = r.querySelector('.ws-2a1c-score-sel');
@@ -8871,12 +8852,12 @@ function updateScore_2_a_1_c(maxBobot) {
   var terbAvg = (pct / 100) * 6.0;
   terbAvg = Math.round(terbAvg * 100) / 100;
   var crit = 'E';
-  var critText = 'Penyusunan 100% berdasarkan isu strategis';
-  if (pct >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis'; }
-  else if (pct > 75.0) { crit = 'D'; critText = 'Penyusunan > 75% s/d <= 99%'; }
-  else if (pct > 50.0) { crit = 'C'; critText = 'Penyusunan > 50% s/d <= 75%'; }
-  else if (pct > 25.0) { crit = 'B'; critText = 'Penyusunan > 25% s/d <= 50%'; }
-  else { crit = 'A'; critText = 'Penyusunan <= 25%'; }
+  var critText = 'Penyusunan 100% berdasarkan isu strategis yang telah diidentifikasi';
+  if (pct >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis yang telah diidentifikasi'; }
+  else if (pct > 75.0) { crit = 'D'; critText = 'Penyusunan prioritas lebih dari 75% dan sama dengan atau kurang dari 99% isu strategis yang telah diidentifikasi'; }
+  else if (pct > 50.0) { crit = 'C'; critText = 'Penyusunan prioritas lebih dari 50% dan sama dengan atau kurang dari 75% isu strategis yang telah diidentifikasi'; }
+  else if (pct > 25.0) { crit = 'B'; critText = 'Penyusunan prioritas lebih dari 25% dan sama dengan atau kurang dari 50% isu strategis yang telah diidentifikasi'; }
+  else { crit = 'A'; critText = 'Penyusunan prioritas sama dengan atau kurang dari 25% isu strategis yang telah diidentifikasi'; }
 
   var elFootPct = document.getElementById('ws2a1cFootPct');
   if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
@@ -8890,65 +8871,33 @@ function updateScore_2_a_1_c(maxBobot) {
   if (excelFxContent) excelFxContent.textContent = 'Isu Strategis vs Prioritas: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
   updateStandardCriteriaHighlight('ws2a1c', crit, terbAvg, {
-    'ws2a1cTotalRows': totalRows + ' Isu Strategis',
-    'ws2a1cPctMatched': matchedCount + ' Isu (' + numFmt(pct) + '%)',
+    'ws2a1cTotalRows': totalRows + ' Relasi Isu Strategis',
+    'ws2a1cPctMatched': matchedCount + ' Relasi (' + numFmt(pct) + '%)',
     'ws2a1cCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
   }, ['A', 'B', 'C', 'D', 'E']);
 
   return terbAvg;
 }
 
-// Helper to extract rows for 2.a.2.a & 2.a.2.b
-function extractRows2a2(d, fallbackMaster) {
-  d = d || {};
-  if (d.rows && Array.isArray(d.rows) && d.rows.length > 0) return d.rows;
-  var auto = getPilar2Auto('2.a.2.b');
-  if (auto.rows && Array.isArray(auto.rows) && auto.rows.length > 0) return auto.rows;
-  if (auto.groups && Array.isArray(auto.groups) && auto.groups.length > 0) {
-    var out = [];
-    auto.groups.forEach(function(g) {
-      if (g.indiks && Array.isArray(g.indiks)) {
-        g.indiks.forEach(function(ind) {
-          out.push({
-            no: out.length + 1,
-            prioritas: g.pd || '',
-            isu_strategis: g.isu || '',
-            indikator_sasaran: ind.indikator || '',
-            nilai_keselarasan: (ind.nilai_keselarasan !== undefined) ? parseFloat(ind.nilai_keselarasan) : 100.0,
-            keselarasan_terbobot: 8.0,
-            dokumen: 'RKPD Kab. Banyuwangi 2026',
-            halaman: '',
-            tabel: '',
-            catatan: ''
-          });
-        });
-      }
-    });
-    if (out.length > 0) return out;
-  }
-  return fallbackMaster || [];
-}
-
 // -------------------------------------------------------------------------
-// 4. POIN 2.a.2.a: Indikator Sasaran pada Prioritas/Isu Strategis Terkait (Bobot 6.00)
+// 4. POIN 2.a.2.a: Ketersediaan Indikator Sasaran untuk Isu Strategis/Prioritas (Bobot 6.00)
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_2_a(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.a.2.a');
-  var rawRows = extractRows2a2(d, MASTER_PILAR2_2A2A);
-  var status = d.opsi_aksi || auto.opsi_aksi || 'Ada';
-  var isAda = (status === 'Ada' || rawRows.length > 0);
+  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2A2A !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A2A)) : []);
+  var isAda = d.status !== undefined ? (d.status === 'Ada') : true;
   var score = isAda ? 6.00 : 0.00;
   var crit = isAda ? 'B' : 'A';
   var critText = isAda ? 'Ada' : 'Tidak ada';
+
   return {
-    rows: rawRows,
-    totalRows: rawRows.length,
+    rows: rows,
+    isAda: isAda,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText
+    catatan: 'Tersedia indikator sasaran untuk prioritas pembangunan daerah/isu strategis terkait: ' + critText
   };
 }
 
@@ -8956,18 +8905,19 @@ function renderWs_2_a_2_a(d, maxBobot) {
   d = d || {};
   var info = getAutoScore_2_a_2_a(d);
   var rows = info.rows;
+  var isAda = info.isAda;
   var score = info.score;
-  var isAda = (score > 0);
-  var crit = info.kriteria || (isAda ? 'B' : 'A');
-  var critText = info.aksi || info.opsi_aksi || (isAda ? 'Ada' : 'Tidak ada');
+  var crit = info.kriteria;
+  var critText = info.aksi || info.opsi_aksi || 'Ada';
 
   var html =
-    '<div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">' +
+    '<div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px 16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">' +
       '<div>' +
-        '<div style="font-weight:700; font-size:13px; color:#0f172a;">Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah / Isu Strategis Terkait:</div>' +
-        '<div style="font-size:12px; color:#64748b;">(Pilih ketersediaan indikator sasaran sesuai dokumen perencanaan daerah)</div>' +
+        '<div style="font-weight:700; color:#0f172a; font-size:13.5px;"><i class="fa fa-check-circle" style="color:#16a34a; margin-right:6px;"></i> Ketersediaan Indikator Sasaran pada RKPD Daerah</div>' +
+        '<div style="font-size:12px; color:#64748b; margin-top:2px;">Ketersediaan indikator sasaran untuk isu strategis / prioritas pembangunan daerah (Status: <strong>' + (isAda ? 'Ada' : 'Tidak ada') + '</strong>)</div>' +
       '</div>' +
-      '<div style="display:flex; align-items:center; gap:12px;">' +
+      '<div style="display:flex; align-items:center; gap:8px;">' +
+        '<label style="margin:0; font-size:12.5px; font-weight:700; color:#334155;">Status:</label>' +
         '<select id="ws2a2aStatusSel" class="form-control" style="width:140px; font-weight:700; font-size:13px; text-align:center; color:' + (isAda ? '#16a34a' : '#dc2626') + ';">' +
           '<option value="Ada" ' + (isAda ? 'selected' : '') + '>Ada</option>' +
           '<option value="Tidak ada" ' + (!isAda ? 'selected' : '') + '>Tidak ada</option>' +
@@ -8980,20 +8930,14 @@ function renderWs_2_a_2_a(d, maxBobot) {
 
   html +=
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_2_a" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_2_a" style="min-width: 1000px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 380px; text-align: center; vertical-align: middle;">Indikator Sasaran</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 150px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 160px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 320px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" style="width: 320px; text-align: center;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Indikator Sasaran</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9005,9 +8949,6 @@ function renderWs_2_a_2_a(d, maxBobot) {
         '<td style="text-align:left;">' + escapeHtml(r.prioritas || '-') + '</td>' +
         '<td style="text-align:left;">' + escapeHtml(r.isu_strategis || '-') + '</td>' +
         '<td style="text-align:left; font-weight:600;">' + escapeHtml(r.indikator_sasaran || '-') + '</td>' +
-        '<td><input type="text" class="form-control ws-2a2a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a2a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a2a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a2a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
       '</tr>';
   });
@@ -9041,8 +8982,7 @@ function renderWs_2_a_2_a(d, maxBobot) {
 
 function updateScore_2_a_2_a(maxBobot) {
   var sel = document.getElementById('ws2a2aStatusSel');
-  var val = sel ? sel.value : 'Ada';
-  var isAda = (val === 'Ada');
+  var isAda = sel ? (sel.value === 'Ada') : true;
   var score = isAda ? 6.00 : 0.00;
   var crit = isAda ? 'B' : 'A';
   var critText = isAda ? 'Ada' : 'Tidak ada';
@@ -9053,7 +8993,7 @@ function updateScore_2_a_2_a(maxBobot) {
   if (modalBobotInput) modalBobotInput.value = numFmt(score);
   if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
   if (modalOpsiAksi) modalOpsiAksi.value = critText;
-  if (modalCatatan) modalCatatan.value = 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText;
+  if (modalCatatan) modalCatatan.value = 'Tersedia indikator sasaran untuk prioritas pembangunan daerah/isu strategis terkait: ' + critText;
   if (excelFxContent) excelFxContent.textContent = 'Ketersediaan Indikator Sasaran: ' + critText + ' -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
 
   updateStandardCriteriaHighlight('ws2a2a', crit, score, {
@@ -9065,32 +9005,38 @@ function updateScore_2_a_2_a(maxBobot) {
 }
 
 // -------------------------------------------------------------------------
-// 5. POIN 2.a.2.b: Prioritas / Isu vs Indikator Sasaran (Bobot 8.00)
+// 5. POIN 2.a.2.b: Tingkat Kesesuaian Indikator Sasaran (Bobot 8.00)
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_2_b(d) {
   d = d || {};
-  var rawRows = extractRows2a2(d, MASTER_PILAR2_2A2B);
-  var totalRows = rawRows.length || 59;
+  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2A2B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A2B)) : []);
+  var totalRows = rows.length || 59;
   var matchedCount = 0;
-  rawRows.forEach(function(r) {
-    if (parseFloat(r.nilai_keselarasan) > 0) matchedCount++;
+
+  rows.forEach(function(r) {
+    var val = (r.nilai_keselarasan !== undefined) ? parseFloat(r.nilai_keselarasan) : 100.0;
+    if (isNaN(val)) val = 100.0;
+    if (val > 0) matchedCount++;
   });
-  var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 94.92;
-  var maxBobot = 8.0;
-  var avgTerbobot = (pctMatched / 100) * maxBobot;
-  avgTerbobot = Math.round(avgTerbobot * 100) / 100;
+
+  if (totalRows === 0) totalRows = 59;
+  var pctMatched = (matchedCount / totalRows) * 100;
+  var score = (pctMatched / 100) * 8.0;
+  score = Math.round(score * 100) / 100;
+
   var crit = 'D';
   var critText = '=> 75%';
   if (pctMatched >= 75.0) { crit = 'D'; critText = '=> 75%'; }
   else if (pctMatched >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
   else if (pctMatched >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
   else { crit = 'A'; critText = '=< 25%'; }
+
   return {
-    rows: rawRows,
+    rows: rows,
     totalRows: totalRows,
     matchedCount: matchedCount,
     pctMatched: pctMatched,
-    score: avgTerbobot,
+    score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
@@ -9106,27 +9052,21 @@ function renderWs_2_a_2_b(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
-  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
+  var critText = info.aksi || info.opsi_aksi || '=> 75%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_2_b" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_2_b" style="min-width: 1050px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 300px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 360px; text-align: center; vertical-align: middle;">Indikator Sasaran</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 260px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" style="width: 280px; text-align: center;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" style="min-width: 320px; text-align: center;">Indikator Sasaran</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9150,9 +9090,6 @@ function renderWs_2_a_2_b(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.00</td>' +
         '<td class="ws-2a2b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a2b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a2b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a2b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a2b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
       '</tr>';
   });
@@ -9165,7 +9102,7 @@ function renderWs_2_a_2_b(d, maxBobot) {
           '<td id="ws2a2bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">8.00</td>' +
           '<td id="ws2a2bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -9175,18 +9112,18 @@ function renderWs_2_a_2_b(d, maxBobot) {
     code: '2.a.2.b',
     safeId: 'ws2a2b',
     title: 'Keterangan & Kriteria Penilaian Poin 2.a.2.b',
-    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
-    colTitle: 'Kriteria Kesesuaian Rumusan Indikator Sasaran terhadap Prioritas/Isu Strategis',
+    badgeText: 'A: =< 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
+    colTitle: 'Kriteria Kesesuaian Indikator Sasaran Menyelesaikan Isu/Prioritas',
     rows: [
-      { crit: 'A', text: '=< 25%', val: '2,00', color: '#dc2626' },
-      { crit: 'B', text: '25% - 50%', val: '4,00', color: '#d97706' },
-      { crit: 'C', text: '50% - 75%', val: '6,00', color: '#2563eb' },
-      { crit: 'D', text: '=> 75%', val: '8,00', color: '#16a34a' }
+      { crit: 'A', text: 'Kesesuaian =< 25%', val: '2,00', color: '#dc2626' },
+      { crit: 'B', text: 'Kesesuaian 25% - 50%', val: '4,00', color: '#d97706' },
+      { crit: 'C', text: 'Kesesuaian 50% - 75%', val: '6,00', color: '#2563eb' },
+      { crit: 'D', text: 'Kesesuaian => 75%', val: '8,00', color: '#16a34a' }
     ],
-    sourceTitle: 'Hasil Penilaian Kesesuaian Rumusan Indikator Sasaran',
+    sourceTitle: 'Hasil Kesesuaian Indikator Sasaran',
     infoRows: [
-      { label: 'Total Indikator Sasaran:', id: 'ws2a2bTotalRows', value: totalRows + ' Indikator' },
-      { label: 'Indikator Selaras:', id: 'ws2a2bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
+      { label: 'Total Indikator Sasaran:', id: 'ws2a2bTotalRows', value: totalRows + ' Indikator Sasaran' },
+      { label: 'Indikator Sesuai Prioritas:', id: 'ws2a2bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
       { label: 'Kriteria Terpenuhi:', id: 'ws2a2bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
     ],
     initialScore: score
@@ -9229,7 +9166,7 @@ function updateScore_2_a_2_b(maxBobot) {
   if (excelFxContent) excelFxContent.textContent = 'Kesesuaian Indikator Sasaran: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
   updateStandardCriteriaHighlight('ws2a2b', crit, terbAvg, {
-    'ws2a2bTotalRows': totalRows + ' Indikator',
+    'ws2a2bTotalRows': totalRows + ' Indikator Sasaran',
     'ws2a2bPctMatched': matchedCount + ' Indikator (' + numFmt(pct) + '%)',
     'ws2a2bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
   }, ['A', 'B', 'C', 'D']);
@@ -9238,46 +9175,45 @@ function updateScore_2_a_2_b(maxBobot) {
 }
 
 // -------------------------------------------------------------------------
-// 6. POIN 2.a.3.a: Prioritas Pembangunan Daerah vs Program Prioritas (Bobot 8.50)
+// 6. POIN 2.a.3.a: Prioritas Pembangunan Daerah dijabarkan ke Program Prioritas (Bobot 8.50)
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_3_a(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.a.3.a');
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A3A);
-  var totalPrioritas = groups.length || 7;
-  var terjabarkanCount = 0;
-  var totalRows = 0;
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A3A !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3A)) : []);
+  var totalItems = 0;
   var matchedCount = 0;
+
   groups.forEach(function(g) {
-    if (g.is_terjabarkan || (g.programs && g.programs.length > 0)) terjabarkanCount++;
     (g.programs || []).forEach(function(prg) {
-      totalRows++;
-      if (parseFloat(prg.nilai_keselarasan) > 0) matchedCount++;
+      totalItems++;
+      var val = (prg.nilai_keselarasan !== undefined) ? parseFloat(prg.nilai_keselarasan) : 100.0;
+      if (isNaN(val)) val = 100.0;
+      if (val > 0) matchedCount++;
     });
   });
-  if (totalPrioritas === 0) totalPrioritas = 7;
-  var pct = totalPrioritas > 0 ? (terjabarkanCount / totalPrioritas) * 100 : 100;
-  var maxBobot = 8.5;
-  var score = 8.50;
+
+  if (totalItems === 0) totalItems = 107;
+  var pctMatched = (matchedCount / totalItems) * 100;
+  var score = (pctMatched / 100) * 8.5;
+  score = Math.round(score * 100) / 100;
+
   var crit = 'D';
   var critText = '=> 75%';
-  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas'; }
-  else if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
-  else if (pct > 50.0) { crit = 'C'; score = 6.375; critText = '> 50% s/d <= 75%'; }
-  else if (pct > 25.0) { crit = 'B'; score = 4.25; critText = '> 25% s/d <= 50%'; }
-  else { crit = 'A'; score = 2.125; critText = '<= 25%'; }
+  if (pctMatched >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pctMatched >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pctMatched >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
+
   return {
     groups: groups,
-    totalPrioritas: totalPrioritas,
-    terjabarkanPrioritas: terjabarkanCount,
-    totalRows: totalRows,
+    totalItems: totalItems,
     matchedCount: matchedCount,
-    pctMatched: pct,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + terjabarkanCount + '/' + totalPrioritas + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)'
+    catatan: 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + matchedCount + '/' + totalItems + ' program prioritas selaras, keselarasan ' + pctMatched.toFixed(2) + '%)'
   };
 }
 
@@ -9285,32 +9221,25 @@ function renderWs_2_a_3_a(d, maxBobot) {
   d = d || {};
   var info = getAutoScore_2_a_3_a(d);
   var groups = info.groups;
-  var totalPrioritas = info.totalPrioritas;
-  var terjabarkanCount = info.terjabarkanPrioritas;
+  var totalItems = info.totalItems;
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
-  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
+  var critText = info.aksi || info.opsi_aksi || '=> 75%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_3_a" style="min-width: 1350px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_3_a" style="min-width: 1100px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 250px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Arah Kebijakan</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Program Prioritas</th>' +
-          '<th class="th-green" rowspan="2" style="width: 120px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 100px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 130px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 75px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 75px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 140px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 240px; text-align: center;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" style="width: 260px; text-align: center;">Arah Kebijakan</th>' +
+          '<th class="th-green" style="min-width: 300px; text-align: center;">Program Prioritas</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9340,9 +9269,6 @@ function renderWs_2_a_3_a(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.50</td>' +
         '<td class="ws-2a3a-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a3a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a3a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.halaman || 'Bab IV') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a3a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a3a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.catatan || '') + '"></td>' +
       '</tr>';
     });
@@ -9352,11 +9278,11 @@ function renderWs_2_a_3_a(d, maxBobot) {
       '</tbody>' +
       '<tfoot>' +
         '<tr style="background:#e2e8f0; font-weight:800;">' +
-          '<td colspan="4" style="text-align:right; padding-right:12px;">Persentase Prioritas Terjabarkan:</td>' +
+          '<td colspan="4" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
           '<td id="ws2a3aFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">8.50</td>' +
           '<td id="ws2a3aFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -9366,20 +9292,18 @@ function renderWs_2_a_3_a(d, maxBobot) {
     code: '2.a.3.a',
     safeId: 'ws2a3a',
     title: 'Keterangan & Kriteria Penilaian Poin 2.a.3.a',
-    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75% | E: 100%',
+    badgeText: 'A: =< 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
     colTitle: 'Kriteria Penjabaran Prioritas Pembangunan Daerah ke Program Prioritas',
     rows: [
-      { crit: 'A', text: 'Dijabarkan <= 25%', val: '2,125', color: '#dc2626' },
-      { crit: 'B', text: 'Dijabarkan > 25% s/d <= 50%', val: '4,250', color: '#d97706' },
-      { crit: 'C', text: 'Dijabarkan > 50% s/d <= 75%', val: '6,375', color: '#2563eb' },
-      { crit: 'D', text: 'Dijabarkan => 75%', val: '8,500', color: '#0891b2' },
-      { crit: 'E', text: '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas Daerah', val: '8,500', color: '#16a34a' }
+      { crit: 'A', text: 'Penjabaran prioritas daerah =< 25%', val: '2,125', color: '#dc2626' },
+      { crit: 'B', text: 'Penjabaran prioritas daerah 25% - 50%', val: '4,25', color: '#d97706' },
+      { crit: 'C', text: 'Penjabaran prioritas daerah 50% - 75%', val: '6,375', color: '#2563eb' },
+      { crit: 'D', text: 'Penjabaran prioritas daerah => 75%', val: '8,50', color: '#16a34a' }
     ],
-    sourceTitle: 'Hasil Penjabaran Prioritas ke Program Prioritas',
+    sourceTitle: 'Hasil Penjabaran Prioritas ke Program',
     infoRows: [
-      { label: 'Total Prioritas Daerah:', id: 'ws2a3aTotalPrioritas', value: totalPrioritas + ' Prioritas' },
-      { label: 'Prioritas Terjabarkan:', id: 'ws2a3aPctMatched', value: info.terjabarkanPrioritas + ' Prioritas (' + numFmt(pctMatched) + '%)' },
-      { label: 'Jumlah Program Terkait:', id: 'ws2a3aTotalRows', value: info.matchedCount + ' Program Prioritas' },
+      { label: 'Total Program Prioritas:', id: 'ws2a3aTotalRows', value: totalItems + ' Program Prioritas' },
+      { label: 'Prioritas Terjabarkan:', id: 'ws2a3aPctMatched', value: info.matchedCount + ' Program (' + numFmt(pctMatched) + '%)' },
       { label: 'Kriteria Terpenuhi:', id: 'ws2a3aCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
     ],
     initialScore: score
@@ -9390,100 +9314,86 @@ function renderWs_2_a_3_a(d, maxBobot) {
 
 function updateScore_2_a_3_a(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_a_3_a .ws-2a3a-row');
-  var totalRows = rows.length || 180;
+  var totalRows = rows.length || 107;
   var matchedCount = 0;
-  var groupMap = {};
   rows.forEach(function(r) {
-    var gIdx = r.getAttribute('data-gidx');
     var sel = r.querySelector('.ws-2a3a-score-sel');
     var val = sel ? parseFloat(sel.value) : 100.0;
-    if (val > 0) {
-      matchedCount++;
-      groupMap[gIdx] = true;
-    }
+    if (val > 0) matchedCount++;
     var terb = (val / 100) * 8.5;
     var elTerb = r.querySelector('.ws-2a3a-terb-val');
     if (elTerb) elTerb.textContent = numFmt(terb);
   });
-  var totalGroups = 7;
-  var activeGroups = Object.keys(groupMap).length;
-  var pct = (activeGroups / totalGroups) * 100;
-  var score = 8.50;
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var terbAvg = (pct / 100) * 8.5;
+  terbAvg = Math.round(terbAvg * 100) / 100;
   var crit = 'D';
   var critText = '=> 75%';
-  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas Daerah'; }
-  else if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
-  else if (pct > 50.0) { crit = 'C'; score = 6.375; critText = '> 50% s/d <= 75%'; }
-  else if (pct > 25.0) { crit = 'B'; score = 4.25; critText = '> 25% s/d <= 50%'; }
-  else { crit = 'A'; score = 2.125; critText = '<= 25%'; }
+  if (pct >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pct >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pct >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
 
   var elFootPct = document.getElementById('ws2a3aFootPct');
   if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
   var elFootTerb = document.getElementById('ws2a3aFootTerb');
-  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (modalBobotInput) modalBobotInput.value = numFmt(score);
-  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
   if (modalOpsiAksi) modalOpsiAksi.value = critText;
-  if (modalCatatan) modalCatatan.value = 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + activeGroups + '/' + totalGroups + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)';
-  if (excelFxContent) excelFxContent.textContent = 'Penjabaran Prioritas Daerah: ' + activeGroups + '/' + totalGroups + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
+  if (modalCatatan) modalCatatan.value = 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + matchedCount + '/' + totalRows + ' program prioritas selaras, keselarasan ' + pct.toFixed(2) + '%)';
+  if (excelFxContent) excelFxContent.textContent = 'Penjabaran Prioritas Daerah: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
-  updateStandardCriteriaHighlight('ws2a3a', crit, score, {
-    'ws2a3aTotalPrioritas': totalGroups + ' Prioritas',
-    'ws2a3aPctMatched': activeGroups + ' Prioritas (' + numFmt(pct) + '%)',
-    'ws2a3aTotalRows': matchedCount + ' Program Prioritas',
+  updateStandardCriteriaHighlight('ws2a3a', crit, terbAvg, {
+    'ws2a3aTotalRows': totalRows + ' Program Prioritas',
+    'ws2a3aPctMatched': matchedCount + ' Program (' + numFmt(pct) + '%)',
     'ws2a3aCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
-  }, ['A', 'B', 'C', 'D', 'E']);
+  }, ['A', 'B', 'C', 'D']);
 
-  return score;
+  return terbAvg;
 }
 
 // -------------------------------------------------------------------------
 // 7. POIN 2.a.3.b: Indikator Sasaran vs Indikator Kinerja Program Prioritas (Bobot 8.50)
 // -------------------------------------------------------------------------
-function extractGroups2a3b(d) {
-  d = d || {};
-  if (d.groups && Array.isArray(d.groups) && d.groups.length > 0) return d.groups;
-  var auto = getPilar2Auto('2.a.3.b');
-  if (auto.groups && Array.isArray(auto.groups) && auto.groups.length > 0) return auto.groups;
-  return MASTER_PILAR2_2A3B;
-}
-
 function getAutoScore_2_a_3_b(d) {
   d = d || {};
-  var groups = extractGroups2a3b(d);
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A3B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3B)) : []);
   var totalItems = 0;
   var matchedCount = 0;
+
   groups.forEach(function(g) {
-    var pList = g.prog_indicators || g.indicators || [];
-    pList.forEach(function(p) {
+    (g.prog_indicators || g.indicators || []).forEach(function(p) {
       totalItems++;
-      var sc = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
-      if (sc > 0) matchedCount++;
+      var val = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
+      if (isNaN(val)) val = 100.0;
+      if (val > 0) matchedCount++;
     });
   });
-  if (totalItems === 0) {
-    totalItems = 180;
-    matchedCount = 180;
-  }
-  var pct = totalItems > 0 ? (matchedCount / totalItems) * 100 : 100;
-  var score = 8.50;
+
+  if (totalItems === 0) totalItems = 181;
+  var pctMatched = (matchedCount / totalItems) * 100;
+  var score = (pctMatched / 100) * 8.5;
+  score = Math.round(score * 100) / 100;
+
   var crit = 'D';
   var critText = '=> 75%';
-  if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
-  else if (pct >= 50.0) { crit = 'C'; score = 6.375; critText = '50% - 75%'; }
-  else if (pct >= 25.0) { crit = 'B'; score = 4.25; critText = '25% - 50%'; }
-  else { crit = 'A'; score = 2.125; critText = '=< 25%'; }
+  if (pctMatched >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pctMatched >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pctMatched >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
+
   return {
     groups: groups,
     totalItems: totalItems,
     matchedCount: matchedCount,
-    pctMatched: pct,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalItems + ' indikator program selaras, ' + pct.toFixed(2) + '%)'
+    catatan: 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalItems + ' indikator program selaras, keselarasan ' + pctMatched.toFixed(2) + '%)'
   };
 }
 
@@ -9495,26 +9405,20 @@ function renderWs_2_a_3_b(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
-  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
+  var critText = info.aksi || info.opsi_aksi || '=> 75%';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_a_3_b" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_3_b" style="min-width: 1050px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 380px; text-align: center; vertical-align: middle;">Indikator Sasaran Pembangunan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Indikator Kinerja Program Prioritas</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 360px; text-align: center;">Indikator Sasaran Pembangunan Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Indikator Kinerja Program Prioritas</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9544,9 +9448,6 @@ function renderWs_2_a_3_b(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.50</td>' +
         '<td class="ws-2a3b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2a3b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a3b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || 'Bab IV') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2a3b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2a3b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
       '</tr>';
     });
@@ -9560,7 +9461,7 @@ function renderWs_2_a_3_b(d, maxBobot) {
           '<td id="ws2a3bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">8.50</td>' +
           '<td id="ws2a3bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -9570,18 +9471,18 @@ function renderWs_2_a_3_b(d, maxBobot) {
     code: '2.a.3.b',
     safeId: 'ws2a3b',
     title: 'Keterangan & Kriteria Penilaian Poin 2.a.3.b',
-    badgeText: 'A: <= 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
-    colTitle: 'Kriteria Kesesuaian Rumusan Indikator Sasaran terhadap Indikator Kinerja Program Prioritas',
+    badgeText: 'A: =< 25% | B: 25%-50% | C: 50%-75% | D: => 75%',
+    colTitle: 'Kriteria Keselarasan Indikator Sasaran dengan Indikator Kinerja Program',
     rows: [
-      { crit: 'A', text: '=< 25%', val: '2,125', color: '#dc2626' },
-      { crit: 'B', text: '25% - 50%', val: '4,250', color: '#d97706' },
-      { crit: 'C', text: '50% - 75%', val: '6,375', color: '#2563eb' },
-      { crit: 'D', text: '=> 75%', val: '8,500', color: '#16a34a' }
+      { crit: 'A', text: 'Keterkaitan indikator =< 25%', val: '2,125', color: '#dc2626' },
+      { crit: 'B', text: 'Keterkaitan indikator 25% - 50%', val: '4,25', color: '#d97706' },
+      { crit: 'C', text: 'Keterkaitan indikator 50% - 75%', val: '6,375', color: '#2563eb' },
+      { crit: 'D', text: 'Keterkaitan indikator => 75%', val: '8,50', color: '#16a34a' }
     ],
-    sourceTitle: 'Hasil Penyelarasan Indikator Program Prioritas',
+    sourceTitle: 'Hasil Keterkaitan Indikator Sasaran vs Program',
     infoRows: [
-      { label: 'Total Indikator Program:', id: 'ws2a3bTotalItems', value: totalItems + ' Indikator' },
-      { label: 'Indikator Selaras:', id: 'ws2a3bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
+      { label: 'Total Indikator Program:', id: 'ws2a3bTotalRows', value: totalItems + ' Indikator Program' },
+      { label: 'Indikator Program Selaras:', id: 'ws2a3bPctMatched', value: info.matchedCount + ' Indikator (' + numFmt(pctMatched) + '%)' },
       { label: 'Kriteria Terpenuhi:', id: 'ws2a3bCritText', value: '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>' }
     ],
     initialScore: score
@@ -9592,7 +9493,7 @@ function renderWs_2_a_3_b(d, maxBobot) {
 
 function updateScore_2_a_3_b(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_a_3_b .ws-2a3b-row');
-  var totalRows = rows.length || 180;
+  var totalRows = rows.length || 181;
   var matchedCount = 0;
   rows.forEach(function(r) {
     var sel = r.querySelector('.ws-2a3b-score-sel');
@@ -9603,66 +9504,73 @@ function updateScore_2_a_3_b(maxBobot) {
     if (elTerb) elTerb.textContent = numFmt(terb);
   });
   var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var score = 8.50;
+  var terbAvg = (pct / 100) * 8.5;
+  terbAvg = Math.round(terbAvg * 100) / 100;
   var crit = 'D';
   var critText = '=> 75%';
-  if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
-  else if (pct >= 50.0) { crit = 'C'; score = 6.375; critText = '50% - 75%'; }
-  else if (pct >= 25.0) { crit = 'B'; score = 4.25; critText = '25% - 50%'; }
-  else { crit = 'A'; score = 2.125; critText = '=< 25%'; }
+  if (pct >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pct >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pct >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
 
   var elFootPct = document.getElementById('ws2a3bFootPct');
   if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
   var elFootTerb = document.getElementById('ws2a3bFootTerb');
-  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (modalBobotInput) modalBobotInput.value = numFmt(score);
-  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
   if (modalOpsiAksi) modalOpsiAksi.value = critText;
-  if (modalCatatan) modalCatatan.value = 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalRows + ' indikator program selaras, ' + pct.toFixed(2) + '%)';
-  if (excelFxContent) excelFxContent.textContent = 'Indikator Sasaran vs Indikator Program: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(score);
+  if (modalCatatan) modalCatatan.value = 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalRows + ' indikator program selaras, keselarasan ' + pct.toFixed(2) + '%)';
+  if (excelFxContent) excelFxContent.textContent = 'Indikator Sasaran vs Indikator Program: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> Kriteria ' + crit + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
-  updateStandardCriteriaHighlight('ws2a3b', crit, score, {
-    'ws2a3bTotalItems': totalRows + ' Indikator',
+  updateStandardCriteriaHighlight('ws2a3b', crit, terbAvg, {
+    'ws2a3bTotalRows': totalRows + ' Indikator Program',
     'ws2a3bPctMatched': matchedCount + ' Indikator (' + numFmt(pct) + '%)',
     'ws2a3bCritText': '<span style="color:#16a34a; font-weight:700;">Kriteria ' + crit + ' (' + critText + ')</span>'
   }, ['A', 'B', 'C', 'D']);
 
-  return score;
+  return terbAvg;
 }
 
 // -------------------------------------------------------------------------
-// 8. POIN 2.b.1: Permasalahan Daerah vs Inovasi Daerah (Bobot 4.50)
+// 8. POIN 2.b.1: Keterkaitan Permasalahan dengan Program Unggulan (Bobot 4.50)
 // -------------------------------------------------------------------------
 function getAutoScore_2_b_1(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.b.1');
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2B1);
-  var totalInov = 0;
-  var matchedInov = 0;
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2B1 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B1)) : []);
+  var totalRows = 0;
+  var matchedCount = 0;
+
   groups.forEach(function(g) {
     (g.inovasi_list || []).forEach(function(inv) {
-      totalInov++;
-      if (parseFloat(inv.nilai_keselarasan) > 0) matchedInov++;
+      totalRows++;
+      var val = (inv.nilai_keselarasan !== undefined) ? parseFloat(inv.nilai_keselarasan) : 100.0;
+      if (isNaN(val)) val = 100.0;
+      if (val > 0) matchedCount++;
     });
   });
-  if (totalInov === 0) totalInov = 58;
-  var pct = totalInov > 0 ? (matchedInov / totalInov) * 100 : 100;
-  var maxBobot = 4.5;
-  var isKuat = pct >= 50.0;
-  var score = isKuat ? 4.50 : 1.00;
-  var crit = isKuat ? 'B' : 'A';
-  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+
+  if (totalRows === 0) totalRows = 60;
+  var pctMatched = (matchedCount / totalRows) * 100;
+  var score = (pctMatched / 100) * 4.5;
+  score = Math.round(score * 100) / 100;
+
+  var crit = 'B';
+  var critText = 'B. Kuat';
+  if (pctMatched >= 50.0) { crit = 'B'; critText = 'B. Kuat'; }
+  else { crit = 'A'; critText = 'A. Lemah'; }
+
   return {
     groups: groups,
-    totalRows: totalInov,
-    matchedCount: matchedInov,
-    pctMatched: pct,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedInov + '/' + totalInov + ' inovasi daerah menjawab ' + groups.length + ' permasalahan)'
+    catatan: 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras, keselarasan ' + pctMatched.toFixed(2) + '%)'
   };
 }
 
@@ -9674,26 +9582,20 @@ function renderWs_2_b_1(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
-  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
+  var critText = info.aksi || info.opsi_aksi || 'B. Kuat';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_b_1" style="min-width: 1250px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_1" style="min-width: 1000px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 380px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 380px; text-align: center; vertical-align: middle;">Inovasi Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 360px; text-align: center;">Permasalahan Daerah</th>' +
+          '<th class="th-green" style="min-width: 380px; text-align: center;">Inovasi Daerah</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9722,9 +9624,6 @@ function renderWs_2_b_1(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">4.50</td>' +
         '<td class="ws-2b1-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2b1-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2b1-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.halaman || 'Bab IV') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2b1-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2b1-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.catatan || '') + '"></td>' +
       '</tr>';
     });
@@ -9738,7 +9637,7 @@ function renderWs_2_b_1(d, maxBobot) {
           '<td id="ws2b1FootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">4.50</td>' +
           '<td id="ws2b1FootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -9768,7 +9667,7 @@ function renderWs_2_b_1(d, maxBobot) {
 
 function updateScore_2_b_1(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_b_1 .ws-2b1-row');
-  var totalRows = rows.length || 58;
+  var totalRows = rows.length || 60;
   var matchedCount = 0;
   rows.forEach(function(r) {
     var sel = r.querySelector('.ws-2b1-score-sel');
@@ -9779,59 +9678,68 @@ function updateScore_2_b_1(maxBobot) {
     if (elTerb) elTerb.textContent = numFmt(terb);
   });
   var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var isKuat = pct >= 50.0;
-  var score = isKuat ? 4.50 : 1.00;
-  var crit = isKuat ? 'B' : 'A';
-  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+  var terbAvg = (pct / 100) * 4.5;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'B';
+  var critText = 'B. Kuat';
+  if (pct >= 50.0) { crit = 'B'; critText = 'B. Kuat'; }
+  else { crit = 'A'; critText = 'A. Lemah'; }
 
   var elFootPct = document.getElementById('ws2b1FootPct');
   if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
   var elFootTerb = document.getElementById('ws2b1FootTerb');
-  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (modalBobotInput) modalBobotInput.value = numFmt(score);
-  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
   if (modalOpsiAksi) modalOpsiAksi.value = critText;
   if (modalCatatan) modalCatatan.value = 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
-  if (excelFxContent) excelFxContent.textContent = 'Permasalahan Daerah vs Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> ' + critText + ' -> Nilai Capaian = ' + numFmt(score);
+  if (excelFxContent) excelFxContent.textContent = 'Permasalahan Daerah vs Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> ' + critText + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
-  updateStandardCriteriaHighlight('ws2b1', crit, score, {
+  updateStandardCriteriaHighlight('ws2b1', crit, terbAvg, {
     'ws2b1TotalRows': totalRows + ' Inovasi',
     'ws2b1PctMatched': matchedCount + ' Inovasi (' + numFmt(pct) + '%)',
     'ws2b1CritText': '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>'
   }, ['A', 'B']);
 
-  return score;
+  return terbAvg;
 }
 
 // -------------------------------------------------------------------------
-// 9. POIN 2.b.2: Inovasi Daerah: Output vs Outcome (Bobot 4.50)
+// 9. POIN 2.b.2: Keterkaitan Output dengan Outcome Inovasi Daerah (Bobot 4.50)
 // -------------------------------------------------------------------------
 function getAutoScore_2_b_2(d) {
   d = d || {};
-  var auto = getPilar2Auto('2.b.2');
-  var rawRows = (d.rows && d.rows.length > 0) ? d.rows : ((auto.rows && auto.rows.length > 0) ? auto.rows : MASTER_PILAR2_2B2);
-  var totalRows = rawRows.length || 58;
+  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2B2 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B2)) : []);
+  var totalRows = rows.length || 60;
   var matchedCount = 0;
-  rawRows.forEach(function(r) {
-    if (parseFloat(r.nilai_keselarasan) > 0) matchedCount++;
+
+  rows.forEach(function(r) {
+    var val = (r.nilai_keselarasan !== undefined) ? parseFloat(r.nilai_keselarasan) : 100.0;
+    if (isNaN(val)) val = 100.0;
+    if (val > 0) matchedCount++;
   });
-  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var maxBobot = 4.5;
-  var isKuat = pct >= 50.0;
-  var score = isKuat ? 4.50 : 1.00;
-  var crit = isKuat ? 'B' : 'A';
-  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+
+  if (totalRows === 0) totalRows = 60;
+  var pctMatched = (matchedCount / totalRows) * 100;
+  var score = (pctMatched / 100) * 4.5;
+  score = Math.round(score * 100) / 100;
+
+  var crit = 'B';
+  var critText = 'B. Kuat';
+  if (pctMatched >= 50.0) { crit = 'B'; critText = 'B. Kuat'; }
+  else { crit = 'A'; critText = 'A. Lemah'; }
+
   return {
-    rows: rawRows,
+    rows: rows,
     totalRows: totalRows,
     matchedCount: matchedCount,
-    pctMatched: pct,
+    pctMatched: pctMatched,
     score: score,
     kriteria: crit,
     aksi: critText,
     opsi_aksi: critText,
-    catatan: 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)'
+    catatan: 'Terdapat keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras, keselarasan ' + pctMatched.toFixed(2) + '%)'
   };
 }
 
@@ -9843,27 +9751,21 @@ function renderWs_2_b_2(d, maxBobot) {
   var pctMatched = info.pctMatched;
   var score = info.score;
   var crit = info.kriteria;
-  var critText = info.aksi || info.opsi_aksi || '> 75% s/d <= 99%';
+  var critText = info.aksi || info.opsi_aksi || 'B. Kuat';
 
   var html =
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1300px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1050px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Inovasi Daerah</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Output</th>' +
-          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Outcome</th>' +
-          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
-          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
-        '</tr>' +
-        '<tr>' +
-          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
-          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
-          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
+          '<th class="th-green" style="width: 260px; text-align: center;">Inovasi Daerah</th>' +
+          '<th class="th-green" style="min-width: 300px; text-align: center;">Output</th>' +
+          '<th class="th-green" style="min-width: 300px; text-align: center;">Outcome</th>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9887,9 +9789,6 @@ function renderWs_2_b_2(d, maxBobot) {
         '</td>' +
         '<td style="text-align:center; font-weight:700; background:#f8fafc;">4.50</td>' +
         '<td class="ws-2b2-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2b2-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2b2-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || 'Bab IV') + '"></td>' +
-        '<td><input type="text" class="form-control ws-2b2-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
         '<td><input type="text" class="form-control ws-2b2-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
       '</tr>';
   });
@@ -9902,7 +9801,7 @@ function renderWs_2_b_2(d, maxBobot) {
           '<td id="ws2b2FootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
           '<td style="text-align:center;">4.50</td>' +
           '<td id="ws2b2FootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
-          '<td colspan="4"></td>' +
+          '<td></td>' +
         '</tr>' +
       '</tfoot>' +
     '</table>' +
@@ -9932,7 +9831,7 @@ function renderWs_2_b_2(d, maxBobot) {
 
 function updateScore_2_b_2(maxBobot) {
   var rows = document.querySelectorAll('#wsTable_2_b_2 .ws-2b2-row');
-  var totalRows = rows.length || 58;
+  var totalRows = rows.length || 60;
   var matchedCount = 0;
   rows.forEach(function(r) {
     var sel = r.querySelector('.ws-2b2-score-sel');
@@ -9943,29 +9842,31 @@ function updateScore_2_b_2(maxBobot) {
     if (elTerb) elTerb.textContent = numFmt(terb);
   });
   var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
-  var isKuat = pct >= 50.0;
-  var score = isKuat ? 4.50 : 1.00;
-  var crit = isKuat ? 'B' : 'A';
-  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+  var terbAvg = (pct / 100) * 4.5;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'B';
+  var critText = 'B. Kuat';
+  if (pct >= 50.0) { crit = 'B'; critText = 'B. Kuat'; }
+  else { crit = 'A'; critText = 'A. Lemah'; }
 
   var elFootPct = document.getElementById('ws2b2FootPct');
   if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
   var elFootTerb = document.getElementById('ws2b2FootTerb');
-  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
 
-  if (modalBobotInput) modalBobotInput.value = numFmt(score);
-  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(score);
+  if (modalBobotInput) modalBobotInput.value = numFmt(terbAvg);
+  if (modalCalcDisplay) modalCalcDisplay.textContent = numFmt(terbAvg);
   if (modalOpsiAksi) modalOpsiAksi.value = critText;
   if (modalCatatan) modalCatatan.value = 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
-  if (excelFxContent) excelFxContent.textContent = 'Output vs Outcome Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> " + critText + " -> Nilai Capaian = ' + numFmt(score);
+  if (excelFxContent) excelFxContent.textContent = 'Output vs Outcome Inovasi: ' + matchedCount + '/' + totalRows + ' (' + numFmt(pct) + '%) -> ' + critText + ' -> Nilai Capaian = ' + numFmt(terbAvg);
 
-  updateStandardCriteriaHighlight('ws2b2', crit, score, {
+  updateStandardCriteriaHighlight('ws2b2', crit, terbAvg, {
     'ws2b2TotalRows': totalRows + ' Inovasi',
     'ws2b2PctMatched': matchedCount + ' Inovasi (' + numFmt(pct) + '%)',
     'ws2b2CritText': '<span style="color:#16a34a; font-weight:700;">' + critText + '</span>'
   }, ['A', 'B']);
 
-  return score;
+  return terbAvg;
 }
 
 // -------------------------------------------------------------------------
@@ -9978,9 +9879,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a1a-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a1a-dok') ? r.querySelector('.ws-2a1a-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a1a-hal') ? r.querySelector('.ws-2a1a-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a1a-tbl') ? r.querySelector('.ws-2a1a-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a1a-cat') ? r.querySelector('.ws-2a1a-cat').value : '')
       });
     });
@@ -9993,9 +9891,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a1b-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a1b-dok') ? r.querySelector('.ws-2a1b-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a1b-hal') ? r.querySelector('.ws-2a1b-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a1b-tbl') ? r.querySelector('.ws-2a1b-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a1b-cat') ? r.querySelector('.ws-2a1b-cat').value : '')
       });
     });
@@ -10008,9 +9903,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a1c-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a1c-dok') ? r.querySelector('.ws-2a1c-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a1c-hal') ? r.querySelector('.ws-2a1c-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a1c-tbl') ? r.querySelector('.ws-2a1c-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a1c-cat') ? r.querySelector('.ws-2a1c-cat').value : '')
       });
     });
@@ -10020,6 +9912,13 @@ function collectDetailJson_Pilar2(code, json) {
   if (code === '2.a.2.a') {
     var sel = document.getElementById('ws2a2aStatusSel');
     json.status = sel ? sel.value : 'Ada';
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_2_a .ws-2a2a-row').forEach(function(r) {
+      rows.push({
+        catatan: (r.querySelector('.ws-2a2a-cat') ? r.querySelector('.ws-2a2a-cat').value : '')
+      });
+    });
+    json.rows = rows;
     return true;
   }
   if (code === '2.a.2.b') {
@@ -10028,9 +9927,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a2b-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a2b-dok') ? r.querySelector('.ws-2a2b-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a2b-hal') ? r.querySelector('.ws-2a2b-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a2b-tbl') ? r.querySelector('.ws-2a2b-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a2b-cat') ? r.querySelector('.ws-2a2b-cat').value : '')
       });
     });
@@ -10043,9 +9939,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a3a-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a3a-dok') ? r.querySelector('.ws-2a3a-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a3a-hal') ? r.querySelector('.ws-2a3a-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a3a-tbl') ? r.querySelector('.ws-2a3a-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a3a-cat') ? r.querySelector('.ws-2a3a-cat').value : '')
       });
     });
@@ -10058,9 +9951,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2a3b-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2a3b-dok') ? r.querySelector('.ws-2a3b-dok').value : ''),
-        halaman: (r.querySelector('.ws-2a3b-hal') ? r.querySelector('.ws-2a3b-hal').value : ''),
-        tabel: (r.querySelector('.ws-2a3b-tbl') ? r.querySelector('.ws-2a3b-tbl').value : ''),
         catatan: (r.querySelector('.ws-2a3b-cat') ? r.querySelector('.ws-2a3b-cat').value : '')
       });
     });
@@ -10073,9 +9963,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2b1-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2b1-dok') ? r.querySelector('.ws-2b1-dok').value : ''),
-        halaman: (r.querySelector('.ws-2b1-hal') ? r.querySelector('.ws-2b1-hal').value : ''),
-        tabel: (r.querySelector('.ws-2b1-tbl') ? r.querySelector('.ws-2b1-tbl').value : ''),
         catatan: (r.querySelector('.ws-2b1-cat') ? r.querySelector('.ws-2b1-cat').value : '')
       });
     });
@@ -10088,9 +9975,6 @@ function collectDetailJson_Pilar2(code, json) {
       var sel = r.querySelector('.ws-2b2-score-sel');
       rows.push({
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        dokumen: (r.querySelector('.ws-2b2-dok') ? r.querySelector('.ws-2b2-dok').value : ''),
-        halaman: (r.querySelector('.ws-2b2-hal') ? r.querySelector('.ws-2b2-hal').value : ''),
-        tabel: (r.querySelector('.ws-2b2-tbl') ? r.querySelector('.ws-2b2-tbl').value : ''),
         catatan: (r.querySelector('.ws-2b2-cat') ? r.querySelector('.ws-2b2-cat').value : '')
       });
     });
@@ -10099,7 +9983,6 @@ function collectDetailJson_Pilar2(code, json) {
   }
   return false;
 }
-
 
   // Master Dispatcher for Worksheet Rendering
   function renderDynamicWorksheet(code, maxBobot, detailData){
