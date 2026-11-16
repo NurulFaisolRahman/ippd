@@ -30298,6 +30298,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
         }
 
+        require_once APPPATH . 'helpers/ippd_pilar2_defaults.php';
+        $pilar2Defaults = get_ippd_pilar2_defaults();
+
         // --- 1.a.1.a Auto Data Pull ---
         $autoData_1_a_1_a = [
             'mn_lpe_base' => '', 'mn_lpe_end' => '',
@@ -33596,13 +33599,16 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'pct_matched' => $pct_2a1a,
             'keselarasan_terbobot' => $score_terbobot_2a1a,
             'kriteria' => $crit_2a1a,
-            'score' => $score_2a1a,
+            'score' => round($score_terbobot_2a1a, 2),
             'opsi_aksi' => $aksi_2a1a,
             'dokumen' => !empty($rows_2a1a[0]['dokumen']) ? $rows_2a1a[0]['dokumen'] : 'LPPD Tahun ' . ($tahun - 2),
             'halaman' => !empty($rows_2a1a[0]['halaman']) ? $rows_2a1a[0]['halaman'] : '',
             'tabel' => !empty($rows_2a1a[0]['tabel']) ? $rows_2a1a[0]['tabel'] : '',
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_2a1a . '/' . $total_2a1a . ' permasalahan memiliki keterkaitan dengan hasil evaluasi)'
         ];
+        if (empty($rows_2a1a)) {
+            $autoData_2_a_1_a = $pilar2Defaults['AutoData_2_a_1_a'];
+        }
 
         // =========================================================================
         // --- 2.a.1.b Auto Data Pull: Keterkaitan Prioritas daerah dengan permasalahan ---
@@ -33666,6 +33672,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => '',
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_perm_2a1b . '/' . $total_perm_2a1b . ' permasalahan selaras dengan Prioritas Pembangunan Daerah)'
         ];
+        if (empty($rows_2a1b) || $total_perm_2a1b == 0) {
+            $autoData_2_a_1_b = $pilar2Defaults['AutoData_2_a_1_b'];
+        }
 
         // =========================================================================
         // --- 2.a.1.c Auto Data Pull: Penyusunan Prioritas berdasarkan Isu Strategis ---
@@ -33731,6 +33740,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => '',
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_isu_rel_2a1c . '/' . $total_isu_rel_2a1c . ' relasi Isu Strategis selaras dengan Prioritas Pembangunan Daerah)'
         ];
+        if (empty($rows_2a1c) || $total_isu_rel_2a1c == 0) {
+            $autoData_2_a_1_c = $pilar2Defaults['AutoData_2_a_1_c'];
+        }
 
         // =========================================================================
         // --- 2.a.2.a & 2.a.2.b Auto Data Pull: Indikator Sasaran Pembangunan Daerah ---
@@ -33802,6 +33814,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => '',
             'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (Tersedia ' . $total_ind_count . ' indikator sasaran untuk Prioritas dan Isu Strategis Daerah)'
         ];
+        if (empty($rows_sasaran) || $total_ind_count == 0) {
+            $autoData_2_a_2_a = $pilar2Defaults['AutoData_2_a_2_a'];
+        }
 
         // 2.a.2.b: Tingkat Kesesuaian Sasaran Indikator (Bobot 8.00)
         // Kriteria: A. =< 25% (2.0) | B. 25% - 50% (4.0) | C. 50% - 75% (6.0) | D. => 75% (8.0)
@@ -33817,13 +33832,16 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'pct_matched' => $pct_2a2b,
             'keselarasan_terbobot' => $score_terbobot_2a2b,
             'kriteria' => $crit_2a2b,
-            'score' => $score_2a2b,
+            'score' => round($score_terbobot_2a2b, 2),
             'opsi_aksi' => $aksi_2a2b,
             'dokumen' => 'RKPD ' . $namaWilRkpd . ' ' . $tahun,
             'halaman' => '',
             'tabel' => '',
             'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (' . $matched_ind_count . '/' . $total_ind_count . ' indikator sasaran selaras, ' . number_format($pct_2a2b, 2) . '%, Rata-rata Terbobot: ' . number_format($score_terbobot_2a2b, 2) . ')'
         ];
+        if (empty($rows_sasaran) || $total_ind_count == 0) {
+            $autoData_2_a_2_b = $pilar2Defaults['AutoData_2_a_2_b'];
+        }
 
         // =========================================================================
         // --- 2.a.3.a Auto Data Pull: Prioritas Daerah dijabarkan menjadi program prioritas ---
@@ -34003,6 +34021,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => 'Tabel Program dan Kegiatan Prioritas Daerah RKPD ' . $tahun,
             'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/ProgramKegiatanPrioritas (' . $terjabarkan_prioritas_2a3a . '/' . $total_prioritas_2a3a . ' Prioritas Pembangunan Daerah dijabarkan ke ' . $matched_progs_2a3a . ' Program Prioritas)'
         ];
+        if (empty($rows_2a3a) || $total_progs_2a3a == 0) {
+            $autoData_2_a_3_a = $pilar2Defaults['AutoData_2_a_3_a'];
+        }
 
         // =========================================================================
         // --- 2.a.3.b Auto Data Pull: Keterkaitan sasaran Prioritas dengan indikator kinerja Program Prioritas ---
@@ -34165,6 +34186,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => 'Tabel Sasaran dan Program Prioritas Daerah RKPD ' . $tahun,
             'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/SasaranPembangunanDaerah dan /Daerah/ProgramPrioritasRPJMD (' . $matched_ind_2a3b . '/' . $total_ind_2a3b . ' indikator kinerja program prioritas selaras, ' . number_format($pct_2a3b, 1) . '%)'
         ];
+        if (empty($groups_2a3b) || $total_ind_2a3b == 0) {
+            $autoData_2_a_3_b = $pilar2Defaults['AutoData_2_a_3_b'];
+        }
 
         // =========================================================================
         // --- 2.b.1 Auto Data Pull: Keterkaitan Permasalahan Daerah dengan Inovasi Daerah ---
@@ -34443,6 +34467,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => 'Tabel Permasalahan dan Inovasi Daerah RKPD ' . $tahun,
             'catatan' => 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah (' . $matched_inov_2b1 . '/' . $total_inov_2b1 . ' inovasi daerah selaras menjawab ' . $total_perm_2b1 . ' permasalahan daerah)'
         ];
+        if (empty($rows_2b1) || $total_inov_2b1 == 0) {
+            $autoData_2_b_1 = $pilar2Defaults['AutoData_2_b_1'];
+        }
 
         // =========================================================================
         // --- 2.b.2 Auto Data Pull: Keterkaitan Output dengan Outcome Inovasi Daerah ---
@@ -34620,6 +34647,9 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'tabel' => 'Tabel Inovasi Daerah, Output dan Outcome RKPD ' . $tahun,
             'catatan' => 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' . $matched_2b2 . '/' . $total_2b2 . ' inovasi daerah selaras)'
         ];
+        if (empty($rows_2b2) || $total_2b2 == 0) {
+            $autoData_2_b_2 = $pilar2Defaults['AutoData_2_b_2'];
+        }
 
         // =========================================================================
         // --- 3.a.1.a Auto Data Pull: Tersedianya OPD Penanggung Jawab untuk Program Prioritas ---
@@ -36544,6 +36574,44 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 'status_verifikasi' => 'Draft',
                 'tgl_verifikasi' => null
             ];
+        }
+
+        // Auto-populate Pilar 2 from synchronized autoData
+        $pilar2Keys = [
+            '2.a.1.a' => 'AutoData_2_a_1_a',
+            '2.a.1.b' => 'AutoData_2_a_1_b',
+            '2.a.1.c' => 'AutoData_2_a_1_c',
+            '2.a.2.a' => 'AutoData_2_a_2_a',
+            '2.a.2.b' => 'AutoData_2_a_2_b',
+            '2.a.3.a' => 'AutoData_2_a_3_a',
+            '2.a.3.b' => 'AutoData_2_a_3_b',
+            '2.b.1'   => 'AutoData_2_b_1',
+            '2.b.2'   => 'AutoData_2_b_2'
+        ];
+        foreach ($pilar2Keys as $pCode => $pKey) {
+            if (isset($autoData[$pKey])) {
+                $adItem = $autoData[$pKey];
+                $scVal = isset($adItem['score']) ? (float)$adItem['score'] : (isset($adItem['keselarasan_terbobot']) ? (float)$adItem['keselarasan_terbobot'] : null);
+                $aksiVal = isset($adItem['opsi_aksi']) ? $adItem['opsi_aksi'] : (isset($adItem['kriteria']) ? $adItem['kriteria'] : '');
+                
+                // If not saved in DB or saved score is empty/draft, synchronize with autoData
+                if (!isset($scoresMap[$pCode]) || $scoresMap[$pCode]['bobot_capaian'] === null || empty($scoresMap[$pCode]['bobot_capaian']) || !isset($scoresMap[$pCode]['status_verifikasi']) || $scoresMap[$pCode]['status_verifikasi'] === 'Draft') {
+                    $scoresMap[$pCode] = [
+                        'id' => isset($scoresMap[$pCode]['id']) ? $scoresMap[$pCode]['id'] : null,
+                        'bobot_capaian' => $scVal,
+                        'opsi_aksi' => $aksiVal,
+                        'catatan' => !empty($scoresMap[$pCode]['catatan']) ? $scoresMap[$pCode]['catatan'] : (isset($adItem['catatan']) ? $adItem['catatan'] : ''),
+                        'bukti_dukung' => isset($scoresMap[$pCode]['bukti_dukung']) ? $scoresMap[$pCode]['bukti_dukung'] : '',
+                        'detail_json' => json_encode($adItem),
+                        'bobot_verifikator' => isset($scoresMap[$pCode]['bobot_verifikator']) ? $scoresMap[$pCode]['bobot_verifikator'] : null,
+                        'opsi_aksi_verifikator' => isset($scoresMap[$pCode]['opsi_aksi_verifikator']) ? $scoresMap[$pCode]['opsi_aksi_verifikator'] : '',
+                        'catatan_verifikator' => isset($scoresMap[$pCode]['catatan_verifikator']) ? $scoresMap[$pCode]['catatan_verifikator'] : '',
+                        'bukti_dukung_verifikator' => isset($scoresMap[$pCode]['bukti_dukung_verifikator']) ? $scoresMap[$pCode]['bukti_dukung_verifikator'] : '',
+                        'status_verifikasi' => isset($scoresMap[$pCode]['status_verifikasi']) ? $scoresMap[$pCode]['status_verifikasi'] : 'Draft',
+                        'tgl_verifikasi' => isset($scoresMap[$pCode]['tgl_verifikasi']) ? $scoresMap[$pCode]['tgl_verifikasi'] : null
+                    ];
+                }
+            }
         }
 
         $Data['SavedScores'] = $scoresMap;

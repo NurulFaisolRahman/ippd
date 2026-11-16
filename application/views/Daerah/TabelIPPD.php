@@ -2695,6 +2695,13 @@ tr.type-sub:hover td {
   var AUTO_DATA_1_B_8_B = <?= isset($AutoData_1_b_8_b) ? json_encode($AutoData_1_b_8_b) : '{}' ?>;
   var AUTO_DATA_1_B_9_B = <?= isset($AutoData_1_b_9_b) ? json_encode($AutoData_1_b_9_b) : '{}' ?>;
   var AUTO_DATA_1_C_1 = <?= isset($AutoData_1_c_1) ? json_encode($AutoData_1_c_1) : '[]' ?>;
+  var AUTO_DATA_2_A_1_A = <?= isset($AutoData_2_a_1_a) ? json_encode($AutoData_2_a_1_a) : '{}' ?>;
+  var AUTO_DATA_2_A_1_B = <?= isset($AutoData_2_a_1_b) ? json_encode($AutoData_2_a_1_b) : '{}' ?>;
+  var AUTO_DATA_2_A_1_C = <?= isset($AutoData_2_a_1_c) ? json_encode($AutoData_2_a_1_c) : '{}' ?>;
+  var AUTO_DATA_2_A_2_A = <?= isset($AutoData_2_a_2_a) ? json_encode($AutoData_2_a_2_a) : '{}' ?>;
+  var AUTO_DATA_2_A_2_B = <?= isset($AutoData_2_a_2_b) ? json_encode($AutoData_2_a_2_b) : '{}' ?>;
+  var AUTO_DATA_2_A_3_A = <?= isset($AutoData_2_a_3_a) ? json_encode($AutoData_2_a_3_a) : '{}' ?>;
+  var AUTO_DATA_2_A_3_B = <?= isset($AutoData_2_a_3_b) ? json_encode($AutoData_2_a_3_b) : '{}' ?>;
   var AUTO_DATA_2_B_1 = <?= isset($AutoData_2_b_1) ? json_encode($AutoData_2_b_1) : '{}' ?>;
   var AUTO_DATA_2_B_2 = <?= isset($AutoData_2_b_2) ? json_encode($AutoData_2_b_2) : '{}' ?>;
   var AUTO_DATA_3_A_1_A = <?= isset($AutoData_3_a_1_a) ? json_encode($AutoData_3_a_1_a) : '{}' ?>;
@@ -2991,6 +2998,34 @@ tr.type-sub:hover td {
                     var auto3a1b = getAutoScore_3_a_1_b();
                     subVal = auto3a1b.finalScore;
                   }
+                  if (sub.code === '2.a.1.a' && (!SCORES_MAP['2.a.1.a'] || SCORES_MAP['2.a.1.a'].bobot_capaian === null || SCORES_MAP['2.a.1.a'].bobot_capaian === undefined)) {
+                    var auto2a1a = getAutoScore_2_a_1_a();
+                    subVal = auto2a1a.score;
+                  }
+                  if (sub.code === '2.a.1.b' && (!SCORES_MAP['2.a.1.b'] || SCORES_MAP['2.a.1.b'].bobot_capaian === null || SCORES_MAP['2.a.1.b'].bobot_capaian === undefined)) {
+                    var auto2a1b = getAutoScore_2_a_1_b();
+                    subVal = auto2a1b.score;
+                  }
+                  if (sub.code === '2.a.1.c' && (!SCORES_MAP['2.a.1.c'] || SCORES_MAP['2.a.1.c'].bobot_capaian === null || SCORES_MAP['2.a.1.c'].bobot_capaian === undefined)) {
+                    var auto2a1c = getAutoScore_2_a_1_c();
+                    subVal = auto2a1c.score;
+                  }
+                  if (sub.code === '2.a.2.a' && (!SCORES_MAP['2.a.2.a'] || SCORES_MAP['2.a.2.a'].bobot_capaian === null || SCORES_MAP['2.a.2.a'].bobot_capaian === undefined)) {
+                    var auto2a2a = getAutoScore_2_a_2_a();
+                    subVal = auto2a2a.score;
+                  }
+                  if (sub.code === '2.a.2.b' && (!SCORES_MAP['2.a.2.b'] || SCORES_MAP['2.a.2.b'].bobot_capaian === null || SCORES_MAP['2.a.2.b'].bobot_capaian === undefined)) {
+                    var auto2a2b = getAutoScore_2_a_2_b();
+                    subVal = auto2a2b.score;
+                  }
+                  if (sub.code === '2.a.3.a' && (!SCORES_MAP['2.a.3.a'] || SCORES_MAP['2.a.3.a'].bobot_capaian === null || SCORES_MAP['2.a.3.a'].bobot_capaian === undefined)) {
+                    var auto2a3a = getAutoScore_2_a_3_a();
+                    subVal = auto2a3a.score;
+                  }
+                  if (sub.code === '2.a.3.b' && (!SCORES_MAP['2.a.3.b'] || SCORES_MAP['2.a.3.b'].bobot_capaian === null || SCORES_MAP['2.a.3.b'].bobot_capaian === undefined)) {
+                    var auto2a3b = getAutoScore_2_a_3_b();
+                    subVal = auto2a3b.score;
+                  }
                   indScore += subVal;
                   var subVerif = SCORES_MAP[sub.code] && SCORES_MAP[sub.code].bobot_verifikator !== null ? Number(SCORES_MAP[sub.code].bobot_verifikator) : 0;
                   indVerifScore += subVerif;
@@ -2998,7 +3033,15 @@ tr.type-sub:hover td {
                 calculated[ind.code] = indScore;
                 calculatedVerif[ind.code] = indVerifScore;
               } else {
-                indScore = SCORES_MAP[ind.code] && SCORES_MAP[ind.code].bobot_capaian !== null ? Number(SCORES_MAP[ind.code].bobot_capaian) : 0;
+                if (ind.code === '2.b.1' && (!SCORES_MAP['2.b.1'] || SCORES_MAP['2.b.1'].bobot_capaian === null || SCORES_MAP['2.b.1'].bobot_capaian === undefined)) {
+                  var auto2b1 = getAutoScore_2_b_1();
+                  indScore = auto2b1.score;
+                } else if (ind.code === '2.b.2' && (!SCORES_MAP['2.b.2'] || SCORES_MAP['2.b.2'].bobot_capaian === null || SCORES_MAP['2.b.2'].bobot_capaian === undefined)) {
+                  var auto2b2 = getAutoScore_2_b_2();
+                  indScore = auto2b2.score;
+                } else {
+                  indScore = SCORES_MAP[ind.code] && SCORES_MAP[ind.code].bobot_capaian !== null ? Number(SCORES_MAP[ind.code].bobot_capaian) : 0;
+                }
                 calculated[ind.code] = indScore;
                 var indVerif = SCORES_MAP[ind.code] && SCORES_MAP[ind.code].bobot_verifikator !== null ? Number(SCORES_MAP[ind.code].bobot_verifikator) : 0;
                 calculatedVerif[ind.code] = indVerif;
@@ -3070,7 +3113,6 @@ tr.type-sub:hover td {
   }
 
   function renderTable(){
-    if (!tbody) return;
     tbody.innerHTML = "";
     var searchKeyword = inputSearch.value.trim().toLowerCase();
     var rollup = calculateRollupScores();
@@ -3169,6 +3211,27 @@ tr.type-sub:hover td {
                   SCORES_MAP['1.a.6'] = savedScoreInd;
                   hasScore = true;
                 }
+              }
+
+              if (ind.code === '2.b.1' && !hasScore) {
+                var auto2b1 = getAutoScore_2_b_1();
+                savedScoreInd = Object.assign(savedScoreInd, {
+                  bobot_capaian: auto2b1.score,
+                  opsi_aksi: auto2b1.aksi,
+                  catatan: auto2b1.catatan
+                });
+                SCORES_MAP['2.b.1'] = savedScoreInd;
+                hasScore = true;
+              }
+              if (ind.code === '2.b.2' && !hasScore) {
+                var auto2b2 = getAutoScore_2_b_2();
+                savedScoreInd = Object.assign(savedScoreInd, {
+                  bobot_capaian: auto2b2.score,
+                  opsi_aksi: auto2b2.aksi,
+                  catatan: auto2b2.catatan
+                });
+                SCORES_MAP['2.b.2'] = savedScoreInd;
+                hasScore = true;
               }
 
               var currentScoreVal = hasSub ? calculatedScores[ind.code] : (hasScore ? savedScoreInd.bobot_capaian : "");
@@ -3306,6 +3369,41 @@ tr.type-sub:hover td {
                     };
                     hasSubScore = true;
                   }
+                  if (sub.code === '2.a.1.a' && !hasSubScore) {
+                    var auto2a1a = getAutoScore_2_a_1_a();
+                    savedScoreSub = { bobot_capaian: auto2a1a.score, opsi_aksi: auto2a1a.aksi, catatan: auto2a1a.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.1.b' && !hasSubScore) {
+                    var auto2a1b = getAutoScore_2_a_1_b();
+                    savedScoreSub = { bobot_capaian: auto2a1b.score, opsi_aksi: auto2a1b.aksi, catatan: auto2a1b.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.1.c' && !hasSubScore) {
+                    var auto2a1c = getAutoScore_2_a_1_c();
+                    savedScoreSub = { bobot_capaian: auto2a1c.score, opsi_aksi: auto2a1c.aksi, catatan: auto2a1c.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.2.a' && !hasSubScore) {
+                    var auto2a2a = getAutoScore_2_a_2_a();
+                    savedScoreSub = { bobot_capaian: auto2a2a.score, opsi_aksi: auto2a2a.aksi, catatan: auto2a2a.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.2.b' && !hasSubScore) {
+                    var auto2a2b = getAutoScore_2_a_2_b();
+                    savedScoreSub = { bobot_capaian: auto2a2b.score, opsi_aksi: auto2a2b.aksi, catatan: auto2a2b.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.3.a' && !hasSubScore) {
+                    var auto2a3a = getAutoScore_2_a_3_a();
+                    savedScoreSub = { bobot_capaian: auto2a3a.score, opsi_aksi: auto2a3a.aksi, catatan: auto2a3a.catatan };
+                    hasSubScore = true;
+                  }
+                  if (sub.code === '2.a.3.b' && !hasSubScore) {
+                    var auto2a3b = getAutoScore_2_a_3_b();
+                    savedScoreSub = { bobot_capaian: auto2a3b.score, opsi_aksi: auto2a3b.aksi, catatan: auto2a3b.catatan };
+                    hasSubScore = true;
+                  }
                   var currentSubScore = hasSubScore ? savedScoreSub.bobot_capaian : "";
                   var hasSubVerif = savedScoreSub.bobot_verifikator !== null && savedScoreSub.bobot_verifikator !== undefined && savedScoreSub.bobot_verifikator !== "";
 
@@ -3432,12 +3530,18 @@ tr.type-sub:hover td {
             '</table>';
 
     if (cfg.notes && Array.isArray(cfg.notes) && cfg.notes.length > 0) {
-      html += 
-        '<div style="margin-top:10px; padding:8px 12px; background:#f8fafc; border-left:3px solid #3b82f6; border-radius:4px; font-size:11.5px; color:#334155; line-height:1.6;">';
-      cfg.notes.forEach(function(nt) {
-        html += '<div style="margin-bottom:2px;"><i class="fa fa-info-circle" style="color:#3b82f6; margin-right:5px; font-size:11px;"></i>' + nt + '</div>';
+      var filteredNotes = cfg.notes.filter(function(nt) {
+        var lower = nt.toLowerCase();
+        return !lower.includes('disinkronkan') && !lower.includes('tarik data') && !lower.includes('sumber data') && !lower.includes('/daerah/');
       });
-      html += '</div>';
+      if (filteredNotes.length > 0) {
+        html += 
+          '<div style="margin-top:10px; padding:8px 12px; background:#f8fafc; border-left:3px solid #3b82f6; border-radius:4px; font-size:11.5px; color:#334155; line-height:1.6;">';
+        filteredNotes.forEach(function(nt) {
+          html += '<div style="margin-bottom:2px;"><i class="fa fa-info-circle" style="color:#3b82f6; margin-right:5px; font-size:11px;"></i>' + nt + '</div>';
+        });
+        html += '</div>';
+      }
     }
 
     html += 
@@ -3448,8 +3552,11 @@ tr.type-sub:hover td {
             '</div>';
 
     infoRows.forEach(function(ir) {
+      if (ir.label && (ir.label.toLowerCase().includes('sumber data') || ir.label.toLowerCase().includes('tarik data') || ir.label.toLowerCase().includes('bukti dukung'))) {
+        return;
+      }
       var idAttr = ir.id ? ' id="' + ir.id + '"' : '';
-      html += 
+      html +=
         '<div style="display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #e2e8f0;">' +
           '<span style="color:#64748b;">' + ir.label + '</span>' +
           '<strong' + idAttr + ' style="color:#0f172a;">' + (ir.value || '-') + '</strong>' +
@@ -3697,7 +3804,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.b</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_1_b" style="width: 100%; min-width: 750px;">' +
@@ -3787,7 +3893,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.d</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_1_d" style="width: 100%; min-width: 750px;">' +
@@ -3902,7 +4007,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.1.c - Matriks Keselarasan PN RPJMN vs Prioritas Daerah (RPJMD)</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Penarikan Data Otomatis</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_1_c" style="width: 100%; min-width: 950px;">' +
@@ -4146,7 +4250,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.a - Pemetaan Program Prioritas PN 1 RPJMN vs Program Daerah</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas)</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_2_a" style="width: 100%; min-width: 1050px;">' +
@@ -4392,7 +4495,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.b - Pemetaan Program Prioritas PN 2 RPJMN vs Program Daerah</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 2)</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_2_b" style="width: 100%; min-width: 1050px;">' +
@@ -4673,7 +4775,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.c - Pemetaan Program Prioritas PN 3 RPJMN vs Program Daerah</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 3)</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_2_c" style="width: 100%; min-width: 1050px;">' +
@@ -4951,7 +5052,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.d - Pemetaan Program Prioritas PN 4 RPJMN vs Program Daerah</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 4)</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_2_d" style="width: 100%; min-width: 1050px;">' +
@@ -5261,7 +5361,6 @@ tr.type-sub:hover td {
     var html = 
       '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11.5px; color:#64748b;">' +
         '<span style="font-weight:700;"><i class="fa fa-table"></i> Lembar Kerja Poin 1.a.2.e - Pemetaan Program Prioritas PN 5 RPJMN vs Program Daerah</span>' +
-        '<span style="font-size:11px; background:#eff6ff; color:#1e40af; border:1px solid #bfdbfe; padding:2px 8px; border-radius:12px; font-weight:600;"><i class="fa fa-database"></i> Sumber: /Daerah/DukunganKegiatanPrioritas (Program Prioritas PN 5)</span>' +
       '</div>' +
       '<div style="overflow-x:auto;">' +
       '<table class="excel-grid-table" id="wsTable_1_a_2_e" style="width: 100%; min-width: 1050px;">' +
@@ -6669,9 +6768,7 @@ tr.type-sub:hover td {
           '</tr>' +
         '</tbody>' +
       '</table>' +
-      '<div style="margin-top: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e293b; font-size: 12.5px; font-weight: 600;">' +
-        '<i class="fa fa-camera" style="color: #3b82f6;"></i> Screenshot Tabel Persandingan di RKPD dapat diunggah melalui Bukti Dukung di bawah.' +
-      '</div>' +
+
       '</div>';
 
     html += renderStandardCriteriaCard({
@@ -6981,13 +7078,7 @@ tr.type-sub:hover td {
       '</tr>' +
       '</tbody></table></div>';
 
-    html +=
-      '<div style="margin-top: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e293b; font-size: 12.5px; font-weight: 600;">' +
-        '<i class="fa fa-camera" style="color: #3b82f6; margin-right: 6px;"></i> Screenshot Prioritas Nasional di RKP dan Dukungan Prioritas Pembangunan Daerah di RKPD dapat diunggah melalui Bukti Dukung di bawah.' +
-      '</div>' +
-      '<div style="margin-top: 6px; font-size: 12px; color: #64748b; font-style: italic;">' +
-        '<i class="fa fa-database" style="color: #0d9488; margin-right: 4px;"></i> Tarik data dari <b>/Daerah/TemaPembangunan</b> (Prioritas Pembangunan Daerah RKPD terhadap Prioritas Nasional RKP).' +
-      '</div>';
+
 
     html += renderStandardCriteriaCard({
       code: '1.b.1.c',
@@ -7219,21 +7310,6 @@ tr.type-sub:hover td {
     });
 
     html += '</tbody></table></div>';
-
-    // Information & evidence banner (Unified with other IPPD sheets)
-    html += 
-      '<div style="margin-top: 10px; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6; border-radius: 6px; color: #1e293b; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; gap: 10px;">' +
-        '<div style="display: flex; align-items: center; gap: 8px;">' +
-          '<i class="fa fa-camera" style="color: #3b82f6; margin-right: 2px;"></i>' +
-          '<span>Screenshot Program Daerah dan Kegiatan Prioritas RKPD dapat diunggah melalui Bukti Dukung di bawah.</span>' +
-        '</div>' +
-        '<a href="' + BASE_URL + 'Daerah/DukunganPrioritasPembangunan" target="_blank" class="btn btn-xs btn-primary" style="padding: 4px 12px; font-weight: 600; font-size: 11.5px; border-radius: 4px; white-space: nowrap;">' +
-          '<i class="fa fa-external-link"></i> Buka Form Dukungan' +
-        '</a>' +
-      '</div>' +
-      '<div style="margin-top: 6px; font-size: 12px; color: #64748b; font-style: italic;">' +
-        '<i class="fa fa-database" style="color: #0d9488; margin-right: 4px;"></i> Tarik data dinamis dari <b>/Daerah/DukunganPrioritasPembangunan</b> (Dukungan Program Pembangunan Daerah terhadap Kegiatan Prioritas pada ' + escapeHtml(pnTitle) + ').' +
-      '</div>';
 
     var safeId = 'ws' + code.replace(/\./g, '');
 
@@ -8244,6 +8320,1620 @@ tr.type-sub:hover td {
     return html;
   }
 
+// =========================================================================
+// PILAR 2: KUALITAS PERENCANAAN (POIN 2.a & 2.b) - 9 COMPLETE WORKSHEET RENDERERS
+// Strictly formatted according to verified HTML sheets without any "Tarik data" text
+// =========================================================================
+
+var MASTER_PILAR2_2A1A = [{"no": 1, "permasalahan": "Belum signifikan penurunan kemiskinan di Kabupaten Banyuwangi", "evaluasi": "Angka kemiskinan ekstrem memiliki kecenderungan menurun akan tetapi belum optimal", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 2, "permasalahan": "Kurangnya tingkat serapan angkatan kerja", "evaluasi": "- Penyerapan tenaga kerja masih didominasi oleh penduduk yang bekerja di kegiatan informal, proposi Penyerapan tenaga kerja oleh penduduk yang bekerja pada kegiatan informal meskipun sudah menurun yaitu dari 64.51 persen di tahun 2020 menjadi 63.55 persen di tahun 2024. - Penurunan Tingkat Partisipasi Angkatan Kerja (TPAK) ditengah meningkatnya jumlah penduduk usia kerja. penurunan TPAK di Kabupaten Banyuwangi dari 79.04 persen di tahun 2023 menjadi 75.36 persen di tahun 2024, meskipun kondisi ini lebih baik dibandingkan tahun 2020 dimana TPAK hanya sebesar 71.80 persen. Kondisi ini menggambarkan adanya stagnasi atau bahkan penurunan aktivitas ekonomi di masyarakat, yang apabila tidak ditangani menyebabkan meningkatnya beban sosial, kesenjangan ekonomi, dan penurunan produktivitas ekonomi.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 3, "permasalahan": "Masih adanya angka putus sekolah", "evaluasi": "Kabupaten Banyuwangi berkomitmen membangun pendidikan yang inklusif dan berkualitas melalui berbagai program dan inovasi yang memperluas aksesibilitas bagi seluruh masyarakat, terutama kelompok rentan dan kurang mampu. Namun, tantangan ke depan tetap harus diantisipasi, seperti perubahan dinamika sosial, perkembangan teknologi, dan tuntutan dunia kerja yang semakin kompetitif.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 4, "permasalahan": "Rerata kemampuan Numerasi SMP berdasarkan asesmen nasional menurun 2023", "evaluasi": "Capaian Kemampuan dan Kemampuan Numerasi masih belum maksimal.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 5, "permasalahan": "capaian indikator SPM kesehatan pada tahun 2023 menurun, indikatornya Pelayanan Kesehatan Ibu Hamil dan pelayanan lanjut usia", "evaluasi": "Belum optimalnya kunjungan ibu hamil di trimester pertama karena:a) budaya masyarakat yang tabu memeriksakan kehamilan saat masih dibawah 4 bulanb) Kehamilan yang disembunyikan (kehamilan anak, kehamilan tidak diinginkan)c) Kesadaran masyarakat yang kurang.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 6, "permasalahan": "potensi stunting yang cukup tinggi", "evaluasi": "Balita stunting mengalami penurunan akan tetapi belum cukup signifikan apabila dibandingkan dengan peningkatan yang terjadi pada periode sebelumnya", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 7, "permasalahan": "jumlah kunjungan wisatawan dan lama tinggal belum dapat mencapai kembali angka seperti ditahun 2019 sebelum covid", "evaluasi": "Keterbatasan dalam kualitas SDM disektor pariwisata, seperti kurangnya pelatihan dan sertifikasi bagi tenaga kerja, dapat memengaruhi pelayanan kepada wisatawan dan daya saing destinasi", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 8, "permasalahan": "Daya saing UMKM belum optimal", "evaluasi": "Minimnya akses modal bagi usaha mikro", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 9, "permasalahan": "Perlambatan PDRB sektor Pertanian", "evaluasi": "sektor unggulan masih mendukung perekonomian daerah, kontraksi pada sektor Pertanian, Kehutanan, dan Perikanan menjadi tantangan tersendiri, mengingat kontribusinya yang masih dominan. Hal ini perlu menjadi perhatian dalam perencanaan strategis ke depan, terutama dalam penguatan ketahanan sektor pertanian dan diversifikasi sumber pertumbuhan ekonomi.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 10, "permasalahan": "perubahan budaya terutama pada generasi Z", "evaluasi": "Belum optimalnya pelestarian dan pengembangan budaya lokal di Kabupaten Banyuwangi", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 11, "permasalahan": "Perubahan iklim.", "evaluasi": "Meskipun Kapasitas Kabupaten Banyuwangi dalam penanggulangan bencana terus meningkat, masih terdapat beberapa kendala dalam upaya perkuatan kesiapsiagaan dan penanganan darurat bencana di Kabupaten Banyuwangi terutama pada beberapa tantangan yang ada yakni:1. Kesiapan dalam penyusunan Rencana Kontinjensi untuk setiap ancaman bencana.2. Sistem peringatan dini yang belum optimal untuk setiap jenis ancaman.3. Ketersediaan jalur dan tempat evakuasi sementara yang memadai.4. Mekanisme penentuan status tanggap darurat dan penerapan sistem komando operasi darurat.5. Peningkatan efektivitas dalam pengerahan Tim Kaji Cepat dan Tim Penyelamatan Korban.6. Tantangan dalam pengorganisasian bantuan bagi masyarakat terdampak di wilayah terpencil.7. Mekanisme penghentian status tanggap darurat bencana.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 12, "permasalahan": "Persentase Sampah yang Dikelola kecenderungan menurun", "evaluasi": "Pengelolaan Sampah, wisata alam secara utama memiliki masalah sampah, terutama di area pantai karena sifatnya adalah sampah kiriman sehingga jika tidak dikelola dengan baik terjadi penumpukan sampah tidak hanya merusak estetika lingkungan tetapi juga dapat menurunkan citra pariwisata.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 13, "permasalahan": "Kualitas lingkungan Hidup meningkat, tetapi tidak lebih baik di bandingkan angka 2019", "evaluasi": "Meskipun Banyuwangi dikenal dengan kekayaan alamnya yang luar biasa, mulai dari pegunungan, hutan, hingga pesisir yang luas, yang membuatnya sangat potensial untuk sektor industri dan pariwisata, perkembangan sektor-sektor ini juga membawa tantangan besar bagi kelestarian lingkungan. Kegiatan industri dan pariwisata yang meningkat berisiko memberi tekanan pada ekosistem.", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 14, "permasalahan": "Aplikasi pemerintahan belum di integrasikan karena belum terwujud dengan super apps", "evaluasi": "", "nilai_keselarasan": 0.0, "keterangan": "Tidak Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}, {"no": 15, "permasalahan": "Jalan kondisi baik menurun di tahun 2023", "evaluasi": "Infrastruktur, pembangunan infrustuktur membutuhkan sumberdaya yang tidak sedikit terutama dalam mendukung destinasi wisata di Banyuwangi mulai dari akses jalan, fasilitas umum pariwisata sehingga perlu skala prioritas dalam pembangunan insfratruktur pendukung pariwisata", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan hasil evaluasi", "dokumen": "LPPD Tahun 2024", "halaman": "", "tabel": "", "catatan": ""}];
+var MASTER_PILAR2_2A1B = [{"prioritas": "PD 1. Peningkatan Produksi Pangan", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Minat bertani berkurang kesejahteraan petani kususnya pada buruh tani", "nilai_keselarasan": 100.0}, {"permasalahan": "Lahan produktif mulai berkurang", "nilai_keselarasan": 100.0}, {"permasalahan": "Kesejahteraan petani yang belum optimal", "nilai_keselarasan": 100.0}, {"permasalahan": "Adanya ancaman penyakit menular dan tidak menular terhadap hewan ternak", "nilai_keselarasan": 100.0}, {"permasalahan": "Adanya ketergantungan terhada pupuk sehingga menyebabkan penurunan kesuburan lahan pertanian", "nilai_keselarasan": 100.0}, {"permasalahan": "Produksi perikanan mengalami penurunan", "nilai_keselarasan": 100.0}, {"permasalahan": "Konsumsi ikan masih rendah hilirasasi produk perikanan", "nilai_keselarasan": 100.0}]}, {"prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Belum optimalnya tata kelola sumber daya koperasi", "nilai_keselarasan": 100.0}, {"permasalahan": "Minimnya diversifikasi usaha koperasi", "nilai_keselarasan": 100.0}, {"permasalahan": "Akses permodalan dan akses pasar", "nilai_keselarasan": 100.0}, {"permasalahan": "serta belum siapnya usaha masyarakat yang beradaptasi dengan teknogi dan pemasaran", "nilai_keselarasan": 100.0}]}, {"prioritas": "3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Hilirisasi dan jaringan keperantaraan pasar sektor pertanian", "nilai_keselarasan": 100.0}, {"permasalahan": "Minimnya promosi serta pengembangan atraksi dan sarana pendukung pariwisata", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum efektif dan efisiennya jaringan distribusi perdagangan melalui penataan sistem dan sarana distribusi", "nilai_keselarasan": 100.0}]}, {"prioritas": "4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Tidak tersedianya lapangan pekerjaan yang sesuai dengan keterampilan dan pengalaman yang dimiliki oleh para pencari kerja.", "nilai_keselarasan": 100.0}, {"permasalahan": "Serapan tenaga kerja di banyuwangi masih belum optimal", "nilai_keselarasan": 100.0}, {"permasalahan": "Tingkat pengangguran yang masih tergolong tinggi", "nilai_keselarasan": 100.0}, {"permasalahan": "Lemahnya daya tarik investasi", "nilai_keselarasan": 100.0}]}, {"prioritas": "5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "IPLT yang ada sekarang tidak dapat menampung kebutuhan", "nilai_keselarasan": 100.0}, {"permasalahan": "Penumpukan sampah yang tidak di daur ulang", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum optimalnya pengelolaan sampah berkelanjutan di wilayah selain wilayah kota", "nilai_keselarasan": 100.0}, {"permasalahan": "Masih rendahnya kesadaran masyarakat terhadap pengelolaan sampah", "nilai_keselarasan": 100.0}, {"permasalahan": "Masih tingginya Pencemaran air dan udara", "nilai_keselarasan": 100.0}, {"permasalahan": "Kerusakan alam dan perubahan iklim mengancam keberlanjutan lingkungan dan kesejahteraan manusia", "nilai_keselarasan": 100.0}, {"permasalahan": "Infrastuktur jalan dan jembatan serta konektivitas daerah belum optimal", "nilai_keselarasan": 100.0}, {"permasalahan": "Kondisi drainase yang belum bisa menampung air hujan", "nilai_keselarasan": 100.0}, {"permasalahan": "Terdapat Konflik kepentingan antar petani terkait pembagian air", "nilai_keselarasan": 100.0}, {"permasalahan": "Pemanfaatan lahan masih belum sesuai peruntukan, belum optimalnya pengembangan jaringan irigasi", "nilai_keselarasan": 100.0}, {"permasalahan": "Masih terdapat sumber mata air inactive", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum adanya dokumen RDTRK menuju digitalisasi dan terintegrasi dengan aplikasi perizinan digital", "nilai_keselarasan": 100.0}, {"permasalahan": "Penerapan industri yang ramah lingkungan (green industry) belum optimal", "nilai_keselarasan": 100.0}]}, {"prioritas": "6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Terjadi peningkatan kekerasan perempuan dan anak", "nilai_keselarasan": 100.0}, {"permasalahan": "Terjadi kerentananan kualitas keluarga yang berdampak pada peningkatan perilaku menyimpang di kalangan individu", "nilai_keselarasan": 100.0}, {"permasalahan": "Ketidaktepatan sasaran bantuan sosial karena data belum tepat", "nilai_keselarasan": 100.0}, {"permasalahan": "Kurang sinerginya pihak terkait dalam pelayanan PMKS", "nilai_keselarasan": 100.0}, {"permasalahan": "Penanganan permukiman kumuh dan RTLH belum berjalan optimal", "nilai_keselarasan": 100.0}]}, {"prioritas": "7. Penguatan Pendidikan Yang Berdaya Saing", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Masih belum meratanya kualitas Pendidikan", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum sepenuhnya kompetensi guru dalam penguasaan IT", "nilai_keselarasan": 100.0}, {"permasalahan": "Sarpras sekolah belum memenuhi akses lengkap yang berkualitas", "nilai_keselarasan": 100.0}, {"permasalahan": "Tantangan dalam mengimbangi Pendidikan dengan nilai karakter", "nilai_keselarasan": 100.0}]}, {"prioritas": "8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Infrastruktur kesehatan penyakit menular dan tidak menular yang berkualitas", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum meratanya jaminan Kesehatan", "nilai_keselarasan": 100.0}, {"permasalahan": "Kenaikan angka kematian ibu", "nilai_keselarasan": 100.0}, {"permasalahan": "Masih adanya kasus Stunting", "nilai_keselarasan": 100.0}, {"permasalahan": "Belum Meratanya Sistem Kesehatan yang berkualitas", "nilai_keselarasan": 100.0}]}, {"prioritas": "9. Reformasi Birokrasi", "keterangan": "Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait", "perms": [{"permasalahan": "Masih kurangnya kesadaran masyarakat terkait pentingnya data kependudukan", "nilai_keselarasan": 100.0}, {"permasalahan": "Kurang maksimalnya integrasi digitalisasi layanan", "nilai_keselarasan": 100.0}, {"permasalahan": "Penguatan sistem keuangan terintegrasi", "nilai_keselarasan": 100.0}, {"permasalahan": "Intensifikasi dan ekstensifikasi PAD", "nilai_keselarasan": 100.0}, {"permasalahan": "Kuantitas dan kualitas SDM peneliti belum memadai", "nilai_keselarasan": 100.0}]}];
+var MASTER_PILAR2_2A1C = [{"isu_strategis": "Sumber Daya Manusia yang Belum Berdaya Saing", "pds": [{"prioritas": "Penguatan Pendidikan Yang Berdaya Saing", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}, {"prioritas": "Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Kurangnya Peranan Gender dalam Pembangunan", "pds": [{"prioritas": "Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Optimalisasi Pengentasan Kemiskinan melalui Perluasan Perlindungan Sosial yang Tepat Sasaran dan Terintegrasi", "pds": [{"prioritas": "Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Ketahanan Pangan", "pds": [{"prioritas": "Peningkatan Produksi Pangan", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Menjaga Tata Kelola dan Akuntabilitas Pemerintah", "pds": [{"prioritas": "Reformasi Birokrasi", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Kerentanan terhadap Lingkungan Hidup", "pds": [{"prioritas": "Peningkatan Akses Infratruktur Pariwisata dan Pertanian serta Peningkatan ketahanan Lingkungan hidup", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}, {"isu_strategis": "Rendahnya Produktivitas Ekonomi", "pds": [{"prioritas": "Peningkatan Akses Infratruktur Pariwisata dan Pertanian serta Peningkatan ketahanan Lingkungan hidup", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}, {"prioritas": "Peningkatan Nilai Tambah Produk UMKM", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}, {"prioritas": "Perluasan Pasar Sektor Pertanian Dan Pariwisata", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}, {"prioritas": "Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis"}]}];
+var MASTER_PILAR2_2A2A = [{"no": 1, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Indeks Ketahanan Pangan"}, {"no": 2, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Prevalensi Ketidakcukupan Konsumsi Pangan (Prevalence of Undernourishment)"}, {"no": 3, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Indeks Daya Beli (PPP)"}, {"no": 4, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Jumlah Wisatawan Domestik dan Mancanegara yang Menginap"}, {"no": 5, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Proporsi Jumlah Usaha Kecil dan Menengah Non Pertanian (%)"}, {"no": 6, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Rasio PDRB Penyediaan Akomodasi Makan dan Minum"}, {"no": 7, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Pertumbuhan PDRB Pertanian"}, {"no": 8, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Kontribusi PDRB Industri"}, {"no": 9, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Pertumbuhan PDRB Pariwisata"}, {"no": 10, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Indeks Gini"}, {"no": 11, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Pertumbuhan PDRB Perdagangan"}, {"no": 12, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Pertumbuhan PDRB Transportasi dan Pergudangan"}, {"no": 13, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Indeks Kepuasan Layanan Infrastruktur (IKLI)"}, {"no": 14, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Pembentukan Modal Tetap Bruto"}, {"no": 15, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Indeks Daya Saing Daerah"}, {"no": 16, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Realisasi Investasi"}, {"no": 17, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "ICOR"}, {"no": 18, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Indeks Kualitas Lingkungan Hidup (IKLH)"}, {"no": 19, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Indeks Resiko Bencana"}, {"no": 20, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Timbulan Sampah Terolah di Fasilitas Pengolahan Sampah"}, {"no": 21, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Rumah Tangga dengan Akses Sanitasi Aman"}, {"no": 22, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Persentase Penurunan Emisi GRK Kumulatif"}, {"no": 23, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Akses Rumah Tangga Perkotaan terhadap Air Siap Minum Perpipaan"}, {"no": 24, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Persentase Rumah Tangga dengan Akses Hunian Layak, Terjangkau dan Berkelanjutan"}, {"no": 25, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Cakupan Kepesertaan Jaminan Sosial Kesehatan"}, {"no": 26, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Cakupan Kepesertaan Jaminan Sosial Ketenagakerjaan"}, {"no": 27, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Kebutuhan Dasar"}, {"no": 28, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Keparahan Kemiskinan"}, {"no": 29, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Pembangunan Kebudayaan"}, {"no": 30, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Harmonisasi Sosial"}, {"no": 31, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Pembangunan Keluarga"}, {"no": 32, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Ketimpangan Gender"}, {"no": 33, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Peranan Sosial"}, {"no": 34, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "TPT"}, {"no": 35, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "% Peserta Penyandang Disabilitas Bekerja di Sektor Formal"}, {"no": 36, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Keberdayaan Ekonomi"}, {"no": 37, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Rasio Kewirausahaan"}, {"no": 38, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan"}, {"no": 39, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Rata-rata Lama Sekolah Penduduk Usia di Atas 15 Tahun"}, {"no": 40, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Proporsi Penduduk Berusia 15 Tahun ke Atas yang Berkualifikasi Pendidikan Tinggi"}, {"no": 41, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Nilai Rapor Pendidikan"}, {"no": 42, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Indeks Pembangunan Literasi Masyarakat"}, {"no": 43, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Menurunnya Transmisi Kemiskinan", "indikator_sasaran": "Harapan Lama Sekolah"}, {"no": 44, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Laju Pertumbuhan Penduduk"}, {"no": 45, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Usia Harapan Hidup"}, {"no": 46, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Angka Kematian Ibu"}, {"no": 47, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Angka Kematian Balita"}, {"no": 48, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Prevalensi Stunting (Pendek dan Sangat Pendek) pada Balita"}, {"no": 49, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Indeks Desa"}, {"no": 50, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Nilai SPBE"}, {"no": 51, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Proporsi Penduduk yang Merasa Aman Berjalan Sendirian di Area Tempat Tinggalnya (%)"}, {"no": 52, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Indeks Demokrasi"}, {"no": 53, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "SAKIP"}, {"no": 54, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "Indeks Pengelolaan Keuangan Daerah"}, {"no": 55, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "Indeks Efektivitas Pencegahan Korupsi"}, {"no": 56, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Aparatur Sipil Negara yang Profesional", "indikator_sasaran": "Indeks Profesionalitas ASN"}, {"no": 57, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Pelayanan Publik"}, {"no": 58, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Inovasi Daerah"}, {"no": 59, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Kepuasan Masyarakat"}];
+var MASTER_PILAR2_2A2B = [{"no": 1, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Indeks Ketahanan Pangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 2, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Prevalensi Ketidakcukupan Konsumsi Pangan (Prevalence of Undernourishment)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 3, "prioritas": "PD 1. Peningkatan Produksi Pangan", "isu_strategis": "Stabilitas Daya Beli Masyarakat", "indikator_sasaran": "Indeks Daya Beli (PPP)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 4, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Jumlah Wisatawan Domestik dan Mancanegara yang Menginap", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 5, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Proporsi Jumlah Usaha Kecil dan Menengah Non Pertanian (%)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 6, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Rasio PDRB Penyediaan Akomodasi Makan dan Minum", "nilai_keselarasan": 0.0, "keselarasan_terbobot": 0.0}, {"no": 7, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Pertumbuhan PDRB Pertanian", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 8, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Kontribusi PDRB Industri", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 9, "prioritas": "PD 2. Peningkatan Nilai Tambah Produk UMKM", "isu_strategis": "Meningkatnya Pertumbuhan Ekonomi Sektor Unggulan", "indikator_sasaran": "Pertumbuhan PDRB Pariwisata", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 10, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Indeks Gini", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 11, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Pertumbuhan PDRB Perdagangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 12, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Pertumbuhan PDRB Transportasi dan Pergudangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 13, "prioritas": "PD 3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "isu_strategis": "Distribusi Ekonomi yang Efisien dan Merata", "indikator_sasaran": "Indeks Kepuasan Layanan Infrastruktur (IKLI)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 14, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Pembentukan Modal Tetap Bruto", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 15, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Indeks Daya Saing Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 16, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "Realisasi Investasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 17, "prioritas": "PD 4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "isu_strategis": "Meningkatnya Nilai Investasi Daerah", "indikator_sasaran": "ICOR", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 18, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Indeks Kualitas Lingkungan Hidup (IKLH)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 19, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Indeks Resiko Bencana", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 20, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Timbulan Sampah Terolah di Fasilitas Pengolahan Sampah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 21, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Rumah Tangga dengan Akses Sanitasi Aman", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 22, "prioritas": "PD 5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "isu_strategis": "Meningkatnya Kualitas Lingkungan sebagai Penunjang Ekonomi yang Berkelanjutan", "indikator_sasaran": "Persentase Penurunan Emisi GRK Kumulatif", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 23, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Akses Rumah Tangga Perkotaan terhadap Air Siap Minum Perpipaan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 24, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Persentase Rumah Tangga dengan Akses Hunian Layak, Terjangkau dan Berkelanjutan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 25, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Cakupan Kepesertaan Jaminan Sosial Kesehatan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 26, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Cakupan Kepesertaan Jaminan Sosial Ketenagakerjaan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 27, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Kebutuhan Dasar", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 28, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Berkurang Beban Pengeluaran Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Keparahan Kemiskinan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 29, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Pembangunan Kebudayaan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 30, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Harmonisasi Sosial", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 31, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Pembangunan Keluarga", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 32, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Ketimpangan Gender", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 33, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Peranan Sosial Masyarakat yang Menguat", "indikator_sasaran": "Indeks Peranan Sosial", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 34, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "TPT", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 35, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "% Peserta Penyandang Disabilitas Bekerja di Sektor Formal", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 36, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Indeks Keberdayaan Ekonomi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 37, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Rasio Kewirausahaan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 38, "prioritas": "PD 6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "isu_strategis": "Meningkatnya Ekonomi Masyarakat Miskin dan Rentan", "indikator_sasaran": "Tingkat Partisipasi Angkatan Kerja (TPAK) Perempuan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 39, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Rata-rata Lama Sekolah Penduduk Usia di Atas 15 Tahun", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 40, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Proporsi Penduduk Berusia 15 Tahun ke Atas yang Berkualifikasi Pendidikan Tinggi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 41, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Nilai Rapor Pendidikan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 42, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Pendidikan Berkualitas dan Merata", "indikator_sasaran": "Indeks Pembangunan Literasi Masyarakat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 43, "prioritas": "PD 7. Penguatan Pendidikan Yang Berdaya Saing", "isu_strategis": "Menurunnya Transmisi Kemiskinan", "indikator_sasaran": "Harapan Lama Sekolah", "nilai_keselarasan": 0.0, "keselarasan_terbobot": 0.0}, {"no": 44, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Laju Pertumbuhan Penduduk", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 45, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Usia Harapan Hidup", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 46, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Angka Kematian Ibu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 47, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Angka Kematian Balita", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 48, "prioritas": "PD 8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "isu_strategis": "Kesehatan Berkualitas dan Merata", "indikator_sasaran": "Prevalensi Stunting (Pendek dan Sangat Pendek) pada Balita", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 49, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Indeks Desa", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 50, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Nilai SPBE", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 51, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Proporsi Penduduk yang Merasa Aman Berjalan Sendirian di Area Tempat Tinggalnya (%)", "nilai_keselarasan": 0.0, "keselarasan_terbobot": 0.0}, {"no": 52, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Optimalnya Tata Kelola Pemerintah Berorientasi Layanan", "indikator_sasaran": "Indeks Demokrasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 53, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "SAKIP", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 54, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "Indeks Pengelolaan Keuangan Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 55, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Pemerintah Daerah yang Akuntabel", "indikator_sasaran": "Indeks Efektivitas Pencegahan Korupsi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 56, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Aparatur Sipil Negara yang Profesional", "indikator_sasaran": "Indeks Profesionalitas ASN", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 57, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Pelayanan Publik", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 58, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Inovasi Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}, {"no": 59, "prioritas": "PD 9. Reformasi Birokrasi", "isu_strategis": "Layanan Publik yang Prima", "indikator_sasaran": "Indeks Kepuasan Masyarakat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.0}];
+var MASTER_PILAR2_2A3A = [{"prioritas": "1. Peningkatan Produksi Pangan", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENANGANAN KERAWANAN PANGAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERLINDUNGAN DAN JAMINAN SOSIAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN DIVERSIFIKASI DAN KETAHANAN PANGAN MASYARAKAT", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYEDIAAN DAN PENGEMBANGAN SARANA PERTANIAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYEDIAAN DAN PENGEMBANGAN PRASARANA PERTANIAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYULUHAN PERTANIAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN SUMBER DAYA EKONOMI UNTUK KEDAULATAN dan KEMANDIRIAN PANGAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PERIKANAN TANGKAP", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PERIKANAN BUDIDAYA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM STABILISASI HARGA BARANG KEBUTUHAN POKOK DAN BARANG PENTING", "nilai_keselarasan": 100.0}, {"program": "PROGRAM STANDARDISASI DAN PERLINDUNGAN KONSUMEN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEREKONOMIAN DAN PEMBANGUNAN", "nilai_keselarasan": 100.0}]}, {"prioritas": "2. Peningkatan Nilai Tambah Produk UMKM", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PERENCANAAN DAN PEMBANGUNAN INDUSTRI", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN UMKM", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN EKSPOR", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEREKONOMIAN DAN PEMBANGUNAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN USAHA MENENGAH, USAHA KECIL, DAN USAHA MIKRO (UMKM)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN DAN PERLINDUNGAN KOPERASI", "nilai_keselarasan": 100.0}]}, {"prioritas": "3. Perluasan Pasar Sektor Pertanian Dan Pariwisata", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENINGKATAN DAYA TARIK DESTINASI PARIWISATA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMASARAN PARIWISATA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN SUMBER DAYA PARIWISATA DAN EKONOMI KREATIF", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PERIKANAN TANGKAP", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PERIKANAN BUDIDAYA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN EKSPOR", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN KEBUDAYAAN", "nilai_keselarasan": 100.0}]}, {"prioritas": "4. Peningkatan Serapan Tenaga Kerja Dalam Sektor UMKM Dan Pariwisata", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENGEMBANGAN IKLIM PENANAMAN MODAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PROMOSI PENANAMAN MODAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERENCANAAN TENAGA KERJA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM HUBUNGAN INDUSTRIAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN KAPASITAS DAYA SAING KEPEMUDAAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENEMPATAN TENAGA KERJA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PELATIHAN KERJA DAN PRODUKTIVITAS TENAGA KERJA", "nilai_keselarasan": 100.0}]}, {"prioritas": "5. Peningkatan Akses Infrastruktur Pariwisata dan Pertanian serta Peningkatan Ketahanan Lingkungan Hidup", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENYELENGGARAAN JALAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN LALU LINTAS DAN ANGKUTAN JALAN (LLAJ)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENATAAN BANGUNAN GEDUNG", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN SARANA DISTRIBUSI PERDAGANGAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM DRAINASE", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN PRASARANA, SARANA DAN UTILITAS UMUM (PSU)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGENDALIAN PENCEMARAN DAN/ATAU KERUSAKAN LINGKUNGAN HIDUP", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGENDALIAN BAHAN BERBAHAYA DAN BERACUN (B3) DAN LIMBAH BAHAN BERBAHAYA DAN BERACUN (LIMBAH B3)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBINAAN DAN PENGAWASAN TERHADAP IZIN LINGKUNGAN DAN IZIN PERLINDUNGAN DAN PENGELOLAAN LINGKUNGAN HIDUP (PPLH)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENCEGAHAN, PENANGGULANGAN, PENYELAMATAN KEBAKARAN DAN PENYELAMATAN NON KEBAKARAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM AIR LIMBAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PERSAMPAHAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN KEANEKARAGAMAN HAYATI (KEHATI)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERENCANAAN LINGKUNGAN HIDUP", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN SUMBER DAYA AIR (SDA)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN PENATAAN RUANG", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM PENYEDIAAN AIR MINUM", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENANGGULANGAN BENCANA", "nilai_keselarasan": 100.0}]}, {"prioritas": "6. Perlindungan Sosial Adaptif Dan Pemberdayaan Masyarakat Miskin Dan Rentan", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENANGANAN BENCANA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGENDALIAN DAN PENANGGULANGAN BENCANA PERTANIAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN PERUMAHAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM KAWASAN PERMUKIMAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN PRASARANA, SARANA DAN UTILITAS UMUM (PSU)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM REHABILITASI SOSIAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN SOSIAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGUATAN IDEOLOGI PANCASILA DAN KARAKTER KEBANGSAAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN LEMBAGA KEMASYARAKATAN, LEMBAGA ADAT DAN MASYARAKAT HUKUM ADAT", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN KUALITAS KELUARGA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN DAN PENINGKATAN KELUARGA SEJAHTERA (KS)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERLINDUNGAN PEREMPUAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN KAPASITAS DAYA SAING KEPEMUDAAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGARUSUTAMAAN GENDER DAN PEMBERDAYAAN PEREMPUAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN MASYARAKAT DESA DAN KELURAHAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN KERJA SAMA DESA", "nilai_keselarasan": 100.0}]}, {"prioritas": "7. Penguatan Pendidikan Yang Berdaya Saing", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PENGELOLAAN PENDIDIKAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBINAAN PERPUSTAKAAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGENDALIAN PERIZINAN PENDIDIKAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENDIDIK DAN TENAGA KEPENDIDIKAN", "nilai_keselarasan": 100.0}]}, {"prioritas": "8. Peningkatan Akses Kesehatan Dan Pola Hidup Sehat", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PEMENUHAN UPAYA KESEHATAN PERORANGAN DAN UPAYA KESEHATAN MASYARAKAT", "nilai_keselarasan": 100.0}, {"program": "PROGRAM SEDIAAN FARMASI, ALAT KESEHATAN DAN MAKANAN MINUMAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM AIR LIMBAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN DAN PENGEMBANGAN SISTEM PENYEDIAAN AIR MINUM", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN MASYARAKAT BIDANG KESEHATAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBINAAN KELUARGA BERENCANA (KB)", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGENDALIAN PENDUDUK", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN KAPASITAS SUMBER DAYA MANUSIA KESEHATAN", "nilai_keselarasan": 100.0}]}, {"prioritas": "9. Reformasi Birokrasi", "keterangan": "Terdapat Program Prioritas sebagai penjabaran dari Prioritas Pembangunan Daerah terkait", "programs": [{"program": "PROGRAM PELAYANAN PENANAMAN MODAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENINGKATAN KETENTERAMAN DAN KETERTIBAN UMUM", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN DAN PENGAWASAN ORGANISASI KEMASYARAKATAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMBERDAYAAN LEMBAGA KEMASYARAKATAN, LEMBAGA ADAT DAN MASYARAKAT HUKUM ADAT", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERENCANAAN, PENGENDALIAN DAN EVALUASI PEMBANGUNAN DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN STATISTIK SEKTORAL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN KEUANGAN DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN BARANG MILIK DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN PENDAPATAN DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN PENGAWASAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEREKONOMIAN DAN PEMBANGUNAN", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGEMBANGAN SUMBER DAYA MANUSIA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM KEPEGAWAIAN DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN PEMERINTAHAN DAN PELAYANAN PUBLIK", "nilai_keselarasan": 100.0}, {"program": "PROGRAM ADMINISTRASI PEMERINTAHAN DESA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENDAFTARAN PENDUDUK", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENCATATAN SIPIL", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN INFORMASI DAN KOMUNIKASI PUBLIK", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN APLIKASI INFORMATIKA", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENYELENGGARAAN PERSANDIAN UNTUK PENGAMANAN INFORMASI", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENGELOLAAN ARSIP", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PERUMUSAN KEBIJAKAN, PENDAMPINGAN DAN ASISTENSI", "nilai_keselarasan": 100.0}, {"program": "PROGRAM DUKUNGAN PELAKSANAAN TUGAS DAN FUNGSI DPRD", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PENELITIAN DAN PENGEMBANGAN DAERAH", "nilai_keselarasan": 100.0}, {"program": "PROGRAM PEMERINTAHAN DAN KESEJAHTERAAN RAKYAT", "nilai_keselarasan": 100.0}]}];
+var MASTER_PILAR2_2A3B = [{"indikator_sasaran": "ICOR", "prog_indicators": [{"indikator_program": "Persentase Potensi Investasi Daerah Yang Dikembangkan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Investor Yang Berinvestasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Ikm Pelayanan Perizinan Dan Non Perizinan Penanaman Modal", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pelaku Usaha Yang Mempunyai Lkpm Sesuai Standar", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pemenuhan Data Dan Informasi Penanaman Modal", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Tingkat Kemantapan Jalan Kabupaten/Kota", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Tenaga Kerja Bersertifikat Kompetensi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Jumlah Organisasi Masyarakat Yang Dibina", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perusahaan Yang Menerapkan Tata Kelola Kerja Yang Layak", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Realisasi Investasi Sektor Industri Dan Kawasan Industri Dibandingkan Realisasi Investasi Seluruh Sektor", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Daerah Aman Dari Daya Rusak Air", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Masyarakat Yang Berpartisipasi Dalam Pengelolaan Sda", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Daerah Irigasi Yang Terlayani", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan DAS Yang Dikonservasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Gedung Negara Dalam Kondisi Baik", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Tingkat Kepuasan Pengguna Terhadap Layanan TIK", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pelanggaran Perda Perda Yang Tertangani", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Pertumbuhan PDRB Pertanian, Kehutanan dan Perikanan", "prog_indicators": [{"indikator_program": "Peningkatan Produksi Komoditas Perkebunan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Peningkatan Produksi Tanaman Pangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Peningkatan Produksi Komoditas Peternakan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Peningkatan Produksi Hortikultura", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyediaan Dan Pengembangan Prasarana Pertanian Mendukung Peternakan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyediaan Dan Pengembangan Prasarana Pertanian Mendukung Tanaman Pangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyediaan Dan Pengembangan Prasarana Pertanian Mendukung Kesehatan Hewan Dan Kesehatan Masyarakat Veteriner", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Wilayah Yang Terkendali Dari Penyakit Hewan Menular Strategis", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Usaha Produk Hewan Yang Bersertifikasi Pra/Nkv", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Luas Areal Pengendalian Dan Penanggulangan Bencana Dpi Tanaman Pangan, Hortikultura Dan Perkebunan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Cakupan Bina Kelompok Petani (%)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Produksi Perikanan Tangkap Nelayan Kecil", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Produksi Perikanan Budidaya", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Peningkatan Jumlah Pelaku Usaha Yang Taat Regulasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Peningkatan Produksi Produk Usaha Mikro Kecil Perikanan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Pertumbuhan PDRB Pariwisata", "prog_indicators": [{"indikator_program": "Persentase Pelaku Ekonomi Kreatif Yang Memiliki Kekayaan Intelektual", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Kunjungan Wisatawan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Length Of Stay", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Pertumbuhan Pelaku Seni", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Budaya Lokal Yang Dilestarikan Dan Dikembangkan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Rasio PDRB Industri Pengolahan", "prog_indicators": [{"indikator_program": "% Pertumbuhan Nilai Produksi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Peningkatan Sentra Industri Pengolahan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Jumlah Ikm Yang Memiliki Jaringan Pemasaran", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Usaha Mikro Yang Meningkat Nilai Omset", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Usaha Mikro Yang Bertransformasi Dari Informal Ke Formal", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Volume Usaha Koperasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Wirausaha Mandiri", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "%Peningkatan Pendapatan Pelaku Ekraf", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Pertumbuhan PDRB Perdagangan", "prog_indicators": [{"indikator_program": "Persentase Layanan Angkutan Darat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Ruas Jalan Yang Memenuhi Standar Keselamatan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Tingkat Kemantapan Jalan Kabupaten/Kota", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Izin Usaha Perdagangan Yang Difasilitasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Sarana Distribusi Perdagangan Yang Mengalami Peningkatan Kualitas", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Jumlah Realisasi Ekspor (Dalam Juta U$$)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Alat Ukur Takar Timbang Dan Perlengkapannya (Uttp) Bertanda Tera Sah Yang Berlaku", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Promosi Produk Lokal Yang Difasilitasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Daya Beli (PPP)", "prog_indicators": [{"indikator_program": "Produktivitas Tenaga Kerja", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penempatan Tenaga Kerja (Dalam Dan Luar Negeri)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Koefisien Variasi Harga Antar Waktu Per Komoditas Bahan Pokok", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Peringkat TPID", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Kualitas Lingkungan Hidup", "prog_indicators": [{"indikator_program": "Persentase Dokumen Perencanaan Lingkungan Hidup Yang Disusun", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Sarana Prasarana Dan Aktifitas Penanggulangan Pencemaran Dan/Atau Kerusakan Lingkungan Hidup", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase RTH", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penerbitan Rekomendasi Teknis Ijin Pengelolaan Limbah B3 Skala Kabupaten", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Kepatuhan Kegiatan Usaha Terhadap Aspek Lingkungan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kelompok Masyarakat Yang Berpartisipasi Dalam Pelestarian Lingkungan Hidup", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penghargaan Terhadap Pelaku Pelestari Lingkungan Hidup", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Rasio Sampah Daerah Yang Tertangani", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Rata-Rata Sampah Yang Masuk Ke TPA", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Rumah Tangga Yang Memiliki Akses Terhadap Layanan Sanitasi Layak.", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Wilayah Yang Telah Tersusun Perencanaan Tata Ruang", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Perumahan Yang Sudah Dilengkapi Psu (Prasarana, Sarana Dan Utilitas Umum)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kecukupan Luasan RTH Publik", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Risiko Bencana", "prog_indicators": [{"indikator_program": "Indeks Pengembangan Sistem Pemulihan Bencana", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Indeks Peningkatan Efektivitas Pencegahan Dan Mitigasi Bencana", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Indeks Perkuatan Kesiapsiagaan Dan Penanganan Darurat Bencana", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Respons Time Rate Maksimal 15 Menit Pada Wilayah Manajemen Kebakaran", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Kebutuhan Dasar", "prog_indicators": [{"indikator_program": "Persentase Penerima Manfaat Yang Terpenuhinya Kebutuhan Dasar", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Angka Kecukupan Energi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Angka Kecukupan Protein", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Daerah Rentan Rawan Pangan (%)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyediaan Dan Rehabilitasi Rumah Yang Layak Huni Bagi Korban Bencana", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Rumah Tidak Layak Huni Yang Diperbaiki Diluar Kawsan Kumuh", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Koefisien Variasi Harga Antar Waktu Per Komoditas Bahan Pokok", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Korban Bencana Alam Dan Sosial Yang Terpenuhi Kebutuhan Dasarnya Ada Saat Dan Setelah Tanggap Darurat Bencana Daerah Kab/Kota", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Rumah Tangga Yang Memiliki Akses Terhadap Layanan Sanitasi Layak.", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Peranan Sosial", "prog_indicators": [{"indikator_program": "Persentase Penyandang Disabilitas Terlantar Yang Terpenuhi Kebutuhan Dasarnya Di Luar Panti", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Anak Terlantar Yang Terpenuhi Kebutuhan Dasarnya Di Luar Panti", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Lanjut Usia Terlantar Yang Terpenuhi Kebutuhan Dasarnya Di Luar Panti", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Gelandangan Pengemis Yang Terpenuhi Kebutuhan Dasarnya Di Luar Panti", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Partisipasi Politik Di Masyarakat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Angka Potensi Konflik Sara Di Masyarakat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Masyarakat Yang Memiliki Wawasan Kesabangsaan, Ideologi Pancasila Dan Ipoleksosbudhankam Yang Baik (Nilai Post Test Lebih Dari 70)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perempuan Korban Kekerasan Dan Tppo Yang Mendapatkan Layanan Komprehensif", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Peningkatan Partisipasi Anak", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pemenuhan Standar Kualitas Proses Perencanaan Pembangunan Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Keberdayaan Ekonomi", "prog_indicators": [{"indikator_program": "Persentase Fasilitasi Kerjasama Desa", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasilitasi Pemberdayaan Lembaga Kemasyarakatan Desa (LKD)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasilitasi Pemberdayaan Lembaga Adat Desa Dan Lembaga Masyarakat Hukum Adat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Rumah Tangga Miskin Yang Mendapatkan Pengembangan Usaha Ekonomi Produktif", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase PSKS Yang Melaksanakan Pelayanan Sosial", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Gini", "prog_indicators": [{"indikator_program": "Produktivitas Tenaga Kerja", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penempatan Tenaga Kerja (Dalam Dan Luar Negeri)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Anggaran Responsif Gender", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Usaha Mikro Yang Bertransformasi Dari Informal Ke Formal", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peningkatan Volume Usaha Koperasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Keparahan Kemiskinan", "prog_indicators": [{"indikator_program": "Persentase Peserta Didik Miskin Dan Berprestasi Yang Mendapatkan Beasiswa Dan Pelayanan Pendidikan Sekolah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Cakupan Imunisasi Bayi Lengkap", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Cakupan Kepesertaan Jaminan Kesehatan Nasional", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Penemuan Kasus Tbc", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasilitas Kesehatan Yang Memenuhi Standar", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Prevalensi Wasting (Gizi Kurang Dan Gizi Buruk) Pada Balita", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Lanjut Usia Yang Mandiri", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perilaku Hidup Bersih Sehat (Phbs) Rumah Tangga", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kunjungan Ibu Hamil K1", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Terlayaninya Keluarga Yang Memanfaatkan Puspaga", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Keluarga Yang Mengikuti Kelompok Kegiatan Ketahanan Keluarga", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Harapan Lama Sekolah/ Rata -Rata Lama Sekolah/ Persentase Satuan Pendidikan yang Memiliki Nilai Rapor Berkategori Baik", "prog_indicators": [{"indikator_program": "Persentase Peserta Didik Miskin Dan Berprestasi Yang Mendapatkan Beasiswa Dan Pelayanan Pendidikan Sekolah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peserta Didik Yang Telah Mencapai Batas Kompetensi Minimum Untuk Numerasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Peserta Didik Yang Telah Mencapai Batas Kompetensi Minimum Untuk Literasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Jumlah Peserta Didik Yang Berprestasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Ketersediaan Sarana Dan Prasarana Pendidikan Berkondisi Baik", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Paud Berakreditasi Minimal B", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Sd Berakreditasi Minimal B", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Smp Berakreditasi Minimal B", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Satuan Pendidikan Kesetaraan Berakreditasi Minimal B", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Bahasa Dan Sastra Daerah Yang Dikembangkan Dan Dilindungi Di Kabupaten Banyuwangi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perangkat Kurikulum Yang Dikembangkan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Perpustakaan Yang Terakreditasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Angka Harapan Hidup", "prog_indicators": [{"indikator_program": "Persentase Hipertensi Dalam Pengendalian", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Cakupan Imunisasi Bayi Lengkap", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Cakupan Kepesertaan Jaminan Kesehatan Nasional", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Penemuan Kasus TBC", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasilitas Kesehatan Yang Memenuhi Standar", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Prevalensi Wasting (Gizi Kurang Dan Gizi Buruk) Pada Balita", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Lanjut Usia Yang Mandiri", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Puskesmas Yang Memenuhi Rasio Puskesmas Terhadap Populasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perilaku Hidup Bersih Sehat (PHBS) Rumah Tangga", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kunjungan Ibu Hamil K1", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Rasio Tenaga Kesehatan Dan Tenaga Medis Terhadap Populasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Apotek Dan Toko Obat Yang Mampu Memelihara Persyaratan Perizinan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Proporsi Penduduk Dengan Aktivitas Fisik Cukup", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kebutuhan Ber-Kb Yang Tidak Terpenuhi (Unmet Need)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Angka Prevalensi Kontrasepsi Modern/Modern Contraceptive (MCPR)", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Pemerintah Digital", "prog_indicators": [{"indikator_program": "Tingkat Kepuasan Masyarajkat Terhadap Akses Dan Kualitas Konten Informasi Publik", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Tingkat Kepuasan Pengguna Terhadap Layanan TIK", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Opd Yang Menggunakan Data Statistik Dalam Menyusun Perencaan Dan Evaluasi Pembangunan Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Indeks KAMI", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Tingkat Ketersediaan Arsip", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "SAKIP", "prog_indicators": [{"indikator_program": "Persentase Pemenuhan Standar Kualitas Proses Perencanaan Pembangunan Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Perangkat Daerah Yang Kinerjanya (Tujuan Dan Sasaran Renstra) Tercapai", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pemenuhan Standar Kualitas Substansi Perencanaan Pembangunan Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Pengelolaan Keuangan Daerah", "prog_indicators": [{"indikator_program": "% Pelayanan Realisasi Pengeluaran Keuangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Pelayanan Realisasi Penerimaan Keuangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pemenuhan LKPD Yang Sesuai SAP Dan Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Pemenuhan Dokumen Penganggaran Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Presentase Pemenuhan LBMD Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kepatuhan Wajib Pajak", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Pertumbuhan Objek Pendapatan Baru", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Sistem Pengendalian Intern Pemerintah", "prog_indicators": [{"indikator_program": "% Tl Akuntabilitas Kinerja", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Tatakelola Kinerja", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Tatakelola Keuangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Akuntabilitas Keuangan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Implementasi MR", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Efektivitas RTP", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Pencegahan Korupsi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "% Tl Dumas, % Tl Pelimpahan Aph/Itprop/Itjen", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Sistem Merit", "prog_indicators": [{"indikator_program": "Persentase Penilaian Dan Kapasitas Kinerja Aparatur", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Nilai Indeks Implementasi NSPK Manajemen ASN", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase ASN Yang Meningkat Kompetensinya", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}, {"indikator_sasaran": "Indeks Pelayanan Publik/ Indeks Kepuasan Masyarakat", "prog_indicators": [{"indikator_program": "IKM Kesra", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Nilai SAKIP Setda", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasilitasi Tata Kelola Desa", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Layanan Pencatatan Sipil Yang Selesai Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Layanan Pendaftaran Penduduk Yang Selesai Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Kajian Kelitbangan Yang Sesuai Dengan Isu Strategis Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Indeks Inovasi Daerah", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Prosentase Pengesahan Dokumen Penganggaran Yang Di Failitasi", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Prosentase Pengesahan Perda Yang Tepat Waktu", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Prosentase Pemenuhan Kebutuhan Terhadap Pelaksanaan Tugas DPRD", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyelenggaraan Pengawasan Pemerintahan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Fasiltasi Penyelenggaraan Urusan Pemerintahan Lainnya Yang Dilaksanakan", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}, {"indikator_program": "Persentase Penyelesaian Pengaduan Masyarakat", "nilai_keselarasan": 100.0, "keselarasan_terbobot": 8.5}]}];
+var MASTER_PILAR2_2B1  = [{"permasalahan": "Belum signifikan penurunan kemiskinan di Kabupaten Banyuwangi", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "Kanggo Riko", "nilai_keselarasan": 100.0}, {"inovasi": "UGDK (Unit Gawat Darurat Kemiskinan)", "nilai_keselarasan": 100.0}, {"inovasi": "GAMBIRAN GEMBIRA (Gambiran Bergerak Bersama Menuju Sejahtera)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Kurangnya tingkat serapan angkatan kerja", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "BIMBINGAN JABATAN ONLINE", "nilai_keselarasan": 100.0}, {"inovasi": "Aplikasi SICAKEP (Sistem Pencatatan Perjanjian Kerja Perusahaan)", "nilai_keselarasan": 100.0}, {"inovasi": "Goker Wangi (Golek Kerjo Banyuwangi)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Masih adanya angka putus sekolah", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "Sekolah Adat Kampoeng Baca Taman Rimba (BATARA)", "nilai_keselarasan": 100.0}, {"inovasi": "GARDA AMPUH (GERAKAN ANGKAT ANAK MUDA PUTUS SEKOLAH)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Rerata kemampuan Numerasi SMP berdasarkan asesmen nasional menurun 2023", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "AYO INKLUSIF AGAGE PINTER", "nilai_keselarasan": 100.0}, {"inovasi": "BANYUWANGI MENGAJAR", "nilai_keselarasan": 100.0}, {"inovasi": "BUDIWANGI (Buku Digitalnya Warga Banyuwangi)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "capaian indikator SPM kesehatan pada tahun 2023 menurun, indikatornya Pelayanan Kesehatan Ibu Hamil dan pelayanan lanjut usia", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)", "nilai_keselarasan": 100.0}, {"inovasi": "BARAK PITTU (BAnyuwangi beRgerAK Peduli pada Ibu hamil Tujuh TerlalU)", "nilai_keselarasan": 100.0}, {"inovasi": "BERSELENDANG SUTRA DENGAN RT PANTAU (Bersama Masyarakat dan Lintas Sektor Bergandengan Tangan Turunkan AKI dan AKB dengan RT Pantau)", "nilai_keselarasan": 100.0}, {"inovasi": "BENTOR SEHATKU (Becak Motor Sehatkan Wargaku", "nilai_keselarasan": 100.0}, {"inovasi": "MELANKOLIS (Melayani Lansia dengan Komprehensif, Luwes dan Istikomah)", "nilai_keselarasan": 100.0}, {"inovasi": "RANTANG KASIH", "nilai_keselarasan": 100.0}, {"inovasi": "AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "potensi stunting yang cukup tinggi", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "ANTING EMAS TOP (Antisipasi Stunting Di Masa Emas Tumbuh Optimal)", "nilai_keselarasan": 100.0}, {"inovasi": "BISKUIT ALIT (Kabat Atasi Stunting Kelola Nutrisi Pada balita)", "nilai_keselarasan": 100.0}, {"inovasi": "BJ HAB&#39;B&#39; (Bayi Jadi Hebat Berkat Bunda)", "nilai_keselarasan": 100.0}, {"inovasi": "BTS (Banyuwangi Tanggap Stunting)", "nilai_keselarasan": 100.0}, {"inovasi": "DUTA GIZI (Wujudkan Upaya Peningkatan Asupan Gizi)", "nilai_keselarasan": 100.0}, {"inovasi": "GEMA CETING (Gerakan Bersama Cegah Stunting)", "nilai_keselarasan": 100.0}, {"inovasi": "GEMPITA CETTING (GERAKAN PEDULI BALITA CEGAH STUNTING)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "jumlah kunjungan wisatawan dan lama tinggal belum dapat mencapai kembali angka seperti ditahun 2019 sebelum covid", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "SIJAMUWANGI (Sistem Informasi Sejarah &amp; Museum Banyuwangi)", "nilai_keselarasan": 100.0}, {"inovasi": "E-TICKETING WISATA BANYUWANGI", "nilai_keselarasan": 100.0}, {"inovasi": "BANYUWANGI TOURISM APP", "nilai_keselarasan": 100.0}, {"inovasi": "HOMESTAY NAIK KELAS", "nilai_keselarasan": 100.0}, {"inovasi": "GEOTRIP", "nilai_keselarasan": 100.0}, {"inovasi": "AMTOMA (Anti Mainstream Tourism Marketing)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Daya saing UMKM belum optimal", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "Boba Wangi (Belanja Online Banyuwangi)", "nilai_keselarasan": 100.0}, {"inovasi": "Teman Usaha Rakyat", "nilai_keselarasan": 100.0}, {"inovasi": "WENAK (Warung Naik Kelas)", "nilai_keselarasan": 100.0}, {"inovasi": "TERASI WANGI (Tera Aplikasi sistem Banyuwangi)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Perlambatan PDRB sektor Pertanian", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "ANIMAL HEALTH CLINIC APPLICATION (AHC)", "nilai_keselarasan": 100.0}, {"inovasi": "Bunga Karang (Budidaya Ikan Di Pekarangan)", "nilai_keselarasan": 100.0}, {"inovasi": "CEK PUBERTAS (Cek Pupuk Bersubsidi Secara Terbatas)", "nilai_keselarasan": 100.0}, {"inovasi": "EFI RABA SIRIP (Efisiensi Pengairan Tanaman Cabai dengan Sistem Drip)", "nilai_keselarasan": 100.0}, {"inovasi": "E-NAK WANGI (ELEKTRONIK KARTU TERNAK BANYUWANGI)", "nilai_keselarasan": 100.0}, {"inovasi": "GERBANG LAMPERA (Gerakan Pengembangan Lampu Perangkap Serangga)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "perubahan budaya terutama pada generasi Z", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "BANYUWANGI CULTURE EVERYWEEK", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Perubahan iklim.", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "Banyuwangi Hijau", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Persentase Sampah yang Dikelola kecenderungan menurun", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "GERBEK AMPUH (Gerakan Bersama mengatasi Masalah Sampah Rumahan )", "nilai_keselarasan": 100.0}, {"inovasi": "PIL SAKTI (Pilah Sampah Wujudkan Kantor Tertata Asri)", "nilai_keselarasan": 100.0}, {"inovasi": "GEROBAKS ( Gerakan Rogojampi Bebas Kumuh dari Sampah dan PKL )", "nilai_keselarasan": 100.0}, {"inovasi": "Gemar Melati (Gerakan Masyarakat Mengumpulkan Sampah Plastik)", "nilai_keselarasan": 100.0}, {"inovasi": "PEMUDA PEDULI SAMPAH", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Kualitas lingkungan Hidup meningkat, tetapi tidak lebih baik di bandingkan angka 2019", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "SIMPLING (Sistem Informasi Manajemen Pelayanan Laboratorium Lingkungan)", "nilai_keselarasan": 100.0}, {"inovasi": "LABLING GOES TO SCHOOL (Laboratorium Lingkungan Goes To School)", "nilai_keselarasan": 100.0}, {"inovasi": "CONTEST WANGI (Comparison Testing An Enviromental Laboratory Of Banyuwangi)", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Aplikasi pemerintahan belum di integrasikan karena belum terwujud dengan super apps", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "Smart Kampung", "nilai_keselarasan": 100.0}]}, {"permasalahan": "Jalan kondisi baik menurun di tahun 2023", "keterangan": "Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah", "inovasi_list": [{"inovasi": "PIJAR (Peningkatan Infrastruktur Jalan Poros Antar Desa)", "nilai_keselarasan": 100.0}]}];
+var MASTER_PILAR2_2B2  = [{"no": 1, "inovasi": "Kanggo Riko", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 2, "inovasi": "UGDK (Unit Gawat Darurat Kemiskinan)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 3, "inovasi": "GAMBIRAN GEMBIRA (Gambiran Bergerak Bersama Menuju Sejahtera)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 4, "inovasi": "BIMBINGAN JABATAN ONLINE", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 5, "inovasi": "Aplikasi SICAKEP (Sistem Pencatatan Perjanjian Kerja Perusahaan)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 6, "inovasi": "Goker Wangi (Golek Kerjo Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 7, "inovasi": "Sekolah Adat Kampoeng Baca Taman Rimba (BATARA)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 8, "inovasi": "GARDA AMPUH (GERAKAN ANGKAT ANAK MUDA PUTUS SEKOLAH)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 9, "inovasi": "AYO INKLUSIF AGAGE PINTER", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 10, "inovasi": "BANYUWANGI MENGAJAR", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 11, "inovasi": "BUDIWANGI (Buku Digitalnya Warga Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 12, "inovasi": "AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 13, "inovasi": "BARAK PITTU (BAnyuwangi beRgerAK Peduli pada Ibu hamil Tujuh TerlalU)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 14, "inovasi": "BERSELENDANG SUTRA DENGAN RT PANTAU (Bersama Masyarakat dan Lintas Sektor Bergandengan Tangan Turunkan AKI dan AKB dengan RT Pantau)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 15, "inovasi": "BENTOR SEHATKU (Becak Motor Sehatkan Wargaku", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 16, "inovasi": "MELANKOLIS (Melayani Lansia dengan Komprehensif, Luwes dan Istikomah)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 17, "inovasi": "RANTANG KASIH", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 18, "inovasi": "AKU PADAMU (Asuhan Kefarmasian khusus Untuk Pasien post rawat inap Anak, Depresi, Akut, Manula, Unstable)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 19, "inovasi": "ANTING EMAS TOP (Antisipasi Stunting Di Masa Emas Tumbuh Optimal)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 20, "inovasi": "BISKUIT ALIT (Kabat Atasi Stunting Kelola Nutrisi Pada balita)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 21, "inovasi": "BJ HAB&#39;B&#39; (Bayi Jadi Hebat Berkat Bunda)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 22, "inovasi": "BTS (Banyuwangi Tanggap Stunting)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 23, "inovasi": "DUTA GIZI (Wujudkan Upaya Peningkatan Asupan Gizi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 24, "inovasi": "GEMA CETING (Gerakan Bersama Cegah Stunting)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 25, "inovasi": "GEMPITA CETTING (GERAKAN PEDULI BALITA CEGAH STUNTING)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 26, "inovasi": "SIJAMUWANGI (Sistem Informasi Sejarah &amp; Museum Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 27, "inovasi": "E-TICKETING WISATA BANYUWANGI", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 28, "inovasi": "BANYUWANGI TOURISM APP", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 29, "inovasi": "HOMESTAY NAIK KELAS", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 30, "inovasi": "GEOTRIP", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 31, "inovasi": "AMTOMA (Anti Mainstream Tourism Marketing)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 32, "inovasi": "Boba Wangi (Belanja Online Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 33, "inovasi": "Teman Usaha Rakyat", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 34, "inovasi": "WENAK (Warung Naik Kelas)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 35, "inovasi": "TERASI WANGI (Tera Aplikasi sistem Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 36, "inovasi": "ANIMAL HEALTH CLINIC APPLICATION (AHC)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 37, "inovasi": "Bunga Karang (Budidaya Ikan Di Pekarangan)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 38, "inovasi": "CEK PUBERTAS (Cek Pupuk Bersubsidi Secara Terbatas)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 39, "inovasi": "EFI RABA SIRIP (Efisiensi Pengairan Tanaman Cabai dengan Sistem Drip)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 40, "inovasi": "E-NAK WANGI (ELEKTRONIK KARTU TERNAK BANYUWANGI)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 41, "inovasi": "GERBANG LAMPERA (Gerakan Pengembangan Lampu Perangkap Serangga)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 42, "inovasi": "BANYUWANGI CULTURE EVERYWEEK", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 43, "inovasi": "Banyuwangi Hijau", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 44, "inovasi": "GERBEK AMPUH (Gerakan Bersama mengatasi Masalah Sampah Rumahan )", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 45, "inovasi": "PIL SAKTI (Pilah Sampah Wujudkan Kantor Tertata Asri)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 46, "inovasi": "GEROBAKS ( Gerakan Rogojampi Bebas Kumuh dari Sampah dan PKL )", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 47, "inovasi": "Gemar Melati (Gerakan Masyarakat Mengumpulkan Sampah Plastik)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 48, "inovasi": "PEMUDA PEDULI SAMPAH", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 49, "inovasi": "SIMPLING (Sistem Informasi Manajemen Pelayanan Laboratorium Lingkungan)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 50, "inovasi": "LABLING GOES TO SCHOOL (Laboratorium Lingkungan Goes To School)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 51, "inovasi": "CONTEST WANGI (Comparison Testing An Enviromental Laboratory Of Banyuwangi)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 52, "inovasi": "Smart Kampung", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 53, "inovasi": "Portal Banyuwangi Satu Data", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 54, "inovasi": "Super ASN (Sistem Upskilling Pembelajaran Terintegrasi ASN)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 55, "inovasi": "SIMPEG (Sistem Informasi Manajemen Kepegawaian)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 56, "inovasi": "SILAKAN (Sistem Layanan Kepegawaian Online)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 57, "inovasi": "PIJAR (Peningkatan Infrastruktur Jalan Poros Antar Desa)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}, {"no": 58, "inovasi": "SITARU (Sistem Informasi Pengendalian Tata Ruang)", "output": "", "outcome": "", "nilai_keselarasan": 100.0, "keterangan": "Terdapat Keterkaitan outcome dengan output inovasi daerah"}];
+
+function getPilar2Auto(code) {
+  if (code === '2.a.1.a') return (typeof AUTO_DATA_2_A_1_A !== 'undefined' && AUTO_DATA_2_A_1_A) ? AUTO_DATA_2_A_1_A : {};
+  if (code === '2.a.1.b') return (typeof AUTO_DATA_2_A_1_B !== 'undefined' && AUTO_DATA_2_A_1_B) ? AUTO_DATA_2_A_1_B : {};
+  if (code === '2.a.1.c') return (typeof AUTO_DATA_2_A_1_C !== 'undefined' && AUTO_DATA_2_A_1_C) ? AUTO_DATA_2_A_1_C : {};
+  if (code === '2.a.2.a') return (typeof AUTO_DATA_2_A_2_A !== 'undefined' && AUTO_DATA_2_A_2_A) ? AUTO_DATA_2_A_2_A : {};
+  if (code === '2.a.2.b') return (typeof AUTO_DATA_2_A_2_B !== 'undefined' && AUTO_DATA_2_A_2_B) ? AUTO_DATA_2_A_2_B : {};
+  if (code === '2.a.3.a') return (typeof AUTO_DATA_2_A_3_A !== 'undefined' && AUTO_DATA_2_A_3_A) ? AUTO_DATA_2_A_3_A : {};
+  if (code === '2.a.3.b') return (typeof AUTO_DATA_2_A_3_B !== 'undefined' && AUTO_DATA_2_A_3_B) ? AUTO_DATA_2_A_3_B : {};
+  if (code === '2.b.1')   return (typeof AUTO_DATA_2_B_1 !== 'undefined' && AUTO_DATA_2_B_1) ? AUTO_DATA_2_B_1 : {};
+  if (code === '2.b.2')   return (typeof AUTO_DATA_2_B_2 !== 'undefined' && AUTO_DATA_2_B_2) ? AUTO_DATA_2_B_2 : {};
+  return {};
+}
+
+// -------------------------------------------------------------------------
+// 1. POIN 2.a.1.a: Permasalahan Daerah vs Hasil Evaluasi (Bobot 6.00)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_1_a(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.a.1.a');
+  var rawRows = (d.rows && d.rows.length > 0) ? d.rows : ((auto.rows && auto.rows.length > 0) ? auto.rows : MASTER_PILAR2_2A1A);
+  var totalRows = rawRows.length || 15;
+  var matchedCount = 0;
+  rawRows.forEach(function(r) {
+    if (parseFloat(r.nilai_keselarasan) > 0) matchedCount++;
+  });
+  var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 93.33;
+  var maxBobot = 6.0;
+  var avgTerbobot = (pctMatched / 100) * maxBobot;
+  avgTerbobot = Math.round(avgTerbobot * 100) / 100;
+  var crit = 'D';
+  var critText = '> 75% s/d <= 99%';
+  if (pctMatched >= 100.0) { crit = 'E'; critText = '100% berdasarkan hasil evaluasi'; }
+  else if (pctMatched > 75.0) { crit = 'D'; critText = '> 75% s/d <= 99%'; }
+  else if (pctMatched > 50.0) { crit = 'C'; critText = '> 50% s/d <= 75%'; }
+  else if (pctMatched > 25.0) { crit = 'B'; critText = '> 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = '<= 25%'; }
+  return {
+    rows: rawRows,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pctMatched,
+    score: avgTerbobot,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Permasalahan daerah dirumuskan berdasarkan hasil evaluasi capaian kinerja (' + matchedCount + '/' + totalRows + ' selaras, rata-rata keselarasan ' + pctMatched.toFixed(2) + '%)'
+  };
+}
+
+function renderWs_2_a_1_a(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_1_a(d);
+  var rows = info.rows;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_a" style="min-width: 1200px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 420px; text-align: center; vertical-align: middle;">Hasil Evaluasi Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 140px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 150px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 160px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  rows.forEach(function(r, idx) {
+    var sc = parseFloat(r.nilai_keselarasan);
+    if (isNaN(sc)) sc = 100.0;
+    var terb = (sc / 100) * 6.0;
+    html +=
+      '<tr class="ws-2a1a-row" data-idx="' + idx + '">' +
+        '<td style="text-align:center; font-weight:700;">' + (r.no || (idx + 1)) + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(r.permasalahan || '-') + '</td>' +
+        '<td style="text-align:left; font-size:12px;">' + escapeHtml(r.evaluasi || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a1a-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
+        '<td class="ws-2a1a-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a1a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'LPPD Tahun 2024') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
+      '</tr>';
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="3" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2a1aFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">6.00</td>' +
+          '<td id="ws2a1aFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.1.a', 6.0, pctMatched, score, crit, [
+    { code: 'A', text: '<= 25%', score: 1.2 },
+    { code: 'B', text: '> 25% s/d <= 50%', score: 2.4 },
+    { code: 'C', text: '> 50% s/d <= 75%', score: 3.6 },
+    { code: 'D', text: '> 75% s/d <= 99%', score: 4.8 },
+    { code: 'E', text: '100% berdasarkan hasil evaluasi', score: 6.0 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_1_a(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_1_a .ws-2a1a-row');
+  var totalRows = rows.length || 15;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2a1a-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 6.0;
+    var elTerb = r.querySelector('.ws-2a1a-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 93.33;
+  var terbAvg = (pct / 100) * 6.0;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'D';
+  var critText = '> 75% s/d <= 99%';
+  if (pct >= 100.0) { crit = 'E'; critText = '100% berdasarkan hasil evaluasi'; }
+  else if (pct > 75.0) { crit = 'D'; critText = '> 75% s/d <= 99%'; }
+  else if (pct > 50.0) { crit = 'C'; critText = '> 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; critText = '> 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = '<= 25%'; }
+
+  var elFootPct = document.getElementById('ws2a1aFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a1aFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.1.a', pct, terbAvg, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(terbAvg);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Permasalahan daerah dirumuskan berdasarkan hasil evaluasi capaian kinerja (' + matchedCount + '/' + totalRows + ' selaras, rata-rata keselarasan ' + pct.toFixed(2) + '%)';
+  return terbAvg;
+}
+
+// -------------------------------------------------------------------------
+// 2. POIN 2.a.1.b: Prioritas Pembangunan Daerah vs Permasalahan Daerah (Bobot 6.00)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_1_b(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.a.1.b');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A1B);
+  var totalRows = 0;
+  var matchedCount = 0;
+  groups.forEach(function(g) {
+    (g.perms || []).forEach(function(p) {
+      totalRows++;
+      if (parseFloat(p.nilai_keselarasan) > 0) matchedCount++;
+    });
+  });
+  if (totalRows === 0) totalRows = 15;
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var maxBobot = 6.0;
+  var score = (pct / 100) * maxBobot;
+  score = Math.round(score * 100) / 100;
+  var crit = 'E';
+  var critText = 'Kesesuaian 100%';
+  if (pct >= 100.0) { crit = 'E'; critText = 'Kesesuaian 100%'; }
+  else if (pct > 75.0) { crit = 'D'; critText = 'Kesesuaian > 75% s/d <= 99%'; }
+  else if (pct > 50.0) { crit = 'C'; critText = 'Kesesuaian > 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; critText = 'Kesesuaian > 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = 'Kesesuaian <= 25%'; }
+  return {
+    groups: groups,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian 100%)'
+  };
+}
+
+function renderWs_2_a_1_b(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_1_b(d);
+  var groups = info.groups;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_b" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  var rowNum = 1;
+  groups.forEach(function(g, gIdx) {
+    var pList = g.perms || [];
+    var rowSpan = pList.length || 1;
+    pList.forEach(function(p, pIdx) {
+      var sc = parseFloat(p.nilai_keselarasan);
+      if (isNaN(sc)) sc = 100.0;
+      var terb = (sc / 100) * 6.0;
+
+      html += '<tr class="ws-2a1b-row" data-gidx="' + gIdx + '" data-pidx="' + pIdx + '">';
+      if (pIdx === 0) {
+        html +=
+          '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.pd || '-') + '</td>';
+      }
+      html +=
+        '<td style="text-align:left;">' + escapeHtml(p.permasalahan || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a1b-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
+        '<td class="ws-2a1b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a1b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
+      '</tr>';
+      rowNum++;
+    });
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="3" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2a1bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">6.00</td>' +
+          '<td id="ws2a1bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.1.b', 6.0, pctMatched, score, crit, [
+    { code: 'A', text: 'Kesesuaian <= 25%', score: 1.2 },
+    { code: 'B', text: 'Kesesuaian > 25% s/d <= 50%', score: 2.4 },
+    { code: 'C', text: 'Kesesuaian > 50% s/d <= 75%', score: 3.6 },
+    { code: 'D', text: 'Kesesuaian > 75% s/d <= 99%', score: 4.8 },
+    { code: 'E', text: 'Kesesuaian 100%', score: 6.0 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_1_b(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_1_b .ws-2a1b-row');
+  var totalRows = rows.length || 15;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2a1b-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 6.0;
+    var elTerb = r.querySelector('.ws-2a1b-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var terbAvg = (pct / 100) * 6.0;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'E';
+  var critText = 'Kesesuaian 100%';
+  if (pct >= 100.0) { crit = 'E'; critText = 'Kesesuaian 100%'; }
+  else if (pct > 75.0) { crit = 'D'; critText = 'Kesesuaian > 75% s/d <= 99%'; }
+  else if (pct > 50.0) { crit = 'C'; critText = 'Kesesuaian > 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; critText = 'Kesesuaian > 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = 'Kesesuaian <= 25%'; }
+
+  var elFootPct = document.getElementById('ws2a1bFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a1bFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.1.b', pct, terbAvg, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(terbAvg);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Prioritas pembangunan daerah menjawab permasalahan daerah (' + matchedCount + '/' + totalRows + ' permasalahan selaras, kesesuaian 100%)';
+  return terbAvg;
+}
+
+// -------------------------------------------------------------------------
+// 3. POIN 2.a.1.c: Isu Strategis Daerah vs Prioritas Pembangunan Daerah (Bobot 6.00)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_1_c(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.a.1.c');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A1C);
+  var totalRows = 0;
+  var matchedCount = 0;
+  groups.forEach(function(g) {
+    (g.pds || []).forEach(function(p) {
+      totalRows++;
+      if (parseFloat(p.nilai_keselarasan) > 0) matchedCount++;
+    });
+  });
+  if (totalRows === 0) totalRows = 8;
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var maxBobot = 6.0;
+  var score = (pct / 100) * maxBobot;
+  score = Math.round(score * 100) / 100;
+  var crit = 'E';
+  var critText = 'Penyusunan 100% berdasarkan isu strategis';
+  if (pct >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis'; }
+  else if (pct > 75.0) { crit = 'D'; critText = 'Penyusunan > 75% s/d <= 99%'; }
+  else if (pct > 50.0) { crit = 'C'; critText = 'Penyusunan > 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; critText = 'Penyusunan > 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = 'Penyusunan <= 25%'; }
+  return {
+    groups: groups,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Prioritas pembangunan daerah disusun berdasarkan isu strategis (' + matchedCount + '/' + totalRows + ' relasi isu strategis selaras, penyusunan 100%)'
+  };
+}
+
+function renderWs_2_a_1_c(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_1_c(d);
+  var groups = info.groups;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_1_c" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  groups.forEach(function(g, gIdx) {
+    var pList = g.pds || [];
+    var rowSpan = pList.length || 1;
+    pList.forEach(function(p, pIdx) {
+      var sc = parseFloat(p.nilai_keselarasan);
+      if (isNaN(sc)) sc = 100.0;
+      var terb = (sc / 100) * 6.0;
+
+      html += '<tr class="ws-2a1c-row" data-gidx="' + gIdx + '" data-pidx="' + pIdx + '">';
+      if (pIdx === 0) {
+        html +=
+          '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.isu || '-') + '</td>';
+      }
+      html +=
+        '<td style="text-align:left;">' + escapeHtml(p.prioritas || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a1c-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">6.00</td>' +
+        '<td class="ws-2a1c-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a1c-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1c-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1c-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a1c-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
+      '</tr>';
+    });
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="3" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2a1cFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">6.00</td>' +
+          '<td id="ws2a1cFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.1.c', 6.0, pctMatched, score, crit, [
+    { code: 'A', text: 'Penyusunan <= 25%', score: 1.2 },
+    { code: 'B', text: 'Penyusunan > 25% s/d <= 50%', score: 2.4 },
+    { code: 'C', text: 'Penyusunan > 50% s/d <= 75%', score: 3.6 },
+    { code: 'D', text: 'Penyusunan > 75% s/d <= 99%', score: 4.8 },
+    { code: 'E', text: 'Penyusunan 100% berdasarkan isu strategis', score: 6.0 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_1_c(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_1_c .ws-2a1c-row');
+  var totalRows = rows.length || 8;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2a1c-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 6.0;
+    var elTerb = r.querySelector('.ws-2a1c-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var terbAvg = (pct / 100) * 6.0;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'E';
+  var critText = 'Penyusunan 100% berdasarkan isu strategis';
+  if (pct >= 100.0) { crit = 'E'; critText = 'Penyusunan 100% berdasarkan isu strategis'; }
+  else if (pct > 75.0) { crit = 'D'; critText = 'Penyusunan > 75% s/d <= 99%'; }
+  else if (pct > 50.0) { crit = 'C'; critText = 'Penyusunan > 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; critText = 'Penyusunan > 25% s/d <= 50%'; }
+  else { crit = 'A'; critText = 'Penyusunan <= 25%'; }
+
+  var elFootPct = document.getElementById('ws2a1cFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a1cFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.1.c', pct, terbAvg, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(terbAvg);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Prioritas pembangunan daerah disusun berdasarkan isu strategis (' + matchedCount + '/' + totalRows + ' relasi isu strategis selaras, penyusunan 100%)';
+  return terbAvg;
+}
+
+// Helper to extract rows for 2.a.2.a & 2.a.2.b
+function extractRows2a2(d, fallbackMaster) {
+  d = d || {};
+  if (d.rows && Array.isArray(d.rows) && d.rows.length > 0) return d.rows;
+  var auto = getPilar2Auto('2.a.2.b');
+  if (auto.rows && Array.isArray(auto.rows) && auto.rows.length > 0) return auto.rows;
+  if (auto.groups && Array.isArray(auto.groups) && auto.groups.length > 0) {
+    var out = [];
+    auto.groups.forEach(function(g) {
+      if (g.indiks && Array.isArray(g.indiks)) {
+        g.indiks.forEach(function(ind) {
+          out.push({
+            no: out.length + 1,
+            prioritas: g.pd || '',
+            isu_strategis: g.isu || '',
+            indikator_sasaran: ind.indikator || '',
+            nilai_keselarasan: (ind.nilai_keselarasan !== undefined) ? parseFloat(ind.nilai_keselarasan) : 100.0,
+            keselarasan_terbobot: 8.0,
+            dokumen: 'RKPD Kab. Banyuwangi 2026',
+            halaman: '',
+            tabel: '',
+            catatan: ''
+          });
+        });
+      }
+    });
+    if (out.length > 0) return out;
+  }
+  return fallbackMaster || [];
+}
+
+// -------------------------------------------------------------------------
+// 4. POIN 2.a.2.a: Indikator Sasaran pada Prioritas/Isu Strategis Terkait (Bobot 6.00)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_2_a(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.a.2.a');
+  var rawRows = extractRows2a2(d, MASTER_PILAR2_2A2A);
+  var status = d.opsi_aksi || auto.opsi_aksi || 'Ada';
+  var isAda = (status === 'Ada' || rawRows.length > 0);
+  var score = isAda ? 6.00 : 0.00;
+  var crit = isAda ? 'B' : 'A';
+  var critText = isAda ? 'Ada' : 'Tidak ada';
+  return {
+    rows: rawRows,
+    totalRows: rawRows.length,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText
+  };
+}
+
+function renderWs_2_a_2_a(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_2_a(d);
+  var rows = info.rows;
+  var score = info.score;
+  var isAda = (score > 0);
+
+  var html =
+    '<div style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:12px 16px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">' +
+      '<div>' +
+        '<div style="font-weight:700; font-size:13px; color:#0f172a;">Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah / Isu Strategis Terkait:</div>' +
+        '<div style="font-size:12px; color:#64748b;">(Pilih ketersediaan indikator sasaran sesuai dokumen perencanaan daerah)</div>' +
+      '</div>' +
+      '<div style="display:flex; align-items:center; gap:12px;">' +
+        '<select id="ws2a2aStatusSel" class="form-control" style="width:140px; font-weight:700; font-size:13px; text-align:center; color:' + (isAda ? '#16a34a' : '#dc2626') + ';">' +
+          '<option value="Ada" ' + (isAda ? 'selected' : '') + '>Ada</option>' +
+          '<option value="Tidak ada" ' + (!isAda ? 'selected' : '') + '>Tidak ada</option>' +
+        '</select>' +
+        '<div style="background:#fef3c7; border:1px solid #fde047; border-radius:6px; padding:6px 14px; font-weight:800; font-size:14px; color:#92400e;">' +
+          'Skor: <span id="ws2a2aBadgeScore">' + numFmt(score) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  html +=
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_2_a" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 320px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 380px; text-align: center; vertical-align: middle;">Indikator Sasaran</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 150px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 160px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  rows.forEach(function(r, idx) {
+    html +=
+      '<tr class="ws-2a2a-row" data-idx="' + idx + '">' +
+        '<td style="text-align:center; font-weight:700;">' + (r.no || (idx + 1)) + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(r.prioritas || '-') + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(r.isu_strategis || '-') + '</td>' +
+        '<td style="text-align:left; font-weight:600;">' + escapeHtml(r.indikator_sasaran || '-') + '</td>' +
+        '<td><input type="text" class="form-control ws-2a2a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
+      '</tr>';
+  });
+
+  html +=
+      '</tbody>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.2.a', 6.0, isAda ? 100 : 0, score, isAda ? 'B' : 'A', [
+    { code: 'A', text: 'Tidak ada', score: 0.0 },
+    { code: 'B', text: 'Ada', score: 6.0 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_2_a(maxBobot) {
+  var sel = document.getElementById('ws2a2aStatusSel');
+  var val = sel ? sel.value : 'Ada';
+  var isAda = (val === 'Ada');
+  var score = isAda ? 6.00 : 0.00;
+  var crit = isAda ? 'B' : 'A';
+  var critText = isAda ? 'Ada' : 'Tidak ada';
+
+  var elBadge = document.getElementById('ws2a2aBadgeScore');
+  if (elBadge) elBadge.textContent = numFmt(score);
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.2.a', isAda ? 100 : 0, score, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(score);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Terdapat Indikator Sasaran pada Prioritas Pembangunan Daerah/Isu Strategis terkait: ' + critText;
+  return score;
+}
+
+// -------------------------------------------------------------------------
+// 5. POIN 2.a.2.b: Prioritas / Isu vs Indikator Sasaran (Bobot 8.00)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_2_b(d) {
+  d = d || {};
+  var rawRows = extractRows2a2(d, MASTER_PILAR2_2A2B);
+  var totalRows = rawRows.length || 59;
+  var matchedCount = 0;
+  rawRows.forEach(function(r) {
+    if (parseFloat(r.nilai_keselarasan) > 0) matchedCount++;
+  });
+  var pctMatched = totalRows > 0 ? (matchedCount / totalRows) * 100 : 94.92;
+  var maxBobot = 8.0;
+  var avgTerbobot = (pctMatched / 100) * maxBobot;
+  avgTerbobot = Math.round(avgTerbobot * 100) / 100;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pctMatched >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pctMatched >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pctMatched >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
+  return {
+    rows: rawRows,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pctMatched,
+    score: avgTerbobot,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Tingkat kesesuaian rumusan indikator sasaran terhadap prioritas/isu strategis (' + matchedCount + '/' + totalRows + ' indikator selaras, kesesuaian ' + pctMatched.toFixed(2) + '%)'
+  };
+}
+
+function renderWs_2_a_2_b(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_2_b(d);
+  var rows = info.rows;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_2_b" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 300px; text-align: center; vertical-align: middle;">Isu Strategis Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 360px; text-align: center; vertical-align: middle;">Indikator Sasaran</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  rows.forEach(function(r, idx) {
+    var sc = parseFloat(r.nilai_keselarasan);
+    if (isNaN(sc)) sc = 100.0;
+    var terb = (sc / 100) * 8.0;
+
+    html +=
+      '<tr class="ws-2a2b-row" data-idx="' + idx + '">' +
+        '<td style="text-align:center; font-weight:700;">' + (r.no || (idx + 1)) + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(r.prioritas || '-') + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(r.isu_strategis || '-') + '</td>' +
+        '<td style="text-align:left; font-weight:600;">' + escapeHtml(r.indikator_sasaran || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a2b-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.00</td>' +
+        '<td class="ws-2a2b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a2b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a2b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
+      '</tr>';
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="4" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2a2bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">8.00</td>' +
+          '<td id="ws2a2bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.2.b', 8.0, pctMatched, score, crit, [
+    { code: 'A', text: '=< 25%', score: 2.0 },
+    { code: 'B', text: '25% - 50%', score: 4.0 },
+    { code: 'C', text: '50% - 75%', score: 6.0 },
+    { code: 'D', text: '=> 75%', score: 8.0 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_2_b(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_2_b .ws-2a2b-row');
+  var totalRows = rows.length || 59;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2a2b-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 8.0;
+    var elTerb = r.querySelector('.ws-2a2b-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 94.92;
+  var terbAvg = (pct / 100) * 8.0;
+  terbAvg = Math.round(terbAvg * 100) / 100;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pct >= 75.0) { crit = 'D'; critText = '=> 75%'; }
+  else if (pct >= 50.0) { crit = 'C'; critText = '50% - 75%'; }
+  else if (pct >= 25.0) { crit = 'B'; critText = '25% - 50%'; }
+  else { crit = 'A'; critText = '=< 25%'; }
+
+  var elFootPct = document.getElementById('ws2a2bFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a2bFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(terbAvg);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.2.b', pct, terbAvg, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(terbAvg);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Tingkat kesesuaian rumusan indikator sasaran terhadap prioritas/isu strategis (' + matchedCount + '/' + totalRows + ' indikator selaras, kesesuaian ' + pct.toFixed(2) + '%)';
+  return terbAvg;
+}
+
+// -------------------------------------------------------------------------
+// 6. POIN 2.a.3.a: Prioritas Pembangunan Daerah vs Program Prioritas (Bobot 8.50)
+// -------------------------------------------------------------------------
+function getAutoScore_2_a_3_a(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.a.3.a');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2A3A);
+  var totalPrioritas = groups.length || 7;
+  var terjabarkanCount = 0;
+  var totalRows = 0;
+  var matchedCount = 0;
+  groups.forEach(function(g) {
+    if (g.is_terjabarkan || (g.programs && g.programs.length > 0)) terjabarkanCount++;
+    (g.programs || []).forEach(function(prg) {
+      totalRows++;
+      if (parseFloat(prg.nilai_keselarasan) > 0) matchedCount++;
+    });
+  });
+  if (totalPrioritas === 0) totalPrioritas = 7;
+  var pct = totalPrioritas > 0 ? (terjabarkanCount / totalPrioritas) * 100 : 100;
+  var maxBobot = 8.5;
+  var score = 8.50;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas'; }
+  else if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
+  else if (pct > 50.0) { crit = 'C'; score = 6.375; critText = '> 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; score = 4.25; critText = '> 25% s/d <= 50%'; }
+  else { crit = 'A'; score = 2.125; critText = '<= 25%'; }
+  return {
+    groups: groups,
+    totalPrioritas: totalPrioritas,
+    terjabarkanPrioritas: terjabarkanCount,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + terjabarkanCount + '/' + totalPrioritas + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)'
+  };
+}
+
+function renderWs_2_a_3_a(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_3_a(d);
+  var groups = info.groups;
+  var totalPrioritas = info.totalPrioritas;
+  var terjabarkanCount = info.terjabarkanPrioritas;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_3_a" style="min-width: 1350px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 250px; text-align: center; vertical-align: middle;">Prioritas Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Arah Kebijakan</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Program Prioritas</th>' +
+          '<th class="th-green" rowspan="2" style="width: 120px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 100px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 130px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 75px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 75px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 140px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  groups.forEach(function(g, gIdx) {
+    var pList = g.programs || [];
+    var rowSpan = pList.length || 1;
+    pList.forEach(function(prg, pIdx) {
+      var sc = parseFloat(prg.nilai_keselarasan);
+      if (isNaN(sc)) sc = 100.0;
+      var terb = (sc / 100) * 8.5;
+
+      html += '<tr class="ws-2a3a-row" data-gidx="' + gIdx + '" data-pidx="' + pIdx + '">';
+      if (pIdx === 0) {
+        html +=
+          '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.pd || '-') + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-size:12px; vertical-align:top;">' + escapeHtml(g.arah || g.arah_kebijakan || '-') + '</td>';
+      }
+      html +=
+        '<td style="text-align:left;">' + escapeHtml(prg.nama_program || prg.program || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a3a-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.50</td>' +
+        '<td class="ws-2a3a-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a3a-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3a-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.halaman || 'Bab IV') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3a-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3a-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(prg.catatan || '') + '"></td>' +
+      '</tr>';
+    });
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="4" style="text-align:right; padding-right:12px;">Persentase Prioritas Terjabarkan:</td>' +
+          '<td id="ws2a3aFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">8.50</td>' +
+          '<td id="ws2a3aFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.3.a', 8.5, pctMatched, score, crit, [
+    { code: 'A', text: 'Dijabarkan <= 25%', score: 2.125 },
+    { code: 'B', text: 'Dijabarkan > 25% s/d <= 50%', score: 4.25 },
+    { code: 'C', text: 'Dijabarkan > 50% s/d <= 75%', score: 6.375 },
+    { code: 'D', text: 'Dijabarkan => 75%', score: 8.5 },
+    { code: 'E', text: '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas', score: 8.5 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_3_a(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_3_a .ws-2a3a-row');
+  var totalRows = rows.length || 180;
+  var matchedCount = 0;
+  var groupMap = {};
+  rows.forEach(function(r) {
+    var gIdx = r.getAttribute('data-gidx');
+    var sel = r.querySelector('.ws-2a3a-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) {
+      matchedCount++;
+      groupMap[gIdx] = true;
+    }
+    var terb = (val / 100) * 8.5;
+    var elTerb = r.querySelector('.ws-2a3a-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var totalGroups = 7;
+  var activeGroups = Object.keys(groupMap).length;
+  var pct = (activeGroups / totalGroups) * 100;
+  var score = 8.50;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pct >= 100.0) { crit = 'E'; score = 8.50; critText = '100% Seluruh Prioritas Daerah dijabarkan menjadi Program Prioritas'; }
+  else if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
+  else if (pct > 50.0) { crit = 'C'; score = 6.375; critText = '> 50% s/d <= 75%'; }
+  else if (pct > 25.0) { crit = 'B'; score = 4.25; critText = '> 25% s/d <= 50%'; }
+  else { crit = 'A'; score = 2.125; critText = '<= 25%'; }
+
+  var elFootPct = document.getElementById('ws2a3aFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a3aFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.3.a', pct, score, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(score);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Prioritas pembangunan daerah dijabarkan ke program prioritas (' + activeGroups + '/' + totalGroups + ' prioritas dijabarkan, ' + matchedCount + ' program prioritas selaras)';
+  return score;
+}
+
+// -------------------------------------------------------------------------
+// 7. POIN 2.a.3.b: Indikator Sasaran vs Indikator Kinerja Program Prioritas (Bobot 8.50)
+// -------------------------------------------------------------------------
+function extractGroups2a3b(d) {
+  d = d || {};
+  if (d.groups && Array.isArray(d.groups) && d.groups.length > 0) return d.groups;
+  var auto = getPilar2Auto('2.a.3.b');
+  if (auto.groups && Array.isArray(auto.groups) && auto.groups.length > 0) return auto.groups;
+  return MASTER_PILAR2_2A3B;
+}
+
+function getAutoScore_2_a_3_b(d) {
+  d = d || {};
+  var groups = extractGroups2a3b(d);
+  var totalItems = 0;
+  var matchedCount = 0;
+  groups.forEach(function(g) {
+    var pList = g.prog_indicators || g.indicators || [];
+    pList.forEach(function(p) {
+      totalItems++;
+      var sc = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
+      if (sc > 0) matchedCount++;
+    });
+  });
+  if (totalItems === 0) {
+    totalItems = 180;
+    matchedCount = 180;
+  }
+  var pct = totalItems > 0 ? (matchedCount / totalItems) * 100 : 100;
+  var score = 8.50;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
+  else if (pct >= 50.0) { crit = 'C'; score = 6.375; critText = '50% - 75%'; }
+  else if (pct >= 25.0) { crit = 'B'; score = 4.25; critText = '25% - 50%'; }
+  else { crit = 'A'; score = 2.125; critText = '=< 25%'; }
+  return {
+    groups: groups,
+    totalItems: totalItems,
+    matchedCount: matchedCount,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalItems + ' indikator program selaras, ' + pct.toFixed(2) + '%)'
+  };
+}
+
+function renderWs_2_a_3_b(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_a_3_b(d);
+  var groups = info.groups;
+  var totalItems = info.totalItems;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_a_3_b" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 380px; text-align: center; vertical-align: middle;">Indikator Sasaran Pembangunan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 400px; text-align: center; vertical-align: middle;">Indikator Kinerja Program Prioritas</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  groups.forEach(function(g, gIdx) {
+    var pList = g.prog_indicators || g.indicators || [];
+    var rowSpan = pList.length || 1;
+    pList.forEach(function(p, pIdx) {
+      var sc = (p.nilai_keselarasan !== undefined) ? parseFloat(p.nilai_keselarasan) : 100.0;
+      if (isNaN(sc)) sc = 100.0;
+      var terb = (sc / 100) * 8.5;
+      var progIndName = p.indikator_program || p.Indikator || p.indikator || p.name || '-';
+
+      html += '<tr class="ws-2a3b-row" data-gidx="' + gIdx + '" data-pidx="' + pIdx + '">';
+      if (pIdx === 0) {
+        html +=
+          '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.indikator_sasaran || g.indikator || '-') + '</td>';
+      }
+      html +=
+        '<td style="text-align:left;">' + escapeHtml(progIndName) + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2a3b-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">8.50</td>' +
+        '<td class="ws-2a3b-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2a3b-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(p.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3b-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(p.halaman || 'Bab IV') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3b-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(p.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2a3b-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(p.catatan || '') + '"></td>' +
+      '</tr>';
+    });
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="3" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2a3bFootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">8.50</td>' +
+          '<td id="ws2a3bFootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.a.3.b', 8.5, pctMatched, score, crit, [
+    { code: 'A', text: '=< 25%', score: 2.125 },
+    { code: 'B', text: '25% - 50%', score: 4.25 },
+    { code: 'C', text: '50% - 75%', score: 6.375 },
+    { code: 'D', text: '=> 75%', score: 8.5 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_a_3_b(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_a_3_b .ws-2a3b-row');
+  var totalRows = rows.length || 180;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2a3b-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 8.5;
+    var elTerb = r.querySelector('.ws-2a3b-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var score = 8.50;
+  var crit = 'D';
+  var critText = '=> 75%';
+  if (pct >= 75.0) { crit = 'D'; score = 8.50; critText = '=> 75%'; }
+  else if (pct >= 50.0) { crit = 'C'; score = 6.375; critText = '50% - 75%'; }
+  else if (pct >= 25.0) { crit = 'B'; score = 4.25; critText = '25% - 50%'; }
+  else { crit = 'A'; score = 2.125; critText = '=< 25%'; }
+
+  var elFootPct = document.getElementById('ws2a3bFootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2a3bFootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.a.3.b', pct, score, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(score);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Indikator sasaran selaras dengan indikator kinerja program prioritas (' + matchedCount + '/' + totalRows + ' indikator program selaras, ' + pct.toFixed(2) + '%)';
+  return score;
+}
+
+// -------------------------------------------------------------------------
+// 8. POIN 2.b.1: Permasalahan Daerah vs Inovasi Daerah (Bobot 4.50)
+// -------------------------------------------------------------------------
+function getAutoScore_2_b_1(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.b.1');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : MASTER_PILAR2_2B1);
+  var totalInov = 0;
+  var matchedInov = 0;
+  groups.forEach(function(g) {
+    (g.inovasi_list || []).forEach(function(inv) {
+      totalInov++;
+      if (parseFloat(inv.nilai_keselarasan) > 0) matchedInov++;
+    });
+  });
+  if (totalInov === 0) totalInov = 58;
+  var pct = totalInov > 0 ? (matchedInov / totalInov) * 100 : 100;
+  var maxBobot = 4.5;
+  var isKuat = pct >= 50.0;
+  var score = isKuat ? 4.50 : 1.00;
+  var crit = isKuat ? 'B' : 'A';
+  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+  return {
+    groups: groups,
+    totalRows: totalInov,
+    matchedCount: matchedInov,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedInov + '/' + totalInov + ' inovasi daerah menjawab ' + groups.length + ' permasalahan)'
+  };
+}
+
+function renderWs_2_b_1(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_b_1(d);
+  var groups = info.groups;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_1" style="min-width: 1250px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 380px; text-align: center; vertical-align: middle;">Permasalahan Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 380px; text-align: center; vertical-align: middle;">Inovasi Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  groups.forEach(function(g, gIdx) {
+    var invList = g.inovasi_list || [];
+    var rowSpan = invList.length || 1;
+    invList.forEach(function(inv, iIdx) {
+      var sc = parseFloat(inv.nilai_keselarasan);
+      if (isNaN(sc)) sc = 100.0;
+      var terb = (sc / 100) * 4.5;
+
+      html += '<tr class="ws-2b1-row" data-gidx="' + gIdx + '" data-iidx="' + iIdx + '">';
+      if (iIdx === 0) {
+        html +=
+          '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.permasalahan || '-') + '</td>';
+      }
+      html +=
+        '<td style="text-align:left;">' + escapeHtml(inv.inovasi || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2b1-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">4.50</td>' +
+        '<td class="ws-2b1-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2b1-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b1-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.halaman || 'Bab IV') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b1-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b1-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(inv.catatan || '') + '"></td>' +
+      '</tr>';
+    });
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="3" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2b1FootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">4.50</td>' +
+          '<td id="ws2b1FootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.b.1', 4.5, pctMatched, score, crit, [
+    { code: 'A', text: 'A. Lemah (< 50%)', score: 1.0 },
+    { code: 'B', text: 'B. Kuat (>= 50%)', score: 4.5 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_b_1(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_b_1 .ws-2b1-row');
+  var totalRows = rows.length || 58;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2b1-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 4.5;
+    var elTerb = r.querySelector('.ws-2b1-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var isKuat = pct >= 50.0;
+  var score = isKuat ? 4.50 : 1.00;
+  var crit = isKuat ? 'B' : 'A';
+  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+
+  var elFootPct = document.getElementById('ws2b1FootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2b1FootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.b.1', pct, score, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(score);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Terdapat keterkaitan permasalahan daerah dengan inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  return score;
+}
+
+// -------------------------------------------------------------------------
+// 9. POIN 2.b.2: Inovasi Daerah: Output vs Outcome (Bobot 4.50)
+// -------------------------------------------------------------------------
+function getAutoScore_2_b_2(d) {
+  d = d || {};
+  var auto = getPilar2Auto('2.b.2');
+  var rawRows = (d.rows && d.rows.length > 0) ? d.rows : ((auto.rows && auto.rows.length > 0) ? auto.rows : MASTER_PILAR2_2B2);
+  var totalRows = rawRows.length || 58;
+  var matchedCount = 0;
+  rawRows.forEach(function(r) {
+    if (parseFloat(r.nilai_keselarasan) > 0) matchedCount++;
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var maxBobot = 4.5;
+  var isKuat = pct >= 50.0;
+  var score = isKuat ? 4.50 : 1.00;
+  var crit = isKuat ? 'B' : 'A';
+  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+  return {
+    rows: rawRows,
+    totalRows: totalRows,
+    matchedCount: matchedCount,
+    pctMatched: pct,
+    score: score,
+    kriteria: crit,
+    aksi: critText,
+    opsi_aksi: critText,
+    catatan: 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)'
+  };
+}
+
+function renderWs_2_b_2(d, maxBobot) {
+  d = d || {};
+  var info = getAutoScore_2_b_2(d);
+  var rows = info.rows;
+  var totalRows = info.totalRows;
+  var pctMatched = info.pctMatched;
+  var score = info.score;
+  var crit = info.kriteria;
+
+  var html =
+    '<div style="overflow-x:auto; padding-bottom:12px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1300px; font-size: 13px;">' +
+      '<thead>' +
+        '<tr>' +
+          '<th class="th-green" rowspan="2" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" rowspan="2" style="width: 280px; text-align: center; vertical-align: middle;">Inovasi Daerah</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Output</th>' +
+          '<th class="th-green" rowspan="2" style="min-width: 320px; text-align: center; vertical-align: middle;">Outcome</th>' +
+          '<th class="th-green" rowspan="2" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" rowspan="2" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" rowspan="2" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" colspan="4" style="text-align: center;">Keterangan Tarikan Data</th>' +
+        '</tr>' +
+        '<tr>' +
+          '<th class="th-green" style="width: 140px; text-align: center;">Dokumen</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Halaman</th>' +
+          '<th class="th-green" style="width: 80px; text-align: center;">Tabel</th>' +
+          '<th class="th-green" style="min-width: 150px; text-align: center;">Catatan</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  rows.forEach(function(r, idx) {
+    var sc = parseFloat(r.nilai_keselarasan);
+    if (isNaN(sc)) sc = 100.0;
+    var terb = (sc / 100) * 4.5;
+
+    html +=
+      '<tr class="ws-2b2-row" data-idx="' + idx + '">' +
+        '<td style="text-align:center; font-weight:700;">' + (r.no || (idx + 1)) + '</td>' +
+        '<td style="text-align:left; font-weight:600;">' + escapeHtml(r.inovasi || '-') + '</td>' +
+        '<td style="text-align:left; font-size:12px;">' + escapeHtml(r.output || '-') + '</td>' +
+        '<td style="text-align:left; font-size:12px;">' + escapeHtml(r.outcome || '-') + '</td>' +
+        '<td style="text-align:center;">' +
+          '<select class="form-control ws-2b2-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+            '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
+            '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
+          '</select>' +
+        '</td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc;">4.50</td>' +
+        '<td class="ws-2b2-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
+        '<td><input type="text" class="form-control ws-2b2-dok" style="font-size:12px; height:30px;" value="' + escapeHtml(r.dokumen || 'RKPD Kab. Banyuwangi 2026') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b2-hal" style="font-size:12px; height:30px;" value="' + escapeHtml(r.halaman || 'Bab IV') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b2-tbl" style="font-size:12px; height:30px;" value="' + escapeHtml(r.tabel || '') + '"></td>' +
+        '<td><input type="text" class="form-control ws-2b2-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
+      '</tr>';
+  });
+
+  html +=
+      '</tbody>' +
+      '<tfoot>' +
+        '<tr style="background:#e2e8f0; font-weight:800;">' +
+          '<td colspan="4" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
+          '<td id="ws2b2FootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center;">4.50</td>' +
+          '<td id="ws2b2FootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4"></td>' +
+        '</tr>' +
+      '</tfoot>' +
+    '</table>' +
+    '</div>';
+
+  html += renderStandardCriteriaCard('2.b.2', 4.5, pctMatched, score, crit, [
+    { code: 'A', text: 'A. Lemah (< 50%)', score: 1.0 },
+    { code: 'B', text: 'B. Kuat (>= 50%)', score: 4.5 }
+  ]);
+
+  return html;
+}
+
+function updateScore_2_b_2(maxBobot) {
+  var rows = document.querySelectorAll('#wsTable_2_b_2 .ws-2b2-row');
+  var totalRows = rows.length || 58;
+  var matchedCount = 0;
+  rows.forEach(function(r) {
+    var sel = r.querySelector('.ws-2b2-score-sel');
+    var val = sel ? parseFloat(sel.value) : 100.0;
+    if (val > 0) matchedCount++;
+    var terb = (val / 100) * 4.5;
+    var elTerb = r.querySelector('.ws-2b2-terb-val');
+    if (elTerb) elTerb.textContent = numFmt(terb);
+  });
+  var pct = totalRows > 0 ? (matchedCount / totalRows) * 100 : 100;
+  var isKuat = pct >= 50.0;
+  var score = isKuat ? 4.50 : 1.00;
+  var crit = isKuat ? 'B' : 'A';
+  var critText = isKuat ? 'B. Kuat' : 'A. Lemah';
+
+  var elFootPct = document.getElementById('ws2b2FootPct');
+  if (elFootPct) elFootPct.textContent = numFmt(pct) + '%';
+  var elFootTerb = document.getElementById('ws2b2FootTerb');
+  if (elFootTerb) elFootTerb.textContent = numFmt(score);
+
+  if (typeof updateStandardCriteriaCardUI === 'function') {
+    updateStandardCriteriaCardUI('2.b.2', pct, score, crit);
+  }
+  var elFinal = document.getElementById('modalComputedFinalScore');
+  if (elFinal) elFinal.value = numFmt(score);
+  var elAksi = document.getElementById('modalOpsiAksi');
+  if (elAksi) elAksi.value = critText;
+  var elCat = document.getElementById('modalCatatan');
+  if (elCat) elCat.value = 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' + matchedCount + '/' + totalRows + ' inovasi daerah selaras)';
+  return score;
+}
+
+// -------------------------------------------------------------------------
+// SERIALIZER FOR PILAR 2
+// -------------------------------------------------------------------------
+function collectDetailJson_Pilar2(code, json) {
+  if (code === '2.a.1.a') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_1_a .ws-2a1a-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a1a-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a1a-dok') ? r.querySelector('.ws-2a1a-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a1a-hal') ? r.querySelector('.ws-2a1a-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a1a-tbl') ? r.querySelector('.ws-2a1a-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a1a-cat') ? r.querySelector('.ws-2a1a-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.a.1.b') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_1_b .ws-2a1b-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a1b-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a1b-dok') ? r.querySelector('.ws-2a1b-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a1b-hal') ? r.querySelector('.ws-2a1b-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a1b-tbl') ? r.querySelector('.ws-2a1b-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a1b-cat') ? r.querySelector('.ws-2a1b-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.a.1.c') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_1_c .ws-2a1c-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a1c-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a1c-dok') ? r.querySelector('.ws-2a1c-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a1c-hal') ? r.querySelector('.ws-2a1c-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a1c-tbl') ? r.querySelector('.ws-2a1c-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a1c-cat') ? r.querySelector('.ws-2a1c-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.a.2.a') {
+    var sel = document.getElementById('ws2a2aStatusSel');
+    json.status = sel ? sel.value : 'Ada';
+    return true;
+  }
+  if (code === '2.a.2.b') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_2_b .ws-2a2b-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a2b-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a2b-dok') ? r.querySelector('.ws-2a2b-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a2b-hal') ? r.querySelector('.ws-2a2b-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a2b-tbl') ? r.querySelector('.ws-2a2b-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a2b-cat') ? r.querySelector('.ws-2a2b-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.a.3.a') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_3_a .ws-2a3a-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a3a-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a3a-dok') ? r.querySelector('.ws-2a3a-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a3a-hal') ? r.querySelector('.ws-2a3a-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a3a-tbl') ? r.querySelector('.ws-2a3a-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a3a-cat') ? r.querySelector('.ws-2a3a-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.a.3.b') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_a_3_b .ws-2a3b-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2a3b-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2a3b-dok') ? r.querySelector('.ws-2a3b-dok').value : ''),
+        halaman: (r.querySelector('.ws-2a3b-hal') ? r.querySelector('.ws-2a3b-hal').value : ''),
+        tabel: (r.querySelector('.ws-2a3b-tbl') ? r.querySelector('.ws-2a3b-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2a3b-cat') ? r.querySelector('.ws-2a3b-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.b.1') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_b_1 .ws-2b1-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2b1-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2b1-dok') ? r.querySelector('.ws-2b1-dok').value : ''),
+        halaman: (r.querySelector('.ws-2b1-hal') ? r.querySelector('.ws-2b1-hal').value : ''),
+        tabel: (r.querySelector('.ws-2b1-tbl') ? r.querySelector('.ws-2b1-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2b1-cat') ? r.querySelector('.ws-2b1-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  if (code === '2.b.2') {
+    var rows = [];
+    document.querySelectorAll('#wsTable_2_b_2 .ws-2b2-row').forEach(function(r) {
+      var sel = r.querySelector('.ws-2b2-score-sel');
+      rows.push({
+        nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
+        dokumen: (r.querySelector('.ws-2b2-dok') ? r.querySelector('.ws-2b2-dok').value : ''),
+        halaman: (r.querySelector('.ws-2b2-hal') ? r.querySelector('.ws-2b2-hal').value : ''),
+        tabel: (r.querySelector('.ws-2b2-tbl') ? r.querySelector('.ws-2b2-tbl').value : ''),
+        catatan: (r.querySelector('.ws-2b2-cat') ? r.querySelector('.ws-2b2-cat').value : '')
+      });
+    });
+    json.rows = rows;
+    return true;
+  }
+  return false;
+}
+
+
   // Master Dispatcher for Worksheet Rendering
   function renderDynamicWorksheet(code, maxBobot, detailData){
     if (code === '1.a.1.a') return renderWs_1_a_1_a(detailData, maxBobot);
@@ -8272,6 +9962,15 @@ tr.type-sub:hover td {
     if (code === '1.c.1') return renderWs_1_c_1(detailData, maxBobot);
     if (code === '3.a.1.a') return renderWs_3_a_1_a(detailData, maxBobot);
     if (code === '3.a.1.b') return renderWs_3_a_1_b(detailData, maxBobot);
+    if (code === '2.a.1.a') return renderWs_2_a_1_a(detailData, maxBobot);
+    if (code === '2.a.1.b') return renderWs_2_a_1_b(detailData, maxBobot);
+    if (code === '2.a.1.c') return renderWs_2_a_1_c(detailData, maxBobot);
+    if (code === '2.a.2.a') return renderWs_2_a_2_a(detailData, maxBobot);
+    if (code === '2.a.2.b') return renderWs_2_a_2_b(detailData, maxBobot);
+    if (code === '2.a.3.a') return renderWs_2_a_3_a(detailData, maxBobot);
+    if (code === '2.a.3.b') return renderWs_2_a_3_b(detailData, maxBobot);
+    if (code === '2.b.1') return renderWs_2_b_1(detailData, maxBobot);
+    if (code === '2.b.2') return renderWs_2_b_2(detailData, maxBobot);
     
     return renderWs_General(code, detailData, maxBobot);
   }
@@ -8283,6 +9982,16 @@ tr.type-sub:hover td {
     var code = modalItemCode.value;
     var maxBobot = parseFloat(modalBobotMaks.value) || 0;
     var computedFinalScore = maxBobot;
+
+    if (code === '2.a.1.a') return updateScore_2_a_1_a(maxBobot);
+    if (code === '2.a.1.b') return updateScore_2_a_1_b(maxBobot);
+    if (code === '2.a.1.c') return updateScore_2_a_1_c(maxBobot);
+    if (code === '2.a.2.a') return updateScore_2_a_2_a(maxBobot);
+    if (code === '2.a.2.b') return updateScore_2_a_2_b(maxBobot);
+    if (code === '2.a.3.a') return updateScore_2_a_3_a(maxBobot);
+    if (code === '2.a.3.b') return updateScore_2_a_3_b(maxBobot);
+    if (code === '2.b.1') return updateScore_2_b_1(maxBobot);
+    if (code === '2.b.2') return updateScore_2_b_2(maxBobot);
 
     // 1. Sheet 1.a.1.a Formula Execution (Kesesuaian Indikator Sasaran RPJMD vs PN RPJMN)
     if (code === '1.a.1.a'){
@@ -9816,6 +11525,10 @@ tr.type-sub:hover td {
       ref_halaman: modalRefHalaman.value.trim(),
       ref_tabel: modalRefTabel.value.trim()
     };
+
+    if (typeof collectDetailJson_Pilar2 === 'function' && collectDetailJson_Pilar2(code, json)) {
+      return json;
+    }
 
     // 1. Sheet 1.a.1.a
     if (code === '1.a.1.a'){
