@@ -30298,8 +30298,13 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
         }
 
-        require_once APPPATH . 'helpers/ippd_pilar2_defaults.php';
-        $pilar2Defaults = get_ippd_pilar2_defaults();
+        $pilar2Defaults = [];
+        if (file_exists(APPPATH . 'helpers/ippd_pilar2_defaults.php')) {
+            require_once APPPATH . 'helpers/ippd_pilar2_defaults.php';
+            if (function_exists('get_ippd_pilar2_defaults')) {
+                $pilar2Defaults = get_ippd_pilar2_defaults();
+            }
+        }
 
         // --- 1.a.1.a Auto Data Pull ---
         $autoData_1_a_1_a = [
@@ -33607,7 +33612,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_2a1a . '/' . $total_2a1a . ' permasalahan memiliki keterkaitan dengan hasil evaluasi)'
         ];
         if (empty($rows_2a1a)) {
-            $autoData_2_a_1_a = $pilar2Defaults['AutoData_2_a_1_a'];
+            $autoData_2_a_1_a = (!empty($pilar2Defaults['AutoData_2_a_1_a']) ? $pilar2Defaults['AutoData_2_a_1_a'] : []);
         }
 
         // =========================================================================
@@ -33673,7 +33678,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_perm_2a1b . '/' . $total_perm_2a1b . ' permasalahan selaras dengan Prioritas Pembangunan Daerah)'
         ];
         if (empty($rows_2a1b) || $total_perm_2a1b == 0) {
-            $autoData_2_a_1_b = $pilar2Defaults['AutoData_2_a_1_b'];
+            $autoData_2_a_1_b = (!empty($pilar2Defaults['AutoData_2_a_1_b']) ? $pilar2Defaults['AutoData_2_a_1_b'] : []);
         }
 
         // =========================================================================
@@ -33741,7 +33746,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik dari /Daerah/CascadingPermasalahan (' . $matched_isu_rel_2a1c . '/' . $total_isu_rel_2a1c . ' relasi Isu Strategis selaras dengan Prioritas Pembangunan Daerah)'
         ];
         if (empty($rows_2a1c) || $total_isu_rel_2a1c == 0) {
-            $autoData_2_a_1_c = $pilar2Defaults['AutoData_2_a_1_c'];
+            $autoData_2_a_1_c = (!empty($pilar2Defaults['AutoData_2_a_1_c']) ? $pilar2Defaults['AutoData_2_a_1_c'] : []);
         }
 
         // =========================================================================
@@ -33815,7 +33820,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (Tersedia ' . $total_ind_count . ' indikator sasaran untuk Prioritas dan Isu Strategis Daerah)'
         ];
         if (empty($rows_sasaran) || $total_ind_count == 0) {
-            $autoData_2_a_2_a = $pilar2Defaults['AutoData_2_a_2_a'];
+            $autoData_2_a_2_a = (!empty($pilar2Defaults['AutoData_2_a_2_a']) ? $pilar2Defaults['AutoData_2_a_2_a'] : []);
         }
 
         // 2.a.2.b: Tingkat Kesesuaian Sasaran Indikator (Bobot 8.00)
@@ -33840,7 +33845,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik dari /Daerah/SasaranPembangunanDaerah (' . $matched_ind_count . '/' . $total_ind_count . ' indikator sasaran selaras, ' . number_format($pct_2a2b, 2) . '%, Rata-rata Terbobot: ' . number_format($score_terbobot_2a2b, 2) . ')'
         ];
         if (empty($rows_sasaran) || $total_ind_count == 0) {
-            $autoData_2_a_2_b = $pilar2Defaults['AutoData_2_a_2_b'];
+            $autoData_2_a_2_b = (!empty($pilar2Defaults['AutoData_2_a_2_b']) ? $pilar2Defaults['AutoData_2_a_2_b'] : []);
         }
 
         // =========================================================================
@@ -34022,7 +34027,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/ProgramKegiatanPrioritas (' . $terjabarkan_prioritas_2a3a . '/' . $total_prioritas_2a3a . ' Prioritas Pembangunan Daerah dijabarkan ke ' . $matched_progs_2a3a . ' Program Prioritas)'
         ];
         if (empty($rows_2a3a) || $total_progs_2a3a == 0) {
-            $autoData_2_a_3_a = $pilar2Defaults['AutoData_2_a_3_a'];
+            $autoData_2_a_3_a = (!empty($pilar2Defaults['AutoData_2_a_3_a']) ? $pilar2Defaults['AutoData_2_a_3_a'] : []);
         }
 
         // =========================================================================
@@ -34187,7 +34192,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Otomatis ditarik secara dinamis dari /Daerah/SasaranPembangunanDaerah dan /Daerah/ProgramPrioritasRPJMD (' . $matched_ind_2a3b . '/' . $total_ind_2a3b . ' indikator kinerja program prioritas selaras, ' . number_format($pct_2a3b, 1) . '%)'
         ];
         if (empty($groups_2a3b) || $total_ind_2a3b == 0) {
-            $autoData_2_a_3_b = $pilar2Defaults['AutoData_2_a_3_b'];
+            $autoData_2_a_3_b = (!empty($pilar2Defaults['AutoData_2_a_3_b']) ? $pilar2Defaults['AutoData_2_a_3_b'] : []);
         }
 
         // =========================================================================
@@ -34468,7 +34473,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Terdapat Keterkaitan permasalahan daerah (kebutuhan daerah) dengan Inovasi Daerah (' . $matched_inov_2b1 . '/' . $total_inov_2b1 . ' inovasi daerah selaras menjawab ' . $total_perm_2b1 . ' permasalahan daerah)'
         ];
         if (empty($rows_2b1) || $total_inov_2b1 == 0) {
-            $autoData_2_b_1 = $pilar2Defaults['AutoData_2_b_1'];
+            $autoData_2_b_1 = (!empty($pilar2Defaults['AutoData_2_b_1']) ? $pilar2Defaults['AutoData_2_b_1'] : []);
         }
 
         // =========================================================================
@@ -34648,7 +34653,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'catatan' => 'Terdapat Keterkaitan outcome dengan output inovasi daerah (' . $matched_2b2 . '/' . $total_2b2 . ' inovasi daerah selaras)'
         ];
         if (empty($rows_2b2) || $total_2b2 == 0) {
-            $autoData_2_b_2 = $pilar2Defaults['AutoData_2_b_2'];
+            $autoData_2_b_2 = (!empty($pilar2Defaults['AutoData_2_b_2']) ? $pilar2Defaults['AutoData_2_b_2'] : []);
         }
 
         // =========================================================================
