@@ -33634,6 +33634,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 if (!isset($groupedPd[$pdName])) {
                     $groupedPd[$pdName] = [
                         'pd' => $pdName,
+                        'prioritas' => $pdName,
                         'id_pd' => $r['IdPrioritasDaerah'],
                         'keterangan' => 'Terdapat Dukungan Program Pembangunan Daerah untuk mendukung Program Prioritas Pembangunan Nasional terkait',
                         'perms' => []
@@ -33703,12 +33704,14 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 if (!isset($groupedIsu[$isuName])) {
                     $groupedIsu[$isuName] = [
                         'isu' => $isuName,
+                        'isu_strategis' => $isuName,
                         'keterangan' => 'Terdapat Prioritas Pembangunan Daerah yang didasarkan kepada Isu Strategis',
                         'pds' => []
                     ];
                 }
                 $groupedIsu[$isuName]['pds'][] = [
                     'prioritas' => $r['ProgramPrioritas'],
+                    'pd' => $r['ProgramPrioritas'],
                     'nilai_keselarasan' => 100.00
                 ];
             }

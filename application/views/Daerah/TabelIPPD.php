@@ -8520,7 +8520,8 @@ function updateScore_2_a_1_a(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_1_b(d) {
   d = d || {};
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A1B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1B)) : []);
+  var auto = getPilar2Auto('2.a.1.b');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : (typeof MASTER_PILAR2_2A1B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1B)) : []));
   var totalRows = 0;
   var matchedCount = 0;
 
@@ -8598,7 +8599,7 @@ function renderWs_2_a_1_b(d, maxBobot) {
       if (pIdx === 0) {
         html +=
           '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
-          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.prioritas || '-') + '</td>';
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.prioritas || g.pd || '-') + '</td>';
       }
       html +=
         '<td style="text-align:left;">' + escapeHtml(p.permasalahan || '-') + '</td>' +
@@ -8703,7 +8704,8 @@ function updateScore_2_a_1_b(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_1_c(d) {
   d = d || {};
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A1C !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1C)) : []);
+  var auto = getPilar2Auto('2.a.1.c');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : (typeof MASTER_PILAR2_2A1C !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A1C)) : []));
   var totalRows = 0;
   var matchedCount = 0;
 
@@ -8780,10 +8782,10 @@ function renderWs_2_a_1_c(d, maxBobot) {
       if (pIdx === 0) {
         html +=
           '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
-          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.isu_strategis || '-') + '</td>';
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.isu_strategis || g.isu || '-') + '</td>';
       }
       html +=
-        '<td style="text-align:left;">' + escapeHtml(p.pd || '-') + '</td>' +
+        '<td style="text-align:left;">' + escapeHtml(p.pd || p.prioritas || '-') + '</td>' +
         '<td style="text-align:center;">' +
           '<select class="form-control ws-2a1c-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
             '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
@@ -8880,12 +8882,40 @@ function updateScore_2_a_1_c(maxBobot) {
 }
 
 // -------------------------------------------------------------------------
+// Helper to extract rows dynamically from Sasaran Pembangunan Daerah
+function extractRows2a2(d, fallbackMaster) {
+  d = d || {};
+  if (d.rows && Array.isArray(d.rows) && d.rows.length > 0) return d.rows;
+  var auto = getPilar2Auto('2.a.2.b');
+  if (auto.rows && Array.isArray(auto.rows) && auto.rows.length > 0) return auto.rows;
+  if (auto.groups && Array.isArray(auto.groups) && auto.groups.length > 0) {
+    var out = [];
+    auto.groups.forEach(function(g) {
+      if (g.indiks && Array.isArray(g.indiks)) {
+        g.indiks.forEach(function(ind) {
+          out.push({
+            no: out.length + 1,
+            prioritas: g.pd || g.prioritas || '',
+            isu_strategis: g.isu || g.isu_strategis || '',
+            indikator_sasaran: ind.indikator || '',
+            nilai_keselarasan: (ind.nilai_keselarasan !== undefined) ? parseFloat(ind.nilai_keselarasan) : 100.0,
+            catatan: ''
+          });
+        });
+      }
+    });
+    if (out.length > 0) return out;
+  }
+  return (fallbackMaster && Array.isArray(fallbackMaster)) ? JSON.parse(JSON.stringify(fallbackMaster)) : [];
+}
+
 // 4. POIN 2.a.2.a: Ketersediaan Indikator Sasaran untuk Isu Strategis/Prioritas (Bobot 6.00)
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_2_a(d) {
   d = d || {};
-  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2A2A !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A2A)) : []);
-  var isAda = d.status !== undefined ? (d.status === 'Ada') : true;
+  var auto = getPilar2Auto('2.a.2.a');
+  var rows = extractRows2a2(d, typeof MASTER_PILAR2_2A2A !== 'undefined' ? MASTER_PILAR2_2A2A : []);
+  var isAda = d.status !== undefined ? (d.status === 'Ada') : (auto.opsi_aksi !== undefined ? (auto.opsi_aksi === 'Ada' || rows.length > 0) : (rows.length > 0));
   var score = isAda ? 6.00 : 0.00;
   var crit = isAda ? 'B' : 'A';
   var critText = isAda ? 'Ada' : 'Tidak ada';
@@ -9009,7 +9039,8 @@ function updateScore_2_a_2_a(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_2_b(d) {
   d = d || {};
-  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2A2B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A2B)) : []);
+  var auto = getPilar2Auto('2.a.2.b');
+  var rows = extractRows2a2(d, typeof MASTER_PILAR2_2A2B !== 'undefined' ? MASTER_PILAR2_2A2B : []);
   var totalRows = rows.length || 59;
   var matchedCount = 0;
 
@@ -9179,7 +9210,8 @@ function updateScore_2_a_2_b(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_3_a(d) {
   d = d || {};
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A3A !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3A)) : []);
+  var auto = getPilar2Auto('2.a.3.a');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : (typeof MASTER_PILAR2_2A3A !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3A)) : []));
   var totalItems = 0;
   var matchedCount = 0;
 
@@ -9256,7 +9288,7 @@ function renderWs_2_a_3_a(d, maxBobot) {
       if (pIdx === 0) {
         html +=
           '<td rowspan="' + rowSpan + '" style="text-align:center; font-weight:700; vertical-align:top;">' + (gIdx + 1) + '</td>' +
-          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.pd || '-') + '</td>' +
+          '<td rowspan="' + rowSpan + '" style="text-align:left; font-weight:600; vertical-align:top;">' + escapeHtml(g.pd || g.prioritas || '-') + '</td>' +
           '<td rowspan="' + rowSpan + '" style="text-align:left; font-size:12px; vertical-align:top;">' + escapeHtml(g.arah || g.arah_kebijakan || '-') + '</td>';
       }
       html +=
@@ -9359,7 +9391,8 @@ function updateScore_2_a_3_a(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_a_3_b(d) {
   d = d || {};
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2A3B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3B)) : []);
+  var auto = getPilar2Auto('2.a.3.b');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : (typeof MASTER_PILAR2_2A3B !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2A3B)) : []));
   var totalItems = 0;
   var matchedCount = 0;
 
@@ -9538,7 +9571,8 @@ function updateScore_2_a_3_b(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_b_1(d) {
   d = d || {};
-  var groups = (d.groups && d.groups.length > 0) ? d.groups : (typeof MASTER_PILAR2_2B1 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B1)) : []);
+  var auto = getPilar2Auto('2.b.1');
+  var groups = (d.groups && d.groups.length > 0) ? d.groups : ((auto.groups && auto.groups.length > 0) ? auto.groups : (typeof MASTER_PILAR2_2B1 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B1)) : []));
   var totalRows = 0;
   var matchedCount = 0;
 
@@ -9710,7 +9744,8 @@ function updateScore_2_b_1(maxBobot) {
 // -------------------------------------------------------------------------
 function getAutoScore_2_b_2(d) {
   d = d || {};
-  var rows = (d.rows && d.rows.length > 0) ? d.rows : (typeof MASTER_PILAR2_2B2 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B2)) : []);
+  var auto = getPilar2Auto('2.b.2');
+  var rows = (d.rows && d.rows.length > 0) ? d.rows : ((auto.rows && auto.rows.length > 0) ? auto.rows : (typeof MASTER_PILAR2_2B2 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B2)) : []));
   var totalRows = rows.length || 60;
   var matchedCount = 0;
 
