@@ -30297,6 +30297,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         if (empty($KodeWilayah)) {
             $KodeWilayah = $this->get_kode_wilayah() ?: $this->session->userdata('KodeWilayah');
         }
+        $isBanyuwangi = (!empty($KodeWilayah) && ($KodeWilayah === '35.10' || strpos((string)$KodeWilayah, '35.10') !== false));
 
         $pilar2Defaults = [];
         if (file_exists(APPPATH . 'helpers/ippd_pilar2_defaults.php')) {
@@ -34217,7 +34218,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 ->order_by('Id', 'ASC')
                 ->get('cascading_permasalahan_rkpd')->result_array();
 
-            if (empty($raw_cp) && $isBanyuwangi) {
+            if (empty($raw_cp) && !empty($isBanyuwangi)) {
                 $raw_cp = $this->db->select('Permasalahan')
                     ->where('KodeWilayah', '35.10')
                     ->where('Tahun', '2026')
@@ -34262,7 +34263,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 ->get('rkpd_inovasi_daerah')->result_array();
 
             if (empty($raw_inv)) {
-                if ($isBanyuwangi) {
+                if (!empty($isBanyuwangi)) {
                     $raw_inv = $this->db->where('kode_wilayah', '35.10')
                         ->where('tahun', '2026')
                         ->where('deleted_at IS NULL')
@@ -34999,11 +35000,6 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             'AutoData_1_b_7_a' => $autoData_1_b_7_a,
             'AutoData_1_b_8_a' => $autoData_1_b_8_a,
             'AutoData_1_b_9_a' => $autoData_1_b_9_a,
-            'AutoData_1_b_2_b' => $autoData_1_b_2_b,
-            'AutoData_1_b_3_b' => $autoData_1_b_3_b,
-            'AutoData_1_b_4_b' => $autoData_1_b_4_b,
-            'AutoData_1_b_5_b' => $autoData_1_b_5_b,
-            'AutoData_1_b_6_b' => $autoData_1_b_6_b,
             'AutoData_1_b_10_a' => $autoData_1_b_10_a,
             'AutoData_1_b_10_b' => $autoData_1_b_10_b,
             'AutoData_1_b_7_b' => $autoData_1_b_7_b,
@@ -35069,6 +35065,8 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
 
     public function TabelIPPD() {
         $this->ensure_ippd_penilaian_table();
+        $Header = [];
+        $Data = [];
         $Header['Halaman'] = 'Tabel Indeks Perencanaan Pembangunan Daerah (IPPD)';
 
         $is_logged_in = $this->is_logged_in();
@@ -38070,6 +38068,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
 
+        $config = [];
         $config['upload_path']          = './uploads/ippd_bukti/';
         $config['allowed_types']        = 'jpg|jpeg|png|pdf';
         $config['max_size']             = 5120; // 5MB
@@ -38144,6 +38143,10 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             $status_verifikasi = trim($this->input->post('status_verifikasi', TRUE));
             $alasan_revisi = trim($this->input->post('alasan_revisi', TRUE));
             $detail_json = $this->input->post('detail_json', FALSE);
+            $detail_str = null;
+            if ($detail_json !== null && $detail_json !== '') {
+                $detail_str = is_string($detail_json) ? $detail_json : json_encode($detail_json);
+            }
 
             if ($status_verifikasi === 'Perlu Perbaikan' || $status_verifikasi === 'Revisi') {
                 if (empty($alasan_revisi) && empty($catatan_verifikator)) {
@@ -38179,8 +38182,8 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 'updated_at' => date('Y-m-d H:i:s')
             ];
 
-            if (!empty($detail_json)) {
-                $saveData['detail_json'] = $detail_json;
+            if (!empty($detail_str)) {
+                $saveData['detail_json'] = $detail_str;
             }
 
             if ($bobot_val !== null) {
@@ -38362,24 +38365,24 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                     'deleted_at IS NULL' => null
                 ])->get('ippd_penilaian')->row_array();
 
-                $detail_json = $this->input->post('detail_json', FALSE);
-            $detail_str = null;
-            if ($detail_json !== null && $detail_json !== '') {
-                $detail_str = is_string($detail_json) ? $detail_json : json_encode($detail_json);
-            }
+                $detail_json = isset($item['detail_json']) ? $item['detail_json'] : $this->input->post('detail_json', FALSE);
+                $detail_str = null;
+                if ($detail_json !== null && $detail_json !== '') {
+                    $detail_str = is_string($detail_json) ? $detail_json : json_encode($detail_json);
+                }
 
-            $saveData = [
-                'kodewilayah' => $kode_wilayah,
-                'instansi_id' => $instansi_id,
-                'tahun' => $tahun,
-                'item_code' => $item_code,
-                'bobot_capaian' => $bobot_val,
-                'opsi_aksi' => $opsi_aksi,
-                'catatan' => $catatan,
-                'bukti_dukung' => $bukti_dukung,
-                'detail_json' => $detail_str,
-                'updated_at' => date('Y-m-d H:i:s')
-            ];
+                $saveData = [
+                    'kodewilayah' => $kode_wilayah,
+                    'instansi_id' => $instansi_id,
+                    'tahun' => $tahun,
+                    'item_code' => $item_code,
+                    'bobot_capaian' => $bobot_val,
+                    'opsi_aksi' => $opsi_aksi,
+                    'catatan' => $catatan,
+                    'bukti_dukung' => $bukti_dukung,
+                    'detail_json' => $detail_str,
+                    'updated_at' => date('Y-m-d H:i:s')
+                ];
 
                 if ($existing) {
                     $this->db->where('id', $existing['id'])->update('ippd_penilaian', $saveData);
