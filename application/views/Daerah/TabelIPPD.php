@@ -13217,35 +13217,41 @@ function collectDetailJson_Pilar2(code, json) {
     });
   }
 
-  document.getElementById("btnExpandAll").addEventListener("click", function(){
-    collapsedKeys.clear();
-    renderTable();
-  });
-
-  document.getElementById("btnCollapseAll").addEventListener("click", function(){
-    collapsedKeys.clear();
-    MASTER_DATA.forEach(function(indeks){
-      collapsedKeys.add(indeks.code);
-      if (indeks.aspek){
-        indeks.aspek.forEach(function(aspek){
-          collapsedKeys.add(aspek.code);
-          if (aspek.indikator){
-            aspek.indikator.forEach(function(ind){
-              collapsedKeys.add(ind.code);
-            });
-          }
-        });
-      }
+  var btnExp = document.getElementById("btnExpandAll");
+  if (btnExp) {
+    btnExp.addEventListener("click", function(){
+      collapsedKeys.clear();
+      renderTable();
     });
-    renderTable();
-  });
+  }
+
+  var btnCol = document.getElementById("btnCollapseAll");
+  if (btnCol) {
+    btnCol.addEventListener("click", function(){
+      collapsedKeys.clear();
+      MASTER_DATA.forEach(function(indeks){
+        collapsedKeys.add(indeks.code);
+        if (indeks.aspek){
+          indeks.aspek.forEach(function(aspek){
+            collapsedKeys.add(aspek.code);
+            if (aspek.indikator){
+              aspek.indikator.forEach(function(ind){
+                collapsedKeys.add(ind.code);
+              });
+            }
+          });
+        }
+      });
+      renderTable();
+    });
+  }
 
   var btnSaveAll = document.getElementById("btnSaveAll");
   if (btnSaveAll) {
     btnSaveAll.addEventListener("click", saveAllScores);
   }
 
-  tbody.addEventListener("click", function(e){
+  if (tbody) tbody.addEventListener("click", function(e){
     // Toggle Tree Chevron
     var toggleBtn = e.target.closest(".tree-toggle-btn");
     if (toggleBtn){
@@ -13274,7 +13280,7 @@ function collectDetailJson_Pilar2(code, json) {
   });
 
   // Dynamic input changes in table
-  tbody.addEventListener("input", function(e){
+  if (tbody) tbody.addEventListener("input", function(e){
     if (e.target.classList.contains("input-bobot-cell")){
       var input = e.target;
       var code = input.getAttribute("data-code");

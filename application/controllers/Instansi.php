@@ -35024,7 +35024,51 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         ];
     }
 
+    private function ensure_ippd_penilaian_table() {
+        if (!$this->db->table_exists('ippd_penilaian')) {
+            $this->db->query("CREATE TABLE IF NOT EXISTS `ippd_penilaian` (
+                `id` INT(11) NOT NULL AUTO_INCREMENT,
+                `kodewilayah` VARCHAR(20) DEFAULT '35.10',
+                `instansi_id` INT(11) DEFAULT 1,
+                `tahun` INT(4) NOT NULL DEFAULT 2026,
+                `item_code` VARCHAR(50) NOT NULL,
+                `bobot_capaian` DECIMAL(8,3) DEFAULT NULL,
+                `opsi_aksi` VARCHAR(255) DEFAULT NULL,
+                `catatan` TEXT DEFAULT NULL,
+                `bukti_dukung` VARCHAR(500) DEFAULT NULL,
+                `detail_json` LONGTEXT DEFAULT NULL,
+                `bobot_verifikator` DECIMAL(8,3) DEFAULT NULL,
+                `status_verifikasi` VARCHAR(50) DEFAULT 'Draft',
+                `catatan_verifikator` TEXT DEFAULT NULL,
+                `alasan_revisi` TEXT DEFAULT NULL,
+                `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+                `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                `deleted_at` DATETIME DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `uk_ippd_eval` (`kodewilayah`, `instansi_id`, `tahun`, `item_code`),
+                INDEX `idx_ippd_lookup` (`tahun`, `instansi_id`, `kodewilayah`, `deleted_at`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+        } else {
+            if (!$this->db->field_exists('detail_json', 'ippd_penilaian')) {
+                $this->db->query("ALTER TABLE `ippd_penilaian` ADD COLUMN `detail_json` LONGTEXT DEFAULT NULL AFTER `bukti_dukung`");
+            }
+            if (!$this->db->field_exists('bobot_verifikator', 'ippd_penilaian')) {
+                $this->db->query("ALTER TABLE `ippd_penilaian` ADD COLUMN `bobot_verifikator` DECIMAL(8,3) DEFAULT NULL AFTER `detail_json`");
+            }
+            if (!$this->db->field_exists('status_verifikasi', 'ippd_penilaian')) {
+                $this->db->query("ALTER TABLE `ippd_penilaian` ADD COLUMN `status_verifikasi` VARCHAR(50) DEFAULT 'Draft' AFTER `bobot_verifikator`");
+            }
+            if (!$this->db->field_exists('catatan_verifikator', 'ippd_penilaian')) {
+                $this->db->query("ALTER TABLE `ippd_penilaian` ADD COLUMN `catatan_verifikator` TEXT DEFAULT NULL AFTER `status_verifikasi`");
+            }
+            if (!$this->db->field_exists('alasan_revisi', 'ippd_penilaian')) {
+                $this->db->query("ALTER TABLE `ippd_penilaian` ADD COLUMN `alasan_revisi` TEXT DEFAULT NULL AFTER `catatan_verifikator`");
+            }
+        }
+    }
+
     public function TabelIPPD() {
+        $this->ensure_ippd_penilaian_table();
         $Header['Halaman'] = 'Tabel Indeks Perencanaan Pembangunan Daerah (IPPD)';
 
         $is_logged_in = $this->is_logged_in();
@@ -36638,6 +36682,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             show_404();
             return;
         }
+        $this->ensure_ippd_penilaian_table();
         header('Content-Type: application/json');
         $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
         $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 0);
@@ -38055,6 +38100,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         header('Content-Type: application/json');
 
         try {
+            $this->ensure_ippd_penilaian_table();
             // Strictly enforce Level 4 requirement: hanya akun level 4 yang dapat mengubah
             if (!$this->is_role_4()) {
                 throw new Exception('Akses ditolak: Hanya akun Level 4 (Verifikator) yang dapat mengubah penilaian verifikator.');
@@ -38197,6 +38243,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         header('Content-Type: application/json');
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
             $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
@@ -38286,6 +38333,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         header('Content-Type: application/json');
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: ($this->get_instansi_id() ?: 1));
             $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
@@ -38359,6 +38407,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         header('Content-Type: application/json');
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $instansi_id = (int)($this->input->post('instansi_id', TRUE) ?: 1);
             $kode_wilayah = $this->get_kode_wilayah() ?: ($this->input->post('kodewilayah', TRUE) ?: '35.10');
@@ -41315,6 +41364,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         }
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -41522,6 +41572,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         }
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -41704,6 +41755,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         }
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -41901,6 +41953,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         }
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42118,6 +42171,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
         }
 
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42253,6 +42307,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42362,6 +42417,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42474,6 +42530,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42596,6 +42653,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42761,6 +42819,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -42930,6 +42989,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43080,6 +43140,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43249,6 +43310,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43418,6 +43480,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43587,6 +43650,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43756,6 +43820,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -43890,6 +43955,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -44021,6 +44087,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -44182,6 +44249,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -44297,6 +44365,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -44984,6 +45053,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -45123,6 +45193,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
@@ -45262,6 +45333,7 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             return;
         }
         try {
+            $this->ensure_ippd_penilaian_table();
             $tahun = (int)($this->input->post('tahun', TRUE) ?: 2026);
             $kodeWilayah = $this->get_kode_wilayah() ?: '35.12';
             $instansiId = (int)($this->input->post('instansi_id', TRUE) ?: 1);
