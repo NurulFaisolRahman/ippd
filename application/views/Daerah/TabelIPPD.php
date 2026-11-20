@@ -9829,21 +9829,14 @@ function renderWs_2_b_2(d, maxBobot) {
   var critText = info.aksi || info.opsi_aksi || 'B. Kuat';
 
   var html =
-    '<div class="alert alert-info py-2 px-3 mb-2" style="font-size:12px; border-left:4px solid #0284c7; background:#f0f9ff; color:#0369a1; display:flex; align-items:center; justify-content:space-between; border-radius:4px;">' +
-      '<div>' +
-        '<i class="fa fa-info-circle mr-1"></i> ' +
-        '<strong>Petunjuk Pengisian Kolom Output &amp; Outcome:</strong> Kolom <strong>Inovasi Daerah</strong> ditarik otomatis dari poin 2.b.1. User dapat <strong>mengisi / mengedit data manual</strong> pada kedua kolom <strong>Output (Apa yang Dihasilkan)</strong> dan <strong>Outcome (Manfaat Jangka Menengah)</strong> di bawah ini.' +
-      '</div>' +
-      '<span class="badge" style="font-size:11px; background:#0284c7; color:#fff; padding:5px 9px; border-radius:4px; font-weight:600; white-space:nowrap; margin-left:12px;"><i class="fa fa-pencil mr-1"></i> User Mengisi Manual</span>' +
-    '</div>' +
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1100px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1050px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
           '<th class="th-green" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
-          '<th class="th-green" style="width: 250px; text-align: center; vertical-align: middle;">Inovasi Daerah<br><small style="font-size:10px; opacity:0.85; font-weight:normal;">(Ditarik dari 2.b.1)</small></th>' +
-          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Output (Apa yang Dihasilkan)<br><span style="display:inline-block; font-size:10px; background:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:3px; padding:1px 6px; font-weight:600; margin-top:2px;"><i class="fa fa-pencil"></i> User Mengisi Manual</span></th>' +
-          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Outcome (Manfaat Jangka Menengah)<br><span style="display:inline-block; font-size:10px; background:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:3px; padding:1px 6px; font-weight:600; margin-top:2px;"><i class="fa fa-pencil"></i> User Mengisi Manual</span></th>' +
+          '<th class="th-green" style="width: 250px; text-align: center; vertical-align: middle;">Inovasi Daerah</th>' +
+          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Output (Apa yang Dihasilkan)</th>' +
+          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Outcome (Manfaat Jangka Menengah)</th>' +
           '<th class="th-green" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
           '<th class="th-blue" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
           '<th class="th-amber" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
@@ -9862,10 +9855,10 @@ function renderWs_2_b_2(d, maxBobot) {
         '<td style="text-align:center; font-weight:700; vertical-align:top; padding-top:8px;">' + (r.no || (idx + 1)) + '</td>' +
         '<td class="ws-2b2-inov-text" style="text-align:left; font-weight:600; vertical-align:top; padding-top:8px;">' + escapeHtml(r.inovasi || '-') + '</td>' +
         '<td style="text-align:left; vertical-align:top; padding:4px;">' +
-          '<textarea class="form-control ws-2b2-output-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Isi output manual (Apa yang dihasilkan)...">' + escapeHtml(r.output || '') + '</textarea>' +
+          '<textarea class="form-control ws-2b2-output-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Output...">' + escapeHtml(r.output || '') + '</textarea>' +
         '</td>' +
         '<td style="text-align:left; vertical-align:top; padding:4px;">' +
-          '<textarea class="form-control ws-2b2-outcome-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Isi outcome manual (Manfaat jangka menengah)...">' + escapeHtml(r.outcome || '') + '</textarea>' +
+          '<textarea class="form-control ws-2b2-outcome-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Outcome...">' + escapeHtml(r.outcome || '') + '</textarea>' +
         '</td>' +
         '<td style="text-align:center; vertical-align:top; padding:4px;">' +
           '<select class="form-control ws-2b2-score-sel calc-inp" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
