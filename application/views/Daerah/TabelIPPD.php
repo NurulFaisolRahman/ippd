@@ -1514,10 +1514,12 @@ tr.type-sub:hover td {
 }
 
 /* Excel Sheet Cell Focus Highlight */
-.excel-grid-table input.calc-inp {
+.excel-grid-table input.calc-inp,
+.excel-grid-table textarea.calc-inp {
   transition: all 0.15s ease;
 }
-.excel-grid-table input.calc-inp:focus {
+.excel-grid-table input.calc-inp:focus,
+.excel-grid-table textarea.calc-inp:focus {
   background: #fafff8 !important;
   border-color: #107c41 !important;
   box-shadow: 0 0 0 2px rgba(16, 124, 65, 0.25) !important;
@@ -9751,7 +9753,39 @@ function updateScore_2_b_1(maxBobot) {
 function getAutoScore_2_b_2(d) {
   d = d || {};
   var auto = getPilar2Auto('2.b.2');
-  var rows = (d.rows && d.rows.length > 0) ? d.rows : ((auto.rows && auto.rows.length > 0) ? auto.rows : (typeof MASTER_PILAR2_2B2 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B2)) : []));
+  var baseRows = (auto.rows && auto.rows.length > 0) ? auto.rows : (typeof MASTER_PILAR2_2B2 !== 'undefined' ? JSON.parse(JSON.stringify(MASTER_PILAR2_2B2)) : []);
+
+  // Merge saved rows with baseRows so user manual edits in detail_json are retained!
+  var rows = [];
+  if (baseRows && baseRows.length > 0) {
+    var savedMap = {};
+    if (d.rows && Array.isArray(d.rows)) {
+      d.rows.forEach(function(sr, sIdx) {
+        if (sr.id) savedMap['id_' + sr.id] = sr;
+        if (sr.inovasi) savedMap['name_' + String(sr.inovasi).trim().toLowerCase()] = sr;
+        savedMap['idx_' + sIdx] = sr;
+      });
+    }
+
+    baseRows.forEach(function(br, bIdx) {
+      var r = Object.assign({}, br);
+      var sr = null;
+      if (r.id && savedMap['id_' + r.id]) sr = savedMap['id_' + r.id];
+      else if (r.inovasi && savedMap['name_' + String(r.inovasi).trim().toLowerCase()]) sr = savedMap['name_' + String(r.inovasi).trim().toLowerCase()];
+      else if (savedMap['idx_' + bIdx]) sr = savedMap['idx_' + bIdx];
+
+      if (sr) {
+        if (sr.output !== undefined && sr.output !== null) r.output = sr.output;
+        if (sr.outcome !== undefined && sr.outcome !== null) r.outcome = sr.outcome;
+        if (sr.nilai_keselarasan !== undefined && sr.nilai_keselarasan !== null) r.nilai_keselarasan = sr.nilai_keselarasan;
+        if (sr.catatan !== undefined && sr.catatan !== null) r.catatan = sr.catatan;
+      }
+      rows.push(r);
+    });
+  } else if (d.rows && d.rows.length > 0) {
+    rows = d.rows;
+  }
+
   var totalRows = rows.length || 60;
   var matchedCount = 0;
 
@@ -9795,18 +9829,25 @@ function renderWs_2_b_2(d, maxBobot) {
   var critText = info.aksi || info.opsi_aksi || 'B. Kuat';
 
   var html =
+    '<div class="alert alert-info py-2 px-3 mb-2" style="font-size:12px; border-left:4px solid #0284c7; background:#f0f9ff; color:#0369a1; display:flex; align-items:center; justify-content:space-between; border-radius:4px;">' +
+      '<div>' +
+        '<i class="fa fa-info-circle mr-1"></i> ' +
+        '<strong>Petunjuk Pengisian Kolom Output &amp; Outcome:</strong> Kolom <strong>Inovasi Daerah</strong> ditarik otomatis dari poin 2.b.1. User dapat <strong>mengisi / mengedit data manual</strong> pada kedua kolom <strong>Output (Apa yang Dihasilkan)</strong> dan <strong>Outcome (Manfaat Jangka Menengah)</strong> di bawah ini.' +
+      '</div>' +
+      '<span class="badge" style="font-size:11px; background:#0284c7; color:#fff; padding:5px 9px; border-radius:4px; font-weight:600; white-space:nowrap; margin-left:12px;"><i class="fa fa-pencil mr-1"></i> User Mengisi Manual</span>' +
+    '</div>' +
     '<div style="overflow-x:auto; padding-bottom:12px;">' +
-    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1050px; font-size: 13px;">' +
+    '<table class="excel-grid-table" id="wsTable_2_b_2" style="min-width: 1100px; font-size: 13px;">' +
       '<thead>' +
         '<tr>' +
-          '<th class="th-green" style="width: 45px; text-align: center;">No</th>' +
-          '<th class="th-green" style="width: 260px; text-align: center;">Inovasi Daerah</th>' +
-          '<th class="th-green" style="min-width: 300px; text-align: center;">Output</th>' +
-          '<th class="th-green" style="min-width: 300px; text-align: center;">Outcome</th>' +
-          '<th class="th-green" style="width: 130px; text-align: center;">Nilai Keselarasan<br>(0% / 100%)</th>' +
-          '<th class="th-blue" style="width: 75px; text-align: center;">Bobot</th>' +
-          '<th class="th-amber" style="width: 110px; text-align: center;">Keselarasan<br>Terbobot</th>' +
-          '<th class="th-green" style="min-width: 180px; text-align: center;">Catatan</th>' +
+          '<th class="th-green" style="width: 45px; text-align: center; vertical-align: middle;">No</th>' +
+          '<th class="th-green" style="width: 250px; text-align: center; vertical-align: middle;">Inovasi Daerah<br><small style="font-size:10px; opacity:0.85; font-weight:normal;">(Ditarik dari 2.b.1)</small></th>' +
+          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Output (Apa yang Dihasilkan)<br><span style="display:inline-block; font-size:10px; background:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:3px; padding:1px 6px; font-weight:600; margin-top:2px;"><i class="fa fa-pencil"></i> User Mengisi Manual</span></th>' +
+          '<th class="th-green" style="min-width: 280px; text-align: center; vertical-align: middle;">Outcome (Manfaat Jangka Menengah)<br><span style="display:inline-block; font-size:10px; background:#fef3c7; color:#92400e; border:1px solid #f59e0b; border-radius:3px; padding:1px 6px; font-weight:600; margin-top:2px;"><i class="fa fa-pencil"></i> User Mengisi Manual</span></th>' +
+          '<th class="th-green" style="width: 130px; text-align: center; vertical-align: middle;">Nilai Keselarasan<br>(0% / 100%)</th>' +
+          '<th class="th-blue" style="width: 75px; text-align: center; vertical-align: middle;">Bobot</th>' +
+          '<th class="th-amber" style="width: 110px; text-align: center; vertical-align: middle;">Keselarasan<br>Terbobot</th>' +
+          '<th class="th-green" style="min-width: 180px; text-align: center; vertical-align: middle;">Catatan</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>';
@@ -9817,20 +9858,24 @@ function renderWs_2_b_2(d, maxBobot) {
     var terb = (sc / 100) * 4.5;
 
     html +=
-      '<tr class="ws-2b2-row" data-idx="' + idx + '">' +
-        '<td style="text-align:center; font-weight:700;">' + (r.no || (idx + 1)) + '</td>' +
-        '<td style="text-align:left; font-weight:600;">' + escapeHtml(r.inovasi || '-') + '</td>' +
-        '<td style="text-align:left; font-size:12px;">' + escapeHtml(r.output || '-') + '</td>' +
-        '<td style="text-align:left; font-size:12px;">' + escapeHtml(r.outcome || '-') + '</td>' +
-        '<td style="text-align:center;">' +
-          '<select class="form-control ws-2b2-score-sel" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
+      '<tr class="ws-2b2-row" data-idx="' + idx + '" data-id="' + (r.id || '') + '" data-inovasi="' + escapeHtml(r.inovasi || '') + '">' +
+        '<td style="text-align:center; font-weight:700; vertical-align:top; padding-top:8px;">' + (r.no || (idx + 1)) + '</td>' +
+        '<td class="ws-2b2-inov-text" style="text-align:left; font-weight:600; vertical-align:top; padding-top:8px;">' + escapeHtml(r.inovasi || '-') + '</td>' +
+        '<td style="text-align:left; vertical-align:top; padding:4px;">' +
+          '<textarea class="form-control ws-2b2-output-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Isi output manual (Apa yang dihasilkan)...">' + escapeHtml(r.output || '') + '</textarea>' +
+        '</td>' +
+        '<td style="text-align:left; vertical-align:top; padding:4px;">' +
+          '<textarea class="form-control ws-2b2-outcome-inp calc-inp" rows="2" style="font-size:12px; width:100%; min-width:240px; resize:vertical; border:1px solid #cbd5e1; border-radius:4px; padding:5px 7px; line-height:1.4;" placeholder="Isi outcome manual (Manfaat jangka menengah)...">' + escapeHtml(r.outcome || '') + '</textarea>' +
+        '</td>' +
+        '<td style="text-align:center; vertical-align:top; padding:4px;">' +
+          '<select class="form-control ws-2b2-score-sel calc-inp" style="font-weight:700; font-size:12px; height:32px; padding:2px 6px;">' +
             '<option value="100" ' + (sc > 0 ? 'selected' : '') + '>100%</option>' +
             '<option value="0" ' + (sc === 0 ? 'selected' : '') + '>0%</option>' +
           '</select>' +
         '</td>' +
-        '<td style="text-align:center; font-weight:700; background:#f8fafc;">4.50</td>' +
-        '<td class="ws-2b2-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e;">' + numFmt(terb) + '</td>' +
-        '<td><input type="text" class="form-control ws-2b2-cat" style="font-size:12px; height:30px;" value="' + escapeHtml(r.catatan || '') + '"></td>' +
+        '<td style="text-align:center; font-weight:700; background:#f8fafc; vertical-align:top; padding-top:8px;">4.50</td>' +
+        '<td class="ws-2b2-terb-val" style="text-align:center; font-weight:700; background:#fef3c7; color:#92400e; vertical-align:top; padding-top:8px;">' + numFmt(terb) + '</td>' +
+        '<td style="vertical-align:top; padding:4px;"><input type="text" class="form-control ws-2b2-cat" style="font-size:12px; height:32px;" value="' + escapeHtml(r.catatan || '') + '" placeholder="Catatan..."></td>' +
       '</tr>';
   });
 
@@ -9838,10 +9883,10 @@ function renderWs_2_b_2(d, maxBobot) {
       '</tbody>' +
       '<tfoot>' +
         '<tr style="background:#e2e8f0; font-weight:800;">' +
-          '<td colspan="4" style="text-align:right; padding-right:12px;">Rata-rata:</td>' +
-          '<td id="ws2b2FootPct" style="text-align:center; color:#1d4ed8;">' + numFmt(pctMatched) + '%</td>' +
-          '<td style="text-align:center;">4.50</td>' +
-          '<td id="ws2b2FootTerb" style="text-align:center; color:#b45309; font-size:14px;">' + numFmt(score) + '</td>' +
+          '<td colspan="4" style="text-align:right; padding-right:12px; vertical-align:middle;">Rata-rata:</td>' +
+          '<td id="ws2b2FootPct" style="text-align:center; color:#1d4ed8; vertical-align:middle;">' + numFmt(pctMatched) + '%</td>' +
+          '<td style="text-align:center; vertical-align:middle;">4.50</td>' +
+          '<td id="ws2b2FootTerb" style="text-align:center; color:#b45309; font-size:14px; vertical-align:middle;">' + numFmt(score) + '</td>' +
           '<td></td>' +
         '</tr>' +
       '</tfoot>' +
@@ -10012,11 +10057,23 @@ function collectDetailJson_Pilar2(code, json) {
   }
   if (code === '2.b.2') {
     var rows = [];
-    document.querySelectorAll('#wsTable_2_b_2 .ws-2b2-row').forEach(function(r) {
+    document.querySelectorAll('#wsTable_2_b_2 .ws-2b2-row').forEach(function(r, idx) {
       var sel = r.querySelector('.ws-2b2-score-sel');
+      var outInp = r.querySelector('.ws-2b2-output-inp');
+      var outcInp = r.querySelector('.ws-2b2-outcome-inp');
+      var catInp = r.querySelector('.ws-2b2-cat');
+      var inovEl = r.querySelector('.ws-2b2-inov-text');
+      var rInov = r.getAttribute('data-inovasi') || (inovEl ? inovEl.textContent.trim() : '');
+      var rId = r.getAttribute('data-id') || '';
+
       rows.push({
+        id: rId,
+        no: idx + 1,
+        inovasi: rInov,
+        output: outInp ? outInp.value : '',
+        outcome: outcInp ? outcInp.value : '',
         nilai_keselarasan: sel ? parseFloat(sel.value) : 100.0,
-        catatan: (r.querySelector('.ws-2b2-cat') ? r.querySelector('.ws-2b2-cat').value : '')
+        catatan: catInp ? catInp.value : ''
       });
     });
     json.rows = rows;

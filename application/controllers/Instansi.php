@@ -34286,15 +34286,16 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
             }
 
             foreach ($raw_inovasi_2b2 as $r) {
-                $invName = trim($r['inovasi_daerah']);
+                $invName = trim($r['inovasi_daerah'] ?? '');
                 if (empty($invName) || $invName === '-') continue;
 
-                $outp = trim($r['output']);
-                $outc = trim($r['outcome']);
-                $sc = (float)$r['nilai_keselarasan'];
+                $outp = trim($r['output'] ?? '');
+                $outc = trim($r['outcome'] ?? '');
+                $sc = (float)($r['nilai_keselarasan'] ?? 100);
                 $ket = $sc > 0 ? 'Terdapat Keterkaitan outcome dengan output inovasi daerah' : 'Belum terdapat keterkaitan outcome dengan output inovasi daerah';
 
                 $rows_2b2[] = [
+                    'id' => (int)$r['id'],
                     'inovasi' => $invName,
                     'output' => $outp,
                     'outcome' => $outc,
@@ -38302,13 +38303,18 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 if (!empty($decRows['rows']) && is_array($decRows['rows'])) {
                     foreach ($decRows['rows'] as $rItem) {
                         $inv = trim($rItem['inovasi'] ?? '');
-                        if (!empty($inv)) {
+                        $rowId = !empty($rItem['id']) ? (int)$rItem['id'] : 0;
+                        if (!empty($inv) || $rowId > 0) {
                             $updInov = [];
                             if (isset($rItem['output'])) $updInov['output'] = $rItem['output'];
                             if (isset($rItem['outcome'])) $updInov['outcome'] = $rItem['outcome'];
                             if (isset($rItem['nilai_keselarasan'])) $updInov['nilai_keselarasan'] = (float)$rItem['nilai_keselarasan'];
                             if (!empty($updInov)) {
-                                $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                                if ($rowId > 0) {
+                                    $this->db->where('id', $rowId)->update('rkpd_inovasi_daerah', $updInov);
+                                } else {
+                                    $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                                }
                             }
                         }
                     }
@@ -38396,13 +38402,18 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 if (!empty($decRows['rows']) && is_array($decRows['rows'])) {
                     foreach ($decRows['rows'] as $rItem) {
                         $inv = trim($rItem['inovasi'] ?? '');
-                        if (!empty($inv)) {
+                        $rowId = !empty($rItem['id']) ? (int)$rItem['id'] : 0;
+                        if (!empty($inv) || $rowId > 0) {
                             $updInov = [];
                             if (isset($rItem['output'])) $updInov['output'] = $rItem['output'];
                             if (isset($rItem['outcome'])) $updInov['outcome'] = $rItem['outcome'];
                             if (isset($rItem['nilai_keselarasan'])) $updInov['nilai_keselarasan'] = (float)$rItem['nilai_keselarasan'];
                             if (!empty($updInov)) {
-                                $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                                if ($rowId > 0) {
+                                    $this->db->where('id', $rowId)->update('rkpd_inovasi_daerah', $updInov);
+                                } else {
+                                    $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                                }
                             }
                         }
                     }
@@ -38480,6 +38491,30 @@ private function determine_bidang_urusan_rkpd($progName, $kodeProg = '') {
                 } else {
                     $saveData['created_at'] = date('Y-m-d H:i:s');
                     $this->db->insert('ippd_penilaian', $saveData);
+                }
+
+                // Sync ke rkpd_inovasi_daerah jika poin 2.b.2 disimpan
+                if ($item_code === '2.b.2' && !empty($detail_str)) {
+                    $decRows = json_decode($detail_str, true);
+                    if (!empty($decRows['rows']) && is_array($decRows['rows'])) {
+                        foreach ($decRows['rows'] as $rItem) {
+                            $inv = trim($rItem['inovasi'] ?? '');
+                            $rowId = !empty($rItem['id']) ? (int)$rItem['id'] : 0;
+                            if (!empty($inv) || $rowId > 0) {
+                                $updInov = [];
+                                if (isset($rItem['output'])) $updInov['output'] = $rItem['output'];
+                                if (isset($rItem['outcome'])) $updInov['outcome'] = $rItem['outcome'];
+                                if (isset($rItem['nilai_keselarasan'])) $updInov['nilai_keselarasan'] = (float)$rItem['nilai_keselarasan'];
+                                if (!empty($updInov)) {
+                                    if ($rowId > 0) {
+                                        $this->db->where('id', $rowId)->update('rkpd_inovasi_daerah', $updInov);
+                                    } else {
+                                        $this->db->where('inovasi_daerah', $inv)->update('rkpd_inovasi_daerah', $updInov);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 $count++;
             }
